@@ -1,4 +1,4 @@
-name: AWS Lambda Deployment
+name: Google Cloud Function Deployment
 on:
   push:
     branches:
