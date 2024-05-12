@@ -1,0 +1,28 @@
+name: AWS Lambda Deployment
+on:
+  push:
+    branches:
+      - main
+jobs:
+    Deploy:
+      name: Deploy
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: GCP Authentication
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+      - id: 'deploy'
+        uses: 'google-github-actions/deploy-cloud-functions@v2'
+        with:
+          name: 'gocroot'
+          runtime: 'go122'
+          entry_point: 'WebHook'
+          region: 'asia-southeast1'
+          env_vars: 'KEY1=VALUE1,KEY2=VALUE2'
+      - id: 'test'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
