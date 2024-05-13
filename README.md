@@ -38,6 +38,7 @@ To get a auth in Google Cloud, you can do the following:
    # TODO: replace ${PROJECT_ID} with your value below.
    gcloud iam service-accounts keys create "key.json" --iam-account "whatsauth@${PROJECT_ID}.iam.gserviceaccount.com"
    cat key.json
+   gcloud run services add-iam-policy-binding gocroot --member="allUsers" --role="roles/run.invoker"
    ```
 2. Open Menu Cloud Build>settings, select Service Account which create by step 1 and enable Cloud Function Developer.  
    ![image](https://github.com/gocroot/gcp/assets/11188109/d2628542-99a6-44ce-ba78-798c249e0f22)  
