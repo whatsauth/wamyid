@@ -28,7 +28,6 @@ This boilerplate has several folders with different functions, such as:
 * helper: helper folder with list of function only called by others file
 
 ## GCP Cloud Function CI/CD setup
-![image](https://github.com/gocroot/gcp/assets/11188109/676580bd-ca12-4741-94d9-bca3e8efa40e)  
 
 To get a auth in Google Cloud, you can do the following:
 
