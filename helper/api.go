@@ -28,7 +28,7 @@ func PostStructWithToken[T any](tokenkey string, tokenvalue string, structname i
 	}
 	if err = json.Unmarshal(respBody, &result); err != nil {
 		rawstring := string(respBody)
-		err = errors.New(rawstring)
+		err = errors.New("Not A Valid JSON Response from " + urltarget + ". CONTENT: " + rawstring)
 		return
 	}
 	return
