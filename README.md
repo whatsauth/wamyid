@@ -29,31 +29,17 @@ This boilerplate has several folders with different functions, such as:
 
 ## GCP Cloud Function CI/CD setup
 
-To get a workload identity provider in Google Cloud, you can do the following:
+To get a auth in Google Cloud, you can do the following:
 
-1. Go to the Workload Identity Pools page in the Google Cloud console
-2. Find the workload identity pool that has the provider
-3. Click the Expand node icon for the pool
-4. Find the provider you want to view and click the Edit icon
-5. The Google Cloud console will show details about the provider
-
-To authenticate a service identity into Google Cloud with Workload Identity Federation, you can do the following:
-
-1. Define a service account on Google Cloud
-2. Create a Workload Identity Pool in Google Cloud
-3. Agree on an audience between the two clouds
-4. Authorize the target service account to allow connections via the pool
-5. You can also use direct resource access to grant external identities access to a Google Cloud resource
-
-Sign Up and login into aws console and go to AWS Lambda menu and follow this instruction:
-
-1. Klik Create Function and input Function name, select Amazon Linux 2023 Runtime, select x86_64 Architecture  
-   ![image](https://github.com/gocroot/aws/assets/11188109/d1728555-88ff-41e5-8b05-766e004c0c43)  
-2. In Advanced settings select Enable function URL, None Aut type.
-   ![image](https://github.com/gocroot/aws/assets/11188109/c600eaee-a60c-4166-b99e-da6a5b8e2fc4)  
-3. Please set the environment variable in Configuration tab:  
-   ![image](https://github.com/gocroot/aws/assets/11188109/f9a1e747-ab19-4498-9fe7-b7b043473a65)  
-
+1. Open Cloud Shell Terminal, type this command
+   ```sh
+   # TODO: replace ${PROJECT_ID} with your value below.
+   gcloud iam service-accounts create "whatsauth" --project "${PROJECT_ID}"
+   # TODO: replace ${PROJECT_ID} with your value below.
+   gcloud iam service-accounts keys create "key.json" --iam-account "my-service-account@${PROJECT_ID}.iam.gserviceaccount.com"
+   ```
+2. Go to github repository, in settings menu>secrets>action add GOOGLE_CREDENTIALS vars with value from step 1.
+3. Add others Vars into secret>action menu:  
    ```sh
    MONGOSTRING=YOURMONGOSTRINGACCESS
    WAQRKEYWORD=yourkeyword
@@ -61,13 +47,6 @@ Sign Up and login into aws console and go to AWS Lambda menu and follow this ins
    WEBHOOKSECRET=yoursecret
    WAPHONENUMBER=62811111
    ```
-
-4. Go to the menu Identity and Access Management (IAM), set lambda:UpdateFunctionCode Policies, and add new users.  
-   ![image](https://github.com/gocroot/aws/assets/11188109/2d489702-2aec-460b-9fe4-c319d8a6e018)  
-5. Create an access key from the Security credentials tab.  
-   ![image](https://github.com/gocroot/aws/assets/11188109/e24f5de5-d46d-435d-b9a6-4c2e452cc914)  
-6. Go to settings>Secrets and variables>Actions in the GitHub repo. Add several Repository secrets.  
-   ![image](https://github.com/gocroot/aws/assets/11188109/8e4e9c68-2beb-403f-a669-ff83b1ac04c3)  
 
 ## WhatsAuth Signup
 
