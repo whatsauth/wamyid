@@ -3,11 +3,12 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"gocroot/config"
-	"gocroot/helper"
-	"gocroot/model"
 	"log"
 	"net/http"
+
+	"github.com/gocroot/config"
+	"github.com/gocroot/helper"
+	"github.com/gocroot/model"
 )
 
 func HandleRequest(respw http.ResponseWriter, req *http.Request) {

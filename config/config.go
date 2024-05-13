@@ -1,7 +1,7 @@
 package config
 
 import (
-	"gocroot/helper"
+	"github.com/gocroot/helper"
 )
 
 var IPPort, Net = helper.GetAddress()

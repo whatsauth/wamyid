@@ -1,9 +1,10 @@
 package config
 
 import (
-	"gocroot/helper"
-	"gocroot/model"
 	"os"
+
+	"github.com/gocroot/helper"
+	"github.com/gocroot/model"
 )
 
 var MongoString string = os.Getenv("MONGOSTRING")
