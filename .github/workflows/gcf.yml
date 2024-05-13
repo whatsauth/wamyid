@@ -14,8 +14,7 @@ jobs:
         id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
       - id: 'deploy'
         uses: 'google-github-actions/deploy-cloud-functions@v2'
         with:
@@ -23,6 +22,11 @@ jobs:
           runtime: 'go122'
           entry_point: 'WebHook'
           region: 'asia-southeast1'
-          env_vars: 'KEY1=VALUE1,KEY2=VALUE2'
+          env_vars: 'MONGOSTRING=${{ secrets.MONGOSTRING }},WAQRKEYWORD=${{ secrets.WAQRKEYWORD }},WEBHOOKURL=${{ secrets.WEBHOOKURL }},WEBHOOKSECRET=${{ secrets.WEBHOOKSECRET }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}'
       - id: 'test'
-        run: 'curl "${{ steps.deploy.outputs.url }}"'
+        run: |
+          'curl "${{ steps.deploy.outputs.url }}"'
+          'echo "${{ steps.deploy.outputs.id }}"'
+          'echo "${{ steps.deploy.outputs.status }}"'
+          'echo "${{ steps.deploy.outputs.version }}"'
+          'echo "${{ steps.deploy.outputs.runtime }}"'
