@@ -40,8 +40,10 @@ To get a auth in Google Cloud, you can do the following:
    gcloud iam service-accounts keys create "key.json" --iam-account "my-service-account@${PROJECT_ID}.iam.gserviceaccount.com"
    cat key.json
    ```
-2. Go to github repository, in settings menu>secrets>action add GOOGLE_CREDENTIALS vars with value from key.json file.
-3. Add others Vars into secret>action menu:  
+2. Open Menu Cloud Build>settings, select Service Account which create by step 1 and enable Cloud Function Developer.  
+   ![image](https://github.com/gocroot/gcp/assets/11188109/d2628542-99a6-44ce-ba78-798c249e0f22)  
+3. Go to github repository, in settings menu>secrets>action add GOOGLE_CREDENTIALS vars with value from key.json file.
+4. Add others Vars into secret>action menu:  
    ```sh
    MONGOSTRING=YOURMONGOSTRINGACCESS
    WAQRKEYWORD=yourkeyword
