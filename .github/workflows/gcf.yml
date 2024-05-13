@@ -28,3 +28,5 @@ jobs:
         run: 'gcloud info' 
       - name: 'Deploy a gen 2 cloud function'
         run: 'gcloud functions deploy gocroot --gen2 --runtime=go122 --region=asia-southeast1 --trigger-http --entry-point=WebHook --allow-unauthenticated --set-env-vars MONGOSTRING=${{ secrets.MONGOSTRING }},WAQRKEYWORD=${{ secrets.WAQRKEYWORD }},WEBHOOKURL=${{ secrets.WEBHOOKURL }},WEBHOOKSECRET=${{ secrets.WEBHOOKSECRET }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}'
+      - name: 'Cleaning Artifact Registry'
+        run: 'gcloud artifacts repositories delete gcf-artifacts --location=asia-southeast1'
