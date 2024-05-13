@@ -19,7 +19,11 @@ func WebHook(WAKeyword, WAPhoneNumber, WAAPIQRLogin, WAAPIMessage string, msg mo
 }
 
 func RefreshToken(dt *model.WebHook, WAPhoneNumber, WAAPIGetToken string, db *mongo.Database) (res *mongo.UpdateResult, err error) {
-	resp, err := PostStructWithToken[model.User]("Token", WAAPIToken(WAPhoneNumber, db), dt, WAAPIGetToken)
+	tokenapi, err := WAAPIToken(WAPhoneNumber, db)
+	if err != nil {
+		return
+	}
+	resp, err := PostStructWithToken[model.User]("Token", tokenapi.Token, dt, WAAPIGetToken)
 	if err != nil {
 		return
 	}
@@ -83,8 +87,9 @@ func GetRandomReplyFromMongo(msg model.IteungMessage, db *mongo.Database) string
 	return replymsg
 }
 
-func WAAPIToken(phonenumber string, db *mongo.Database) string {
+func WAAPIToken(phonenumber string, db *mongo.Database) (apitoken model.Profile, err error) {
 	filter := bson.M{"phonenumber": phonenumber}
-	apitoken, _ := GetOneDoc[model.Profile](db, "profile", filter)
-	return apitoken.Token
+	apitoken, err = GetOneDoc[model.Profile](db, "profile", filter)
+
+	return
 }
