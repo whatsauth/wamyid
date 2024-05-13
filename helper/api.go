@@ -3,6 +3,7 @@ package helper
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 )
@@ -26,6 +27,8 @@ func PostStructWithToken[T any](tokenkey string, tokenvalue string, structname i
 		return
 	}
 	if err = json.Unmarshal(respBody, &result); err != nil {
+		rawstring := string(respBody)
+		err = errors.New(rawstring)
 		return
 	}
 	return
