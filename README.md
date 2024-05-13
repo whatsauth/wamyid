@@ -39,6 +39,7 @@ To get a auth in Google Cloud, you can do the following:
    gcloud iam service-accounts keys create "key.json" --iam-account "whatsauth@${PROJECT_ID}.iam.gserviceaccount.com"
    cat key.json
    gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:whatsauth@${PROJECT_ID}.iam.gserviceaccount.com --role=roles/run.admin
+   gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:whatsauth@${PROJECT_ID}.iam.gserviceaccount.com --role=roles/artifactregistry.admin
    ```
 2. Open Menu Cloud Build>settings, select Service Account which create by step 1 and enable Cloud Function Developer.  
    ![image](https://github.com/gocroot/gcp/assets/11188109/d2628542-99a6-44ce-ba78-798c249e0f22)  
