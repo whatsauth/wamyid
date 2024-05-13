@@ -18,8 +18,9 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 		err := json.NewDecoder(req.Body).Decode(&msg)
 		if err != nil {
 			resp.Response = err.Error()
+		} else {
+			resp = helper.WebHook(config.WAKeyword, config.WAPhoneNumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
 		}
-		resp = helper.WebHook(config.WAKeyword, config.WAPhoneNumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
 	} else {
 		dt := &model.WebHook{
 			URL:    config.WebhookURL,
