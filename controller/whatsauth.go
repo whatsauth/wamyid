@@ -31,7 +31,7 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 		}
 		res, err := helper.RefreshToken(dt, config.WAPhoneNumber, config.WAAPIGetToken, config.Mongoconn)
 		if err != nil {
-			resp.Response = err.Error() + " ACCESS FROM: " + helper.GetIPaddress()
+			resp.Response = err.Error()
 		} else {
 			resp.Response = jsonstr(res.ModifiedCount)
 		}

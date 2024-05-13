@@ -23,17 +23,20 @@ func RefreshToken(dt *model.WebHook, WAPhoneNumber, WAAPIGetToken string, db *mo
 	if err != nil {
 		return
 	}
-	resp, err := PostStructWithToken[model.User]("Token", tokenapi.Token, dt, WAAPIGetToken)
-	if err != nil {
-		return
-	}
-	profile := &model.Profile{
-		Phonenumber: resp.PhoneNumber,
-		Token:       resp.Token,
-	}
-	res, err = ReplaceOneDoc(db, "profile", bson.M{"phonenumber": resp.PhoneNumber}, profile)
-	if err != nil {
-		return
+	var resp model.User
+	if tokenapi.Token != "" {
+		resp, err = PostStructWithToken[model.User]("Token", tokenapi.Token, dt, WAAPIGetToken)
+		if err != nil {
+			return
+		}
+		profile := &model.Profile{
+			Phonenumber: resp.PhoneNumber,
+			Token:       resp.Token,
+		}
+		res, err = ReplaceOneDoc(db, "profile", bson.M{"phonenumber": resp.PhoneNumber}, profile)
+		if err != nil {
+			return
+		}
 	}
 	return
 }
