@@ -15,18 +15,16 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-      - id: 'deploy'
-        uses: 'google-github-actions/deploy-cloud-functions@v2'
-        with:
-          name: 'gocroot'
-          runtime: 'go122'
-          entry_point: 'WebHook'
-          region: 'asia-southeast1'
-          env_vars: 'MONGOSTRING=${{ secrets.MONGOSTRING }},WAQRKEYWORD=${{ secrets.WAQRKEYWORD }},WEBHOOKURL=${{ secrets.WEBHOOKURL }},WEBHOOKSECRET=${{ secrets.WEBHOOKSECRET }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}'
-      - id: 'test'
+      - name: Debug GCP credentials
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-          'curl "${{ steps.deploy.outputs.url }}"'
-          'echo "${{ steps.deploy.outputs.id }}"'
-          'echo "${{ steps.deploy.outputs.status }}"'
-          'echo "${{ steps.deploy.outputs.version }}"'
-          'echo "${{ steps.deploy.outputs.runtime }}"'
+          echo "$GOOGLE_APPLICATION_CREDENTIALS" > credentials.json
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+        with:
+          version: '>= 363.0.0'
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info' 
+      - name: 'Deploy a gen 2 cloud function'
+        run: 'gcloud functions deploy gocroot --gen2 --runtime=go122 --region=asia-southeast1 --trigger-http --entry-point=WebHook --allow-unauthenticated --set-env-vars MONGOSTRING=${{ secrets.MONGOSTRING }},WAQRKEYWORD=${{ secrets.WAQRKEYWORD }},WEBHOOKURL=${{ secrets.WEBHOOKURL }},WEBHOOKSECRET=${{ secrets.WEBHOOKSECRET }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}'
