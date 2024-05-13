@@ -36,7 +36,7 @@ To get a auth in Google Cloud, you can do the following:
    # TODO: replace ${PROJECT_ID} with your value below.
    gcloud iam service-accounts create "whatsauth" --project "${PROJECT_ID}"
    # TODO: replace ${PROJECT_ID} with your value below.
-   gcloud iam service-accounts keys create "key.json" --iam-account "my-service-account@${PROJECT_ID}.iam.gserviceaccount.com"
+   gcloud iam service-accounts keys create "key.json" --iam-account "whatsauth@${PROJECT_ID}.iam.gserviceaccount.com"
    cat key.json
    ```
 2. Open Menu Cloud Build>settings, select Service Account which create by step 1 and enable Cloud Function Developer.  
