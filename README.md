@@ -37,8 +37,9 @@ To get a auth in Google Cloud, you can do the following:
    gcloud iam service-accounts create "whatsauth" --project "${PROJECT_ID}"
    # TODO: replace ${PROJECT_ID} with your value below.
    gcloud iam service-accounts keys create "key.json" --iam-account "my-service-account@${PROJECT_ID}.iam.gserviceaccount.com"
+   cat key.json
    ```
-2. Go to github repository, in settings menu>secrets>action add GOOGLE_CREDENTIALS vars with value from step 1.
+2. Go to github repository, in settings menu>secrets>action add GOOGLE_CREDENTIALS vars with value from key.json file.
 3. Add others Vars into secret>action menu:  
    ```sh
    MONGOSTRING=YOURMONGOSTRINGACCESS
