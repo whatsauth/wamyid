@@ -38,7 +38,7 @@ To get a auth in Google Cloud, you can do the following:
    # TODO: replace ${PROJECT_ID} with your value below.
    gcloud iam service-accounts keys create "key.json" --iam-account "whatsauth@${PROJECT_ID}.iam.gserviceaccount.com"
    cat key.json
-   gcloud run services add-iam-policy-binding gocroot --member="allUsers" --role="roles/run.invoker"
+   gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:whatsauth@${PROJECT_ID}.iam.gserviceaccount.com --role=roles/run.admin
    ```
 2. Open Menu Cloud Build>settings, select Service Account which create by step 1 and enable Cloud Function Developer.  
    ![image](https://github.com/gocroot/gcp/assets/11188109/d2628542-99a6-44ce-ba78-798c249e0f22)  
@@ -51,8 +51,6 @@ To get a auth in Google Cloud, you can do the following:
    WEBHOOKSECRET=yoursecret
    WAPHONENUMBER=62811111
    ```
-![image](https://github.com/gocroot/gcp/assets/11188109/6e219c02-8c76-4399-8886-6838ad9edf59)
-![image](https://github.com/gocroot/gcp/assets/11188109/8f713d3f-09ab-4267-bf9c-10957b37d9f8)
 
 ## WhatsAuth Signup
 
