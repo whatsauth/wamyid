@@ -74,7 +74,10 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 }
 
 func GetRandomReplyFromMongo(msg model.IteungMessage, db *mongo.Database) string {
-	rply, _ := GetRandomDoc[model.Reply](db, "reply", 1)
+	rply, err := GetRandomDoc[model.Reply](db, "reply", 1)
+	if err != nil {
+		return "Koneksi Database Gagal"
+	}
 	replymsg := strings.ReplaceAll(rply[0].Message, "#BOTNAME#", msg.Alias_name)
 	replymsg = strings.ReplaceAll(replymsg, "\\n", "\n")
 	return replymsg
