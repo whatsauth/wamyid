@@ -9,11 +9,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func WebHook(WAKeyword, WAPhoneNumber, WAAPIQRLogin, WAAPIMessage string, msg model.IteungMessage, db *mongo.Database) (resp model.Response) {
+func WebHook(WAKeyword, WAPhoneNumber, WAAPIQRLogin, WAAPIMessage string, msg model.IteungMessage, db *mongo.Database) (resp model.Response, err error) {
 	if IsLoginRequest(msg, WAKeyword) { //untuk whatsauth request login
-		resp = HandlerQRLogin(msg, WAKeyword, WAPhoneNumber, db, WAAPIQRLogin)
+		resp, err = HandlerQRLogin(msg, WAKeyword, WAPhoneNumber, db, WAAPIQRLogin)
 	} else { //untuk membalas pesan masuk
-		resp = HandlerIncomingMessage(msg, WAPhoneNumber, db, WAAPIMessage)
+		resp, err = HandlerIncomingMessage(msg, WAPhoneNumber, db, WAAPIMessage)
 	}
 	return
 }
@@ -46,17 +46,21 @@ func GetUUID(msg model.IteungMessage, keyword string) string {
 	return strings.Replace(msg.Message, keyword, "", 1)
 }
 
-func HandlerQRLogin(msg model.IteungMessage, WAKeyword string, WAPhoneNumber string, db *mongo.Database, WAAPIQRLogin string) (resp model.Response) {
+func HandlerQRLogin(msg model.IteungMessage, WAKeyword string, WAPhoneNumber string, db *mongo.Database, WAAPIQRLogin string) (resp model.Response, err error) {
 	dt := &model.WhatsauthRequest{
 		Uuid:        GetUUID(msg, WAKeyword),
 		Phonenumber: msg.Phone_number,
 		Delay:       msg.From_link_delay,
 	}
-	resp, _ = PostStructWithToken[model.Response]("Token", WAAPIToken(WAPhoneNumber, db), dt, WAAPIQRLogin)
+	structtoken, err := WAAPIToken(WAPhoneNumber, db)
+	if err != nil {
+		return
+	}
+	resp, err = PostStructWithToken[model.Response]("Token", structtoken.Token, dt, WAAPIQRLogin)
 	return
 }
 
-func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *mongo.Database, WAAPIMessage string) (resp model.Response) {
+func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *mongo.Database, WAAPIMessage string) (resp model.Response, err error) {
 	dt := &model.TextMessage{
 		To:       msg.Chat_number,
 		IsGroup:  false,
@@ -66,13 +70,15 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 		dt.IsGroup = true
 	}
 	if (msg.Phone_number != "628112000279") && (msg.Phone_number != "6283131895000") { //ignore pesan datang dari iteung
-		pasetoken := WAAPIToken(WAPhoneNumber, db)
-		if pasetoken != "" {
-			resp, _ = PostStructWithToken[model.Response]("Token", WAAPIToken(WAPhoneNumber, db), dt, WAAPIMessage)
-		} else {
-			resp.Response = "Not Found Phonenumber " + WAPhoneNumber + " in the profile collection db, check phone number env."
+		var profile model.Profile
+		profile, err = WAAPIToken(WAPhoneNumber, db)
+		if err != nil {
+			return
 		}
-
+		resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
+		if err != nil {
+			return
+		}
 	}
 	return
 }

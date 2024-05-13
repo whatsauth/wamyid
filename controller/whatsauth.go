@@ -19,7 +19,10 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			resp.Response = err.Error()
 		} else {
-			resp = helper.WebHook(config.WAKeyword, config.WAPhoneNumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
+			resp, err = helper.WebHook(config.WAKeyword, config.WAPhoneNumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
+			if err != nil {
+				resp.Response = err.Error()
+			}
 		}
 	} else {
 		dt := &model.WebHook{
