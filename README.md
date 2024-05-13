@@ -50,6 +50,8 @@ To get a auth in Google Cloud, you can do the following:
    WEBHOOKSECRET=yoursecret
    WAPHONENUMBER=62811111
    ```
+![image](https://github.com/gocroot/gcp/assets/11188109/6e219c02-8c76-4399-8886-6838ad9edf59)
+![image](https://github.com/gocroot/gcp/assets/11188109/8f713d3f-09ab-4267-bf9c-10957b37d9f8)
 
 ## WhatsAuth Signup
 
