@@ -1,7 +1,7 @@
 package gocroot
 
 import (
-	"gocroot/controller"
+	"github.com/gocroot/controller"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
