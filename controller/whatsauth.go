@@ -32,9 +32,9 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 			resp.Response = err.Error()
 		} else {
 			resp.Response = helper.Jsonstr(res.ModifiedCount)
-			resp.Info = req.Method + " " + req.URL.Path
 		}
 
 	}
+	resp.Info = req.Method + " " + req.URL.Path
 	helper.WriteResponse(respw, http.StatusOK, resp)
 }
