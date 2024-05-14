@@ -33,7 +33,7 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 			resp.Response = err.Error()
 		} else {
 			resp.Response = helper.Jsonstr(res.ModifiedCount)
-			resp.Response = "{\"urlpath\":" + url + ",\"updatedecount\":" + resp.Response + "}"
+			resp.Info = url
 		}
 
 	}
