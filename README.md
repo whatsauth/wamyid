@@ -26,6 +26,7 @@ This boilerplate has several folders with different functions, such as:
 * controller: all of the endpoint functions
 * model: all of the type structs used in this app
 * helper: helper folder with list of function only called by others file
+* route: all routes URL
 
 ## GCP Cloud Function CI/CD setup
 
