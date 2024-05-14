@@ -37,7 +37,8 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 		}
 
 	}
-	fmt.Fprintf(respw, resp.Response)
+	responsestring := jsonstr(resp)
+	fmt.Fprintf(respw, responsestring)
 }
 
 func jsonstr(strc interface{}) string {
