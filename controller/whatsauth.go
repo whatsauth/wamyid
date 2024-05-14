@@ -2,8 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gocroot/config"
@@ -14,7 +12,8 @@ import (
 func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 	var resp model.Response
 	var msg model.IteungMessage
-	if GetSecretFromHeader(req) == config.WebhookSecret {
+	url := req.URL.Path
+	if helper.GetSecretFromHeader(req) == config.WebhookSecret {
 		err := json.NewDecoder(req.Body).Decode(&msg)
 		if err != nil {
 			resp.Response = err.Error()
@@ -33,27 +32,10 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			resp.Response = err.Error()
 		} else {
-			resp.Response = jsonstr(res.ModifiedCount)
+			resp.Response = helper.Jsonstr(res.ModifiedCount)
+			resp.Response = "{\"urlpath\":" + url + ",\"updatedecount\":" + resp.Response + "}"
 		}
 
 	}
-	responsestring := jsonstr(resp)
-	fmt.Fprintf(respw, responsestring)
-}
-
-func jsonstr(strc interface{}) string {
-	jsonData, err := json.Marshal(strc)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(jsonData)
-}
-
-func GetSecretFromHeader(r *http.Request) (secret string) {
-	if r.Header.Get("secret") != "" {
-		secret = r.Header.Get("secret")
-	} else if r.Header.Get("Secret") != "" {
-		secret = r.Header.Get("Secret")
-	}
-	return
+	helper.WriteResponse(respw, http.StatusOK, resp)
 }
