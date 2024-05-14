@@ -48,7 +48,7 @@ To get a auth in Google Cloud, you can do the following:
    ```sh
    MONGOSTRING=YOURMONGOSTRINGACCESS
    WAQRKEYWORD=yourkeyword
-   WEBHOOKURL=https://yourappname.alwaysdata.net/whatsauth/webhook
+   WEBHOOKURL=https://yourappname.gcp.net/whatsauth/webhook
    WEBHOOKSECRET=yoursecret
    WAPHONENUMBER=62811111
    ```
