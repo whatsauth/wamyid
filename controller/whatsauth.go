@@ -12,7 +12,6 @@ import (
 func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 	var resp model.Response
 	var msg model.IteungMessage
-	url := req.URL.Path
 	if helper.GetSecretFromHeader(req) == config.WebhookSecret {
 		err := json.NewDecoder(req.Body).Decode(&msg)
 		if err != nil {
@@ -33,7 +32,7 @@ func HandleRequest(respw http.ResponseWriter, req *http.Request) {
 			resp.Response = err.Error()
 		} else {
 			resp.Response = helper.Jsonstr(res.ModifiedCount)
-			resp.Info = url
+			resp.Info = req.Method + " " + req.URL.Path
 		}
 
 	}
