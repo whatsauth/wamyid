@@ -27,6 +27,9 @@ type IteungMessage struct {
 type Profile struct {
 	Token       string `bson:"token"`
 	Phonenumber string `bson:"phonenumber"`
+	Secret      string `bson:"secret"`
+	URL         string `bson:"url"`
+	QRKeyword   string `bson:"qrkeyword"`
 }
 
 type WebHook struct {

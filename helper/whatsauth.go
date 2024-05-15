@@ -19,20 +19,18 @@ func WebHook(WAKeyword, WAPhoneNumber, WAAPIQRLogin, WAAPIMessage string, msg mo
 }
 
 func RefreshToken(dt *model.WebHook, WAPhoneNumber, WAAPIGetToken string, db *mongo.Database) (res *mongo.UpdateResult, err error) {
-	tokenapi, err := WAAPIToken(WAPhoneNumber, db)
+	profile, err := GetAppProfile(WAPhoneNumber, db)
 	if err != nil {
 		return
 	}
 	var resp model.User
-	if tokenapi.Token != "" {
-		resp, err = PostStructWithToken[model.User]("Token", tokenapi.Token, dt, WAAPIGetToken)
+	if profile.Token != "" {
+		resp, err = PostStructWithToken[model.User]("Token", profile.Token, dt, WAAPIGetToken)
 		if err != nil {
 			return
 		}
-		profile := &model.Profile{
-			Phonenumber: resp.PhoneNumber,
-			Token:       resp.Token,
-		}
+		profile.Phonenumber = resp.PhoneNumber
+		profile.Token = resp.Token
 		res, err = ReplaceOneDoc(db, "profile", bson.M{"phonenumber": resp.PhoneNumber}, profile)
 		if err != nil {
 			return
@@ -55,7 +53,7 @@ func HandlerQRLogin(msg model.IteungMessage, WAKeyword string, WAPhoneNumber str
 		Phonenumber: msg.Phone_number,
 		Delay:       msg.From_link_delay,
 	}
-	structtoken, err := WAAPIToken(WAPhoneNumber, db)
+	structtoken, err := GetAppProfile(WAPhoneNumber, db)
 	if err != nil {
 		return
 	}
@@ -74,7 +72,7 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 	}
 	if (msg.Phone_number != "628112000279") && (msg.Phone_number != "6283131895000") { //ignore pesan datang dari iteung
 		var profile model.Profile
-		profile, err = WAAPIToken(WAPhoneNumber, db)
+		profile, err = GetAppProfile(WAPhoneNumber, db)
 		if err != nil {
 			return
 		}
@@ -96,7 +94,7 @@ func GetRandomReplyFromMongo(msg model.IteungMessage, db *mongo.Database) string
 	return replymsg
 }
 
-func WAAPIToken(phonenumber string, db *mongo.Database) (apitoken model.Profile, err error) {
+func GetAppProfile(phonenumber string, db *mongo.Database) (apitoken model.Profile, err error) {
 	filter := bson.M{"phonenumber": phonenumber}
 	apitoken, err = GetOneDoc[model.Profile](db, "profile", filter)
 

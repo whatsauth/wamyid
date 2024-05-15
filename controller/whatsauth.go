@@ -20,12 +20,17 @@ func PostInbox(respw http.ResponseWriter, req *http.Request) {
 	var msg model.IteungMessage
 	httpstatus := http.StatusUnauthorized
 	resp.Response = "Wrong Secret"
-	if helper.GetSecretFromHeader(req) == config.WebhookSecret {
+	prof, err := helper.GetAppProfile(config.WAPhoneNumber, config.Mongoconn)
+	if err != nil {
+		resp.Response = err.Error()
+		httpstatus = http.StatusServiceUnavailable
+	}
+	if helper.GetSecretFromHeader(req) == prof.Secret {
 		err := json.NewDecoder(req.Body).Decode(&msg)
 		if err != nil {
 			resp.Response = err.Error()
 		} else {
-			resp, err = helper.WebHook(config.WAKeyword, config.WAPhoneNumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
+			resp, err = helper.WebHook(prof.QRKeyword, config.WAPhoneNumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
 			if err != nil {
 				resp.Response = err.Error()
 			}
@@ -37,9 +42,13 @@ func PostInbox(respw http.ResponseWriter, req *http.Request) {
 func GetNewToken(respw http.ResponseWriter, req *http.Request) {
 	var resp model.Response
 	httpstatus := http.StatusServiceUnavailable
+	prof, err := helper.GetAppProfile(config.WAPhoneNumber, config.Mongoconn)
+	if err != nil {
+		resp.Response = err.Error()
+	}
 	dt := &model.WebHook{
-		URL:    config.WebhookURL,
-		Secret: config.WebhookSecret,
+		URL:    prof.URL,
+		Secret: prof.Secret,
 	}
 	res, err := helper.RefreshToken(dt, config.WAPhoneNumber, config.WAAPIGetToken, config.Mongoconn)
 	if err != nil {
