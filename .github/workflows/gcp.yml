@@ -37,7 +37,7 @@ jobs:
             --trigger-http \
             --verbosity=debug \
             --source=. \
-            --set-env-vars=[MONGOSTRING=${{ secrets.MONGOSTRING }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}]
+            --set-env-vars=WAPHONENUMBER=${{ secrets.WAPHONENUMBER }},MONGOSTRING=${{ secrets.MONGOSTRING }}
       - name: 'Cek eksistensi fungsi'
         run: 'gcloud functions describe wamyid --region=asia-southeast1'
       - name: 'Cek log debugging'
