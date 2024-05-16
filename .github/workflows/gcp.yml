@@ -22,8 +22,6 @@ jobs:
           echo "$GOOGLE_APPLICATION_CREDENTIALS" > credentials.json
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
-        with:
-          version: '>= 363.0.0'
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
       - name: 'Buat zip dari sumber kode'
