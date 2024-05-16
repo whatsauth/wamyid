@@ -24,8 +24,6 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v2'
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
-      # - name: 'Buat zip dari sumber kode'
-      #   run: 'zip -r function.zip *'
       - name: 'Deploy a gen 2 cloud function'
         run: |
           gcloud functions deploy wamyid \
@@ -35,12 +33,10 @@ jobs:
             --gen2 \
             --runtime=go122 \
             --trigger-http \
-            --verbosity=debug \
-            --source=. \
             --set-env-vars=WAPHONENUMBER='${{ secrets.WAPHONENUMBER }}',MONGOSTRING='${{ secrets.MONGOSTRING }}'
       - name: 'Cek eksistensi fungsi'
         run: 'gcloud functions describe wamyid --region=asia-southeast1'
       - name: 'Cek log debugging'
         run: 'gcloud functions logs read wamyid --region=asia-southeast1'
-      # - name: 'Cleaning Artifact Registry'
-      #   run: 'gcloud artifacts repositories delete gcf-artifacts --location=asia-southeast1 --quiet'
+      - name: 'Cleaning Artifact Registry'
+        run: 'gcloud artifacts repositories delete gcf-artifacts --location=asia-southeast1 --quiet'
