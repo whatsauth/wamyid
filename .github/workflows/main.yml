@@ -30,6 +30,6 @@ jobs:
         with:
           args: zip -qq -r dir.zip .
       - name: 'Deploy a gen 2 cloud function'
-        run: 'gcloud functions deploy wamyid --gen2 --runtime=go122 --region=asia-southeast1 --trigger-http --entry-point=WebHook --allow-unauthenticated --source=dir.zip --set-env-vars=MONGOSTRING=${{ secrets.MONGOSTRING }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}'
+        run: 'gcloud functions deploy wamyid --gen2 --runtime=go122 --region=asia-southeast1 --trigger-http --entry-point=WebHook --allow-unauthenticated --source=./dir.zip --set-env-vars=MONGOSTRING=${{ secrets.MONGOSTRING }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}'
       - name: 'Cleaning Artifact Registry'
         run: 'gcloud artifacts repositories delete gcf-artifacts --location=asia-southeast1 --quiet'
