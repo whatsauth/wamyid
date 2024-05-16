@@ -27,6 +27,6 @@ jobs:
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
       - name: 'Deploy a gen 2 cloud function'
-        run: 'gcloud functions deploy wamyid --region=asia-southeast1 --allow-unauthenticated --entry-point=WebHook --gen2 --runtime=go122 --set-env-vars=[MONGOSTRING=${{ secrets.MONGOSTRING }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}] --trigger-http'
+        run: 'gcloud functions deploy wamyid --region=asia-southeast1 --allow-unauthenticated --entry-point=WebHook --gen2 --runtime=go122  --trigger-http --set-env-vars=[MONGOSTRING=${{ secrets.MONGOSTRING }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}]'
       - name: 'Cleaning Artifact Registry'
         run: 'gcloud artifacts repositories delete gcf-artifacts --location=asia-southeast1 --quiet'
