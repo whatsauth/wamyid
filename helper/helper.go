@@ -8,6 +8,16 @@ import (
 	"strings"
 )
 
+func URLParam(reqpath string, url string) bool {
+	urls := strings.Split(url, ":")
+	prefix := reqpath[:strings.LastIndex(reqpath, "/")+1]
+	return prefix == urls[0]
+}
+
+func GetParam(r *http.Request) string {
+	return r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
+}
+
 func GetAddress() (ipport string, network string) {
 	port := os.Getenv("PORT")
 	network = "tcp4"

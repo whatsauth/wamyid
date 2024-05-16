@@ -39,6 +39,31 @@ func PostInbox(respw http.ResponseWriter, req *http.Request) {
 	helper.WriteResponse(respw, httpstatus, resp)
 }
 
+func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
+	var resp model.Response
+	var msg model.IteungMessage
+	httpstatus := http.StatusUnauthorized
+	resp.Response = "Wrong Secret"
+	waphonenumber := helper.GetParam(req)
+	prof, err := helper.GetAppProfile(waphonenumber, config.Mongoconn)
+	if err != nil {
+		resp.Response = err.Error()
+		httpstatus = http.StatusServiceUnavailable
+	}
+	if helper.GetSecretFromHeader(req) == prof.Secret {
+		err := json.NewDecoder(req.Body).Decode(&msg)
+		if err != nil {
+			resp.Response = err.Error()
+		} else {
+			resp, err = helper.WebHook(prof.QRKeyword, waphonenumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
+			if err != nil {
+				resp.Response = err.Error()
+			}
+		}
+	}
+	helper.WriteResponse(respw, httpstatus, resp)
+}
+
 func GetNewToken(respw http.ResponseWriter, req *http.Request) {
 	var resp model.Response
 	httpstatus := http.StatusServiceUnavailable
