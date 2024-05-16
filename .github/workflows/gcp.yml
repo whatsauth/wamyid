@@ -33,7 +33,7 @@ jobs:
             --gen2 \
             --runtime=go122 \
             --trigger-http \
-            --set-env-vars=WAPHONENUMBER='${{ secrets.WAPHONENUMBER }}',MONGOSTRING='${{ secrets.MONGOSTRING }}'
+            --set-env-vars=MONGOSTRING='${{ secrets.MONGOSTRING }}'
       - name: 'Cek eksistensi fungsi'
         run: 'gcloud functions describe wamyid --region=asia-southeast1'
       - name: 'Cek log debugging'
