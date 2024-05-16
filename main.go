@@ -7,5 +7,5 @@ import (
 )
 
 func init() {
-	functions.HTTP("WebHook", route.URL)
+	functions.HTTP("Main", route.URL)
 }
