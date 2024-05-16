@@ -26,9 +26,6 @@ jobs:
           version: '>= 363.0.0'
       - name: 'Use gcloud CLI'
         run: 'gcloud info' 
-      - uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r dir.zip .
       - name: 'Deploy a gen 2 cloud function'
         run: 'gcloud functions deploy wamyid --gen2 --runtime=go122 --region=asia-southeast1 --trigger-http --entry-point=WebHook --allow-unauthenticated --set-env-vars=[MONGOSTRING=${{ secrets.MONGOSTRING }},WAPHONENUMBER=${{ secrets.WAPHONENUMBER }}]'
       - name: 'Cleaning Artifact Registry'
