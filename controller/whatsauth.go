@@ -67,21 +67,27 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 func GetNewToken(respw http.ResponseWriter, req *http.Request) {
 	var resp model.Response
 	httpstatus := http.StatusServiceUnavailable
-	prof, err := helper.GetAppProfile(config.WAPhoneNumber, config.Mongoconn)
-	if err != nil {
-		resp.Response = err.Error()
-	}
-	dt := &model.WebHook{
-		URL:    prof.URL,
-		Secret: prof.Secret,
-	}
-	res, err := helper.RefreshToken(dt, config.WAPhoneNumber, config.WAAPIGetToken, config.Mongoconn)
+	//prof, err := helper.GetAppProfile(config.WAPhoneNumber, config.Mongoconn)
+	profs, err := helper.GetAllDoc[[]model.Profile](config.Mongoconn, "profile")
 	if err != nil {
 		resp.Response = err.Error()
 	} else {
-		resp.Response = helper.Jsonstr(res.ModifiedCount)
-		httpstatus = http.StatusOK
+		for _, prof := range profs {
+			dt := &model.WebHook{
+				URL:    prof.URL,
+				Secret: prof.Secret,
+			}
+			res, err := helper.RefreshToken(dt, prof.Phonenumber, config.WAAPIGetToken, config.Mongoconn)
+			if err != nil {
+				resp.Response = err.Error()
+				break
+			} else {
+				resp.Response = helper.Jsonstr(res.ModifiedCount)
+				httpstatus = http.StatusOK
+			}
+		}
 	}
+
 	helper.WriteResponse(respw, httpstatus, resp)
 }
 
