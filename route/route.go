@@ -23,7 +23,7 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	case method == "GET" && path == "/refresh/token":
 		controller.GetNewToken(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
-		controller.GetNewToken(w, r)
+		controller.PostInboxNomor(w, r)
 	default:
 		controller.NotFound(w, r)
 	}
