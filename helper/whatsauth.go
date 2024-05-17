@@ -40,7 +40,7 @@ func RefreshToken(dt *model.WebHook, WAPhoneNumber, WAAPIGetToken string, db *mo
 }
 
 func IsLoginRequest(msg model.IteungMessage, keyword string) bool {
-	return strings.Contains(msg.Message, keyword) && msg.From_link
+	return strings.Contains(msg.Message, keyword) // && msg.From_link
 }
 
 func GetUUID(msg model.IteungMessage, keyword string) string {
