@@ -70,11 +70,11 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 	if msg.Chat_server == "g.us" { //jika pesan datang dari group maka balas ke group
 		dt.IsGroup = true
 	}
-	profilebot, err := GetAppProfile(msg.Phone_number, db)
+	botnumber, err := IsBotNumber(msg.Phone_number, db)
 	if err != nil {
 		return
 	}
-	if (profilebot == model.Profile{}) { //ignore pesan datang dari sesama bot di profile
+	if !botnumber { //ignore pesan datang dari sesama bot di profile
 		var profile model.Profile
 		profile, err = GetAppProfile(WAPhoneNumber, db)
 		if err != nil {
@@ -84,6 +84,17 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 		if err != nil {
 			return
 		}
+	}
+	return
+}
+
+func IsBotNumber(phonenumber string, db *mongo.Database) (status bool, err error) {
+	profilebot, err := GetAppProfile(phonenumber, db)
+	if err != nil {
+		return
+	}
+	if (profilebot != model.Profile{}) {
+		return true, nil
 	}
 	return
 }
