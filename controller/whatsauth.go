@@ -35,18 +35,9 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 			if err != nil {
 				resp.Response = err.Error()
 			}
-			//check apakah pesan masuk dari bot yang lain, untuk menghindari saling balas
-			prof, err := helper.GetAppProfile(msg.Phone_number, config.Mongoconn)
+			resp, err = helper.WebHook(prof.QRKeyword, waphonenumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
 			if err != nil {
 				resp.Response = err.Error()
-				httpstatus = http.StatusServiceUnavailable
-			}
-			//jika tidak ada di daftra profile maka kirim balasan
-			if (prof == model.Profile{}) {
-				resp, err = helper.WebHook(prof.QRKeyword, waphonenumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
-				if err != nil {
-					resp.Response = err.Error()
-				}
 			}
 		}
 	}
