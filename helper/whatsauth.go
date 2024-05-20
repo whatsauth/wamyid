@@ -74,7 +74,12 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 	if err != nil {
 		return
 	}
-	if !botnumber { //ignore pesan datang dari sesama bot di profile
+	if botnumber {
+		dt.Messages = dt.Messages + " terdeteksi nomor bot"
+	} else {
+		dt.Messages = dt.Messages + " bukan nomor bot"
+	}
+	if true { //ignore pesan datang dari sesama bot di profile
 		var profile model.Profile
 		profile, err = GetAppProfile(WAPhoneNumber, db)
 		if err != nil {
