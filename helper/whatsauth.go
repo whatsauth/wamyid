@@ -62,15 +62,6 @@ func HandlerQRLogin(msg model.IteungMessage, WAKeyword string, WAPhoneNumber str
 }
 
 func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *mongo.Database, WAAPIMessage string) (resp model.Response, err error) {
-	dt := &model.TextMessage{
-		To:       msg.Chat_number,
-		IsGroup:  false,
-		Messages: GetRandomReplyFromMongo(msg, db),
-	}
-	if msg.Chat_server == "g.us" { //jika pesan datang dari group maka balas ke group
-		dt.IsGroup = true
-	}
-
 	_, bukanbot := GetAppProfile(msg.Phone_number, db) //cek apakah nomor adalah bot
 	if bukanbot != nil {                               //jika tidak terdapat di profile
 		var profile model.Profile
@@ -78,20 +69,37 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 		if err != nil {
 			return
 		}
-		resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
-		if err != nil {
-			return
+		dt := &model.TextMessage{
+			To:       msg.Chat_number,
+			IsGroup:  false,
+			Messages: GetRandomReplyFromMongo(msg, profile.Botname, db),
 		}
+		if msg.Chat_server == "g.us" { //jika pesan datang dari group maka balas ke group
+			dt.IsGroup = true
+		}
+		if !dt.IsGroup { //kalo chat personal langsung balas tanpa manggil nama
+			resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
+			if err != nil {
+				return
+			}
+		} else if strings.Contains(strings.ToLower(msg.Message), profile.Botname) { //klo chat group harus panggil nama
+			resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
+			if err != nil {
+				return
+			}
+
+		}
+
 	}
 	return
 }
 
-func GetRandomReplyFromMongo(msg model.IteungMessage, db *mongo.Database) string {
+func GetRandomReplyFromMongo(msg model.IteungMessage, botname string, db *mongo.Database) string {
 	rply, err := GetRandomDoc[model.Reply](db, "reply", 1)
 	if err != nil {
 		return "Koneksi Database Gagal: " + err.Error()
 	}
-	replymsg := strings.ReplaceAll(rply[0].Message, "#BOTNAME#", msg.Alias_name)
+	replymsg := strings.ReplaceAll(rply[0].Message, "#BOTNAME#", botname)
 	replymsg = strings.ReplaceAll(replymsg, "\\n", "\n")
 	return replymsg
 }

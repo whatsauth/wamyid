@@ -31,6 +31,8 @@ type Profile struct {
 	Secret      string `bson:"secret"`
 	URL         string `bson:"url"`
 	QRKeyword   string `bson:"qrkeyword"`
+	Botname     string `bson:"botname"`
+	Triggerword string `bson:"triggerword"`
 }
 
 type WebHook struct {
