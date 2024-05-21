@@ -69,20 +69,22 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 		if err != nil {
 			return
 		}
-		dt := &model.TextMessage{
-			To:       msg.Chat_number,
-			IsGroup:  false,
-			Messages: GetRandomReplyFromMongo(msg, profile.Botname, db),
-		}
-		if msg.Chat_server == "g.us" { //jika pesan datang dari group maka balas ke group
-			dt.IsGroup = true
-		}
-		if !dt.IsGroup { //kalo chat personal langsung balas tanpa manggil nama
+		if msg.Chat_server != "g.us" { //kalo chat personal langsung balas tanpa manggil nama
+			dt := &model.TextMessage{
+				To:       msg.Chat_number,
+				IsGroup:  false,
+				Messages: GetRandomReplyFromMongo(msg, profile.Botname, db),
+			}
 			resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
 			if err != nil {
 				return
 			}
-		} else if strings.Contains(strings.ToLower(msg.Message), profile.Botname) { //klo chat group harus panggil nama
+		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //klo chat group harus panggil nama
+			dt := &model.TextMessage{
+				To:       msg.Chat_number,
+				IsGroup:  true,
+				Messages: GetRandomReplyFromMongo(msg, profile.Botname, db),
+			}
 			resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
 			if err != nil {
 				return
