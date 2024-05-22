@@ -66,5 +66,6 @@ type Response struct {
 type WhatsauthRequest struct {
 	Uuid        string `json:"uuid,omitempty" bson:"uuid,omitempty"`
 	Phonenumber string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	Aliasname   string `json:"aliasname,omitempty" bson:"aliasname,omitempty"`
 	Delay       uint32 `json:"delay,omitempty" bson:"delay,omitempty"`
 }

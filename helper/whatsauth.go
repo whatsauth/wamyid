@@ -51,6 +51,7 @@ func HandlerQRLogin(msg model.IteungMessage, WAKeyword string, WAPhoneNumber str
 	dt := &model.WhatsauthRequest{
 		Uuid:        GetUUID(msg, WAKeyword),
 		Phonenumber: msg.Phone_number,
+		Aliasname:   msg.Alias_name,
 		Delay:       msg.From_link_delay,
 	}
 	structtoken, err := GetAppProfile(WAPhoneNumber, db)
