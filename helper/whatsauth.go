@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gocroot/model"
+	"github.com/gocroot/module"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -74,7 +75,7 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 			dt := &model.TextMessage{
 				To:       msg.Chat_number,
 				IsGroup:  false,
-				Messages: GetRandomReplyFromMongo(msg, profile.Botname, db),
+				Messages: GetRandomReplyFromMongo(msg, profile.Botname, db) + " " + module.GetModuleName(msg, db, "module"),
 			}
 			resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
 			if err != nil {
