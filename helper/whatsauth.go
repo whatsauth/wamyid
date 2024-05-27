@@ -71,6 +71,7 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 		if err != nil {
 			return
 		}
+		module.NormalizeAndTypoCorrection(&msg.Message, db, "typo")
 		if msg.Chat_server != "g.us" { //kalo chat personal langsung balas tanpa manggil nama
 			dt := &model.TextMessage{
 				To:       msg.Chat_number,
