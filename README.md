@@ -119,3 +119,10 @@ If you want to upgrade apps, please delete (go.mod) and (go.sum) files first, th
 go mod init gocroot
 go mod tidy
 ```
+
+
+## Managing Module
+Steps are follow:
+1. Create Package in mod folder
+2. Edit modcaller.go file, call your mod package here
+3. Register keyword in module collection in mongodb

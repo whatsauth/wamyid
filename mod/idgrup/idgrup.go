@@ -1,4 +1,4 @@
-package mod
+package idgrup
 
 import "github.com/gocroot/model"
 

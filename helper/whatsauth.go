@@ -3,6 +3,8 @@ package helper
 import (
 	"strings"
 
+	"github.com/gocroot/mod"
+
 	"github.com/gocroot/model"
 	"github.com/gocroot/module"
 
@@ -76,7 +78,7 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 		var msgstr string
 		if msg.Chat_server != "g.us" { //chat personal
 			if personal && modname != "" {
-				msgstr = module.Caller(modname, msg)
+				msgstr = mod.Caller(modname, msg)
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
@@ -91,7 +93,7 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 			}
 		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //chat group
 			if group && modname != "" {
-				msgstr = module.Caller(modname, msg)
+				msgstr = mod.Caller(modname, msg)
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
