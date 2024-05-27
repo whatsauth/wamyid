@@ -74,8 +74,8 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 		module.NormalizeAndTypoCorrection(&msg.Message, db, "typo")
 		modname, group, personal := module.GetModuleName(WAPhoneNumber, msg, db, "module")
 		var msgstr string
-		if msg.Chat_server != "g.us" { //kalo chat personal langsung balas tanpa manggil nama
-			if group && modname != "" {
+		if msg.Chat_server != "g.us" { //chat personal
+			if personal && modname != "" {
 				msgstr = module.Caller(modname, msg)
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
@@ -89,8 +89,8 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 			if err != nil {
 				return
 			}
-		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //klo chat group harus panggil nama
-			if personal && modname != "" {
+		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //chat group
+			if group && modname != "" {
 				msgstr = module.Caller(modname, msg)
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
