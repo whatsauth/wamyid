@@ -18,30 +18,38 @@ func GetHome(respw http.ResponseWriter, req *http.Request) {
 func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 	var resp model.Response
 	var msg model.IteungMessage
-	httpstatus := http.StatusUnauthorized
-	resp.Response = "Wrong Secret"
 	waphonenumber := helper.GetParam(req)
 	prof, err := helper.GetAppProfile(waphonenumber, config.Mongoconn)
 	if err != nil {
 		resp.Response = err.Error()
-		httpstatus = http.StatusServiceUnavailable
+		helper.WriteResponse(respw, http.StatusServiceUnavailable, resp)
+		return
 	}
 	if helper.GetSecretFromHeader(req) == prof.Secret {
 		err := json.NewDecoder(req.Body).Decode(&msg)
 		if err != nil {
 			resp.Response = err.Error()
-		} else {
-			_, err = helper.InsertOneDoc(config.Mongoconn, "inbox", msg)
+			helper.WriteResponse(respw, http.StatusBadRequest, resp)
+			return
+		} else if msg.Message != "" {
+			/* _, err = helper.InsertOneDoc(config.Mongoconn, "inbox", msg)
 			if err != nil {
 				resp.Response = err.Error()
-			}
+			} */
 			resp, err = helper.WebHook(prof.QRKeyword, waphonenumber, config.WAAPIQRLogin, config.WAAPIMessage, msg, config.Mongoconn)
 			if err != nil {
 				resp.Response = err.Error()
 			}
+			helper.WriteResponse(respw, http.StatusOK, resp)
+			return
+		} else {
+			resp.Response = "pesan kosong"
+			helper.WriteResponse(respw, http.StatusOK, resp)
+			return
 		}
 	}
-	helper.WriteResponse(respw, httpstatus, resp)
+	resp.Response = "Wrong Secret"
+	helper.WriteResponse(respw, http.StatusForbidden, resp)
 }
 
 func GetNewToken(respw http.ResponseWriter, req *http.Request) {
