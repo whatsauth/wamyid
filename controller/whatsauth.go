@@ -6,18 +6,18 @@ import (
 
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
-	"github.com/gocroot/model"
+	"github.com/whatsauth/itmodel"
 )
 
 func GetHome(respw http.ResponseWriter, req *http.Request) {
-	var resp model.Response
+	var resp itmodel.Response
 	resp.Response = helper.GetIPaddress()
 	helper.WriteResponse(respw, http.StatusOK, resp)
 }
 
 func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
-	var resp model.Response
-	var msg model.IteungMessage
+	var resp itmodel.Response
+	var msg itmodel.IteungMessage
 	waphonenumber := helper.GetParam(req)
 	prof, err := helper.GetAppProfile(waphonenumber, config.Mongoconn)
 	if err != nil {
@@ -53,15 +53,15 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 }
 
 func GetNewToken(respw http.ResponseWriter, req *http.Request) {
-	var resp model.Response
+	var resp itmodel.Response
 	httpstatus := http.StatusServiceUnavailable
 	//prof, err := helper.GetAppProfile(config.WAPhoneNumber, config.Mongoconn)
-	profs, err := helper.GetAllDoc[[]model.Profile](config.Mongoconn, "profile")
+	profs, err := helper.GetAllDoc[[]itmodel.Profile](config.Mongoconn, "profile")
 	if err != nil {
 		resp.Response = err.Error()
 	} else {
 		for _, prof := range profs {
-			dt := &model.WebHook{
+			dt := &itmodel.WebHook{
 				URL:    prof.URL,
 				Secret: prof.Secret,
 			}
@@ -80,7 +80,7 @@ func GetNewToken(respw http.ResponseWriter, req *http.Request) {
 }
 
 func NotFound(respw http.ResponseWriter, req *http.Request) {
-	var resp model.Response
+	var resp itmodel.Response
 	resp.Response = "Not Found"
 	helper.WriteResponse(respw, http.StatusNotFound, resp)
 }

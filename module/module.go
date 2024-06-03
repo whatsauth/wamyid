@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/gocroot/helper/atdb"
-	"github.com/gocroot/model"
+	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetModuleName(WAPhoneNumber string, im model.IteungMessage, MongoConn *mongo.Database, ModuleCollection string) (modulename string, group bool, personal bool) {
+func GetModuleName(WAPhoneNumber string, im itmodel.IteungMessage, MongoConn *mongo.Database, ModuleCollection string) (modulename string, group bool, personal bool) {
 	modules, _ := atdb.GetAllDoc[[]Module](MongoConn, ModuleCollection, bson.M{"phonenumbers": WAPhoneNumber})
 	for _, mod := range modules {
 		complete, _ := IsMatch(strings.ToLower(im.Message), mod.Keyword...)

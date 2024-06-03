@@ -5,14 +5,14 @@ import (
 
 	"github.com/gocroot/mod"
 
-	"github.com/gocroot/model"
 	"github.com/gocroot/module"
+	"github.com/whatsauth/itmodel"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func WebHook(WAKeyword, WAPhoneNumber, WAAPIQRLogin, WAAPIMessage string, msg model.IteungMessage, db *mongo.Database) (resp model.Response, err error) {
+func WebHook(WAKeyword, WAPhoneNumber, WAAPIQRLogin, WAAPIMessage string, msg itmodel.IteungMessage, db *mongo.Database) (resp itmodel.Response, err error) {
 	if IsLoginRequest(msg, WAKeyword) { //untuk whatsauth request login
 		resp, err = HandlerQRLogin(msg, WAKeyword, WAPhoneNumber, db, WAAPIQRLogin)
 	} else { //untuk membalas pesan masuk
@@ -21,14 +21,14 @@ func WebHook(WAKeyword, WAPhoneNumber, WAAPIQRLogin, WAAPIMessage string, msg mo
 	return
 }
 
-func RefreshToken(dt *model.WebHook, WAPhoneNumber, WAAPIGetToken string, db *mongo.Database) (res *mongo.UpdateResult, err error) {
+func RefreshToken(dt *itmodel.WebHook, WAPhoneNumber, WAAPIGetToken string, db *mongo.Database) (res *mongo.UpdateResult, err error) {
 	profile, err := GetAppProfile(WAPhoneNumber, db)
 	if err != nil {
 		return
 	}
-	var resp model.User
+	var resp itmodel.User
 	if profile.Token != "" {
-		resp, err = PostStructWithToken[model.User]("Token", profile.Token, dt, WAAPIGetToken)
+		resp, err = PostStructWithToken[itmodel.User]("Token", profile.Token, dt, WAAPIGetToken)
 		if err != nil {
 			return
 		}
@@ -42,16 +42,16 @@ func RefreshToken(dt *model.WebHook, WAPhoneNumber, WAAPIGetToken string, db *mo
 	return
 }
 
-func IsLoginRequest(msg model.IteungMessage, keyword string) bool {
+func IsLoginRequest(msg itmodel.IteungMessage, keyword string) bool {
 	return strings.Contains(msg.Message, keyword) // && msg.From_link
 }
 
-func GetUUID(msg model.IteungMessage, keyword string) string {
+func GetUUID(msg itmodel.IteungMessage, keyword string) string {
 	return strings.Replace(msg.Message, keyword, "", 1)
 }
 
-func HandlerQRLogin(msg model.IteungMessage, WAKeyword string, WAPhoneNumber string, db *mongo.Database, WAAPIQRLogin string) (resp model.Response, err error) {
-	dt := &model.WhatsauthRequest{
+func HandlerQRLogin(msg itmodel.IteungMessage, WAKeyword string, WAPhoneNumber string, db *mongo.Database, WAAPIQRLogin string) (resp itmodel.Response, err error) {
+	dt := &itmodel.WhatsauthRequest{
 		Uuid:        GetUUID(msg, WAKeyword),
 		Phonenumber: msg.Phone_number,
 		Aliasname:   msg.Alias_name,
@@ -61,14 +61,14 @@ func HandlerQRLogin(msg model.IteungMessage, WAKeyword string, WAPhoneNumber str
 	if err != nil {
 		return
 	}
-	resp, err = PostStructWithToken[model.Response]("Token", structtoken.Token, dt, WAAPIQRLogin)
+	resp, err = PostStructWithToken[itmodel.Response]("Token", structtoken.Token, dt, WAAPIQRLogin)
 	return
 }
 
-func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *mongo.Database, WAAPIMessage string) (resp model.Response, err error) {
+func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db *mongo.Database, WAAPIMessage string) (resp itmodel.Response, err error) {
 	_, bukanbot := GetAppProfile(msg.Phone_number, db) //cek apakah nomor adalah bot
 	if bukanbot != nil {                               //jika tidak terdapat di profile
-		var profile model.Profile
+		var profile itmodel.Profile
 		profile, err = GetAppProfile(WAPhoneNumber, db)
 		if err != nil {
 			return
@@ -82,12 +82,12 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
-			dt := &model.TextMessage{
+			dt := &itmodel.TextMessage{
 				To:       msg.Chat_number,
 				IsGroup:  false,
 				Messages: msgstr,
 			}
-			resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
+			resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
 			if err != nil {
 				return
 			}
@@ -97,12 +97,12 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
-			dt := &model.TextMessage{
+			dt := &itmodel.TextMessage{
 				To:       msg.Chat_number,
 				IsGroup:  true,
 				Messages: msgstr,
 			}
-			resp, err = PostStructWithToken[model.Response]("Token", profile.Token, dt, WAAPIMessage)
+			resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
 			if err != nil {
 				return
 			}
@@ -113,8 +113,8 @@ func HandlerIncomingMessage(msg model.IteungMessage, WAPhoneNumber string, db *m
 	return
 }
 
-func GetRandomReplyFromMongo(msg model.IteungMessage, botname string, db *mongo.Database) string {
-	rply, err := GetRandomDoc[model.Reply](db, "reply", 1)
+func GetRandomReplyFromMongo(msg itmodel.IteungMessage, botname string, db *mongo.Database) string {
+	rply, err := GetRandomDoc[itmodel.Reply](db, "reply", 1)
 	if err != nil {
 		return "Koneksi Database Gagal: " + err.Error()
 	}
@@ -123,9 +123,9 @@ func GetRandomReplyFromMongo(msg model.IteungMessage, botname string, db *mongo.
 	return replymsg
 }
 
-func GetAppProfile(phonenumber string, db *mongo.Database) (apitoken model.Profile, err error) {
+func GetAppProfile(phonenumber string, db *mongo.Database) (apitoken itmodel.Profile, err error) {
 	filter := bson.M{"phonenumber": phonenumber}
-	apitoken, err = GetOneDoc[model.Profile](db, "profile", filter)
+	apitoken, err = GetOneDoc[itmodel.Profile](db, "profile", filter)
 
 	return
 }
