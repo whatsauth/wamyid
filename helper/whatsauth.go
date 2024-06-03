@@ -78,7 +78,7 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 		var msgstr string
 		if msg.Chat_server != "g.us" { //chat personal
 			if personal && modname != "" {
-				msgstr = mod.Caller(modname, msg)
+				msgstr = mod.Caller(modname, msg, db)
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
@@ -93,7 +93,7 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 			}
 		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //chat group
 			if group && modname != "" {
-				msgstr = mod.Caller(modname, msg)
+				msgstr = mod.Caller(modname, msg, db)
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
