@@ -9,6 +9,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+func CekSelfie(Pesan itmodel.IteungMessage) {
+
+}
+
 func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	if !Pesan.LiveLoc {
 		return "Minimal share live location dulu lah kak."
@@ -22,7 +26,7 @@ func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 	if lokasiuser.Nama == "" {
 		return "Nama nya kosong kak"
 	}
-	dtuser := &CekinLokasi{
+	dtuser := &PresensiLokasi{
 		PhoneNumber: Pesan.Phone_number,
 		Lokasi:      lokasiuser,
 	}

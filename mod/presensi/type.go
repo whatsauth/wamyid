@@ -14,8 +14,14 @@ type Geometry struct { //data geometry untuk lokasi presensi
 	Coordinates interface{} `json:"coordinates" bson:"coordinates"`
 }
 
-type CekinLokasi struct {
+type PresensiLokasi struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
 	PhoneNumber string             `bson:"phonenumber,omitempty"`
 	Lokasi      Lokasi             `bson:"lokasi,omitempty"`
+	Selfie      bool               `bson:"selfie,omitempty"`
+}
+
+type PresensiSelfie struct {
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	CekInLokasi PresensiLokasi     `bson:"cekinlokasi,omitempty"`
 }
