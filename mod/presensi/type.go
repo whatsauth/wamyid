@@ -19,9 +19,11 @@ type PresensiLokasi struct {
 	PhoneNumber string             `bson:"phonenumber,omitempty"`
 	Lokasi      Lokasi             `bson:"lokasi,omitempty"`
 	Selfie      bool               `bson:"selfie,omitempty"`
+	IsDatang    bool               `bson:"isdatang,omitempty"`
 }
 
 type PresensiSelfie struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
 	CekInLokasi PresensiLokasi     `bson:"cekinlokasi,omitempty"`
+	IsDatang    bool               `bson:"isdatang,omitempty"`
 }
