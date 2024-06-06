@@ -10,6 +10,9 @@ import (
 )
 
 func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+	if !Pesan.LiveLoc {
+		return "Minimal share live location dulu lah kak."
+	}
 	longitude := fmt.Sprintf("%f", Pesan.Longitude)
 	latitude := fmt.Sprintf("%f", Pesan.Latitude)
 	lokasiuser, err := GetLokasi(db, Pesan.Longitude, Pesan.Latitude)
