@@ -23,7 +23,7 @@ func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
 	}
-	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number}
+	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number, "ismasuk": true}
 	pstoday, err := atdb.GetOneDoc[PresensiLokasi](db, "presensi", filter)
 	if err != nil {
 		return "Wah kak mohon maaf kakak belum cekin share live location hari ini " + err.Error()
@@ -55,6 +55,39 @@ func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		PhoneNumber: Pesan.Phone_number,
 		Lokasi:      lokasiuser,
 		IsMasuk:     true,
+	}
+	_, err = atdb.InsertOneDoc(db, "presensi", dtuser)
+	if err != nil {
+		return "Gagal insert ke database kak"
+	}
+
+	return "Hai.. hai.. kakak atas nama:\n" + Pesan.Alias_name + "\nLongitude: " + longitude + "\nLatitude: " + latitude + "\nLokasi:" + lokasiuser.Nama + "\nberhasil absen\nmakasih"
+}
+
+func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+	if !Pesan.LiveLoc {
+		return "Minimal share live location dulu lah kak."
+	}
+	longitude := fmt.Sprintf("%f", Pesan.Longitude)
+	latitude := fmt.Sprintf("%f", Pesan.Latitude)
+	lokasiuser, err := GetLokasi(db, Pesan.Longitude, Pesan.Latitude)
+	if err != nil {
+		return "Mohon maaf kak, kakak belum berada di lokasi presensi, silahkan menuju lokasi presensi dahulu baru cekin masuk."
+	}
+	if lokasiuser.Nama == "" {
+		return "Nama nya kosong kak"
+	}
+	dtuser := &PresensiLokasi{
+		PhoneNumber: Pesan.Phone_number,
+		Lokasi:      lokasiuser,
+	}
+	filter := bson.M{"_id": atdb.TodayFilter(), "iduser": Pesan.Phone_number, "ismasuk": true}
+	docselfie, err := atdb.GetOneLatestDoc[PresensiSelfie](db, "selfie", filter)
+	if err != nil {
+		return "Kakak belum selfie masuk ini " + err.Error()
+	}
+	if docselfie.CekInLokasi.Lokasi.ID != lokasiuser.ID {
+		return "Lokasi pulang nya harus sama dengan lokasi masuknya kak: " + lokasiuser.Nama
 	}
 	_, err = atdb.InsertOneDoc(db, "presensi", dtuser)
 	if err != nil {
