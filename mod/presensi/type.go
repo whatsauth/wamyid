@@ -45,3 +45,11 @@ type Config struct {
 	LeaflySecret     string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
 	DomyikadoUserURL string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
 }
+
+type FaceInfo struct {
+	PhoneNumber string `phonenumber:"secret,omitempty" bson:"phonenumber,omitempty"`
+	Commit      string `json:"commit,omitempty" bson:"commit,omitempty"`
+	Remaining   int    `json:"remaining,omitempty" bson:"remaining,omitempty"`
+	FileHash    string `json:"filehash,omitempty" bson:"filehash,omitempty"`
+	Error       string `json:"error,omitempty" bson:"error,omitempty"`
+}

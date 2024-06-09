@@ -2,6 +2,7 @@ package presensi
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
@@ -27,12 +28,21 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
-	pselfie, err := atapi.PostStructWithToken[PresensiSelfie]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
+	statuscode, faceinfo, err := atapi.PostStructWithToken[FaceInfo]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
 	}
-	pselfie.CekInLokasi = pstoday
-	pselfie.IsMasuk = false
+	if statuscode != http.StatusOK {
+		return "Wah kak mohon maaf: " + faceinfo.Error
+	}
+	pselfie := PresensiSelfie{
+		CekInLokasi: pstoday,
+		IsMasuk:     true,
+		IDUser:      faceinfo.PhoneNumber,
+		Commit:      faceinfo.Commit,
+		Filehash:    faceinfo.FileHash,
+		Remaining:   faceinfo.Remaining,
+	}
 	_, err = atdb.InsertOneDoc(db, "selfie", pselfie)
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
@@ -58,12 +68,21 @@ func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
-	pselfie, err := atapi.PostStructWithToken[PresensiSelfie]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
+	statuscode, faceinfo, err := atapi.PostStructWithToken[FaceInfo]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
 	}
-	pselfie.CekInLokasi = pstoday
-	pselfie.IsMasuk = true
+	if statuscode != http.StatusOK {
+		return "Wah kak mohon maaf: " + faceinfo.Error
+	}
+	pselfie := PresensiSelfie{
+		CekInLokasi: pstoday,
+		IsMasuk:     true,
+		IDUser:      faceinfo.PhoneNumber,
+		Commit:      faceinfo.Commit,
+		Filehash:    faceinfo.FileHash,
+		Remaining:   faceinfo.Remaining,
+	}
 	_, err = atdb.InsertOneDoc(db, "selfie", pselfie)
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
