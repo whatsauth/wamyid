@@ -3,6 +3,7 @@ package presensi
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
@@ -108,6 +109,7 @@ func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		PhoneNumber: Pesan.Phone_number,
 		Lokasi:      lokasiuser,
 		IsMasuk:     true,
+		CreatedAt:   time.Now(),
 	}
 	_, err = atdb.InsertOneDoc(db, "presensi", dtuser)
 	if err != nil {
@@ -134,6 +136,7 @@ func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 		PhoneNumber: Pesan.Phone_number,
 		Lokasi:      lokasiuser,
 		IsMasuk:     false,
+		CreatedAt:   time.Now(),
 	}
 	filter := bson.M{"_id": atdb.TodayFilter(), "iduser": Pesan.Phone_number, "ismasuk": true}
 	docselfie, err := atdb.GetOneLatestDoc[PresensiSelfie](db, "selfie", filter)
