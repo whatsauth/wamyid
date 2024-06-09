@@ -13,6 +13,8 @@ func Caller(Modulename string, Pesan itmodel.IteungMessage, db *mongo.Database) 
 		reply = idgrup.IDGroup(Pesan)
 	case "presensi-masuk":
 		reply = presensi.PresensiMasuk(Pesan, db)
+	case "selfie-masuk":
+		reply = presensi.CekSelfieMasuk(Pesan, db)
 	}
 	return
 }
