@@ -10,10 +10,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+	if Pesan.Filedata == "" {
+		return "Kirim pap nya dulu dong kak.."
+	}
 	dt := FaceDetect{
 		IDUser:    Pesan.Phone_number,
 		Base64Str: Pesan.Filedata,
+	}
+	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number, "ismasuk": false}
+	pstoday, err := atdb.GetOneDoc[PresensiLokasi](db, "presensi", filter)
+	if err != nil {
+		return "Wah kak mohon maaf kakak belum cekin share live location hari ini " + err.Error()
 	}
 	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
 	if err != nil {
@@ -23,10 +31,36 @@ func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
 	}
+	pselfie.CekInLokasi = pstoday
+	pselfie.IsMasuk = false
+	_, err = atdb.InsertOneDoc(db, "selfie", pselfie)
+	if err != nil {
+		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
+	}
+	return
+
+}
+
+func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+	if Pesan.Filedata == "" {
+		return "Kirim pap nya dulu dong kak.."
+	}
+	dt := FaceDetect{
+		IDUser:    Pesan.Phone_number,
+		Base64Str: Pesan.Filedata,
+	}
 	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number, "ismasuk": true}
 	pstoday, err := atdb.GetOneDoc[PresensiLokasi](db, "presensi", filter)
 	if err != nil {
 		return "Wah kak mohon maaf kakak belum cekin share live location hari ini " + err.Error()
+	}
+	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
+	if err != nil {
+		return "Wah kak mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+	}
+	pselfie, err := atapi.PostStructWithToken[PresensiSelfie]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
+	if err != nil {
+		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
 	}
 	pselfie.CekInLokasi = pstoday
 	pselfie.IsMasuk = true
@@ -80,6 +114,7 @@ func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	dtuser := &PresensiLokasi{
 		PhoneNumber: Pesan.Phone_number,
 		Lokasi:      lokasiuser,
+		IsMasuk:     false,
 	}
 	filter := bson.M{"_id": atdb.TodayFilter(), "iduser": Pesan.Phone_number, "ismasuk": true}
 	docselfie, err := atdb.GetOneLatestDoc[PresensiSelfie](db, "selfie", filter)
