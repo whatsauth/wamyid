@@ -15,20 +15,33 @@ type Geometry struct { //data geometry untuk lokasi presensi
 }
 
 type PresensiLokasi struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	PhoneNumber string             `bson:"phonenumber,omitempty"`
 	Lokasi      Lokasi             `bson:"lokasi,omitempty"`
 	Selfie      bool               `bson:"selfie,omitempty"`
-	IsDatang    bool               `bson:"isdatang,omitempty"`
+	IsMasuk     bool               `bson:"ismasuk,omitempty"`
 }
 
 type PresensiSelfie struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	CekInLokasi PresensiLokasi     `bson:"cekinlokasi,omitempty"`
-	IsDatang    bool               `bson:"isdatang,omitempty"`
+	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	IDUser      string             `json:"iduser,omitempty" bson:"iduser,omitempty"`
+	CekInLokasi PresensiLokasi     `json:"cekinlokasi,omitempty" bson:"cekinlokasi,omitempty"`
+	IsMasuk     bool               `json:"ismasuk,omitempty" bson:"ismasuk,omitempty"`
+	Commit      string             `json:"commit,omitempty" bson:"commit,omitempty"`
+	Remaining   int                `json:"remaining,omitempty" bson:"remaining,omitempty"`
+	Filehash    string             `json:"filehash,omitempty" bson:"filehash,omitempty"`
 }
 
 type FaceDetect struct {
+	IDUser    string `json:"iduser,omitempty" bson:"iduser,omitempty"`
+	IDFile    string `json:"idfile,omitempty" bson:"idfile,omitempty"`
 	Nfaces    int    `json:"nfaces,omitempty" bson:"nfaces,omitempty"`
 	Base64Str string `json:"base64str,omitempty" bson:"base64str,omitempty"`
+}
+
+type Config struct {
+	PhoneNumber      string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	LeaflyURL        string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
+	LeaflySecret     string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+	DomyikadoUserURL string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
 }

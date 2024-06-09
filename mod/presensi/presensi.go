@@ -3,13 +3,38 @@ package presensi
 import (
 	"fmt"
 
+	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CekSelfie(Pesan itmodel.IteungMessage) {
+func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+	dt := FaceDetect{
+		IDUser:    Pesan.Phone_number,
+		Base64Str: Pesan.Filedata,
+	}
+	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
+	if err != nil {
+		return "Wah kak mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+	}
+	pselfie, err := atapi.PostStructWithToken[PresensiSelfie]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
+	if err != nil {
+		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
+	}
+	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number}
+	pstoday, err := atdb.GetOneDoc[PresensiLokasi](db, "presensi", filter)
+	if err != nil {
+		return "Wah kak mohon maaf kakak belum cekin share live location hari ini " + err.Error()
+	}
+	pselfie.CekInLokasi = pstoday
+	pselfie.IsMasuk = true
+	_, err = atdb.InsertOneDoc(db, "selfie", pselfie)
+	if err != nil {
+		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
+	}
+	return
 
 }
 
@@ -29,6 +54,7 @@ func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 	dtuser := &PresensiLokasi{
 		PhoneNumber: Pesan.Phone_number,
 		Lokasi:      lokasiuser,
+		IsMasuk:     true,
 	}
 	_, err = atdb.InsertOneDoc(db, "presensi", dtuser)
 	if err != nil {
