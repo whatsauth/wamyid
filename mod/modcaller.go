@@ -17,6 +17,8 @@ func Caller(Modulename string, Pesan itmodel.IteungMessage, db *mongo.Database) 
 		reply = presensi.PresensiPulang(Pesan, db)
 	case "selfie-masuk":
 		reply = presensi.CekSelfieMasuk(Pesan, db)
+	case "selfie-pulang":
+		reply = presensi.CekSelfiePulang(Pesan, db)
 	}
 	return
 }
