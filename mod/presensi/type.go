@@ -1,6 +1,10 @@
 package presensi
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Lokasi struct { //lokasi yang bisa melakukan presensi
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
@@ -20,6 +24,7 @@ type PresensiLokasi struct {
 	Lokasi      Lokasi             `bson:"lokasi,omitempty"`
 	Selfie      bool               `bson:"selfie,omitempty"`
 	IsMasuk     bool               `bson:"ismasuk,omitempty"`
+	CreatedAt   time.Time          `bson:"createdAt"`
 }
 
 type PresensiSelfie struct {
