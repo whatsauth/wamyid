@@ -36,7 +36,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	}
 	if statuscode != http.StatusOK {
 		if statuscode == http.StatusFailedDependency {
-			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kasih foto bekas dong. Kasih yang paling fresh dan live ya kak. " + strconv.Itoa(statuscode)
+			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kasih foto bekas dong. Terus tunjukin dong ekspresinya... jangan gitu gitu terus gayanya"
 
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf: " + strconv.Itoa(statuscode)
@@ -45,7 +45,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	}
 	pselfie := PresensiSelfie{
 		CekInLokasi: pstoday,
-		IsMasuk:     true,
+		IsMasuk:     false,
 		IDUser:      faceinfo.PhoneNumber,
 		Commit:      faceinfo.Commit,
 		Filehash:    faceinfo.FileHash,
@@ -55,8 +55,21 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	if err != nil {
 		return "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan input ke database " + err.Error()
 	}
+	filter = bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number, "ismasuk": true}
+	selfiemasuk, err := atdb.GetOneLatestDoc[PresensiSelfie](db, "selfie", filter)
+	if err != nil {
+		return "Wah kak " + Pesan.Alias_name + " mohon maaf kakak belum selfie masuk. " + err.Error()
+	}
+	// Ekstrak timestamp dari ObjectID
+	objectIDTimestamp := selfiemasuk.ID.Timestamp()
+	// Dapatkan waktu saat ini
+	currentTime := time.Now()
+	// Hitung selisih waktu dalam detik
+	diff := currentTime.Sub(objectIDTimestamp).Seconds()
+	skor := diff / 28800 //selisih waktu dibagi 8 jam
+	skorValue := fmt.Sprintf("%f", skor)
 
-	return "Hai kak, " + Pesan.Alias_name + "\nBerhasil Presensi Pulang di lokasi:" + pstoday.Lokasi.Nama
+	return "Hai kak, " + Pesan.Alias_name + "\nBerhasil Presensi Pulang di lokasi:" + pstoday.Lokasi.Nama + "\n*Skor: " + skorValue + "*"
 
 }
 
@@ -83,7 +96,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	}
 	if statuscode != http.StatusOK {
 		if statuscode == http.StatusFailedDependency {
-			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kasih foto bekas dong. Kasih yang paling fresh dan live ya kak. " + strconv.Itoa(statuscode)
+			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kasih foto bekas dong. Terus tunjukin dong ekspresinya... jangan gitu gitu terus gayanya"
 
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf: " + strconv.Itoa(statuscode)
