@@ -71,7 +71,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	}
 	statuscode, faceinfo, err := atapi.PostStructWithToken[FaceInfo]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
 	if err != nil {
-		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
+		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly :" + err.Error()
 	}
 	if statuscode != http.StatusOK {
 		return "Wah kak mohon maaf: " + faceinfo.Error
@@ -127,7 +127,7 @@ func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	latitude := fmt.Sprintf("%f", Pesan.Latitude)
 	lokasiuser, err := GetLokasi(db, Pesan.Longitude, Pesan.Latitude)
 	if err != nil {
-		return "Mohon maaf kak, kakak belum berada di lokasi presensi, silahkan menuju lokasi presensi dahulu baru cekin masuk."
+		return "Mohon maaf kak, kakak belum berada di lokasi presensi, silahkan menuju lokasi presensi dahulu baru cekin pulang."
 	}
 	if lokasiuser.Nama == "" {
 		return "Nama nya kosong kak"
@@ -138,7 +138,7 @@ func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 		IsMasuk:     false,
 		CreatedAt:   time.Now(),
 	}
-	filter := bson.M{"_id": atdb.TodayFilter(), "iduser": Pesan.Phone_number, "ismasuk": true}
+	filter := bson.M{"_id": atdb.TodayFilter(), "cekinlokasi.phonenumber": Pesan.Phone_number, "ismasuk": true}
 	docselfie, err := atdb.GetOneLatestDoc[PresensiSelfie](db, "selfie", filter)
 	if err != nil {
 		return "Kakak belum selfie masuk ini " + err.Error()
