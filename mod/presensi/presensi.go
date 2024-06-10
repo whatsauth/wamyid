@@ -52,7 +52,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 
 }
 
-func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	if Pesan.Filedata == "" {
 		return "Kirim pap nya dulu dong kak.."
 	}
@@ -65,9 +65,18 @@ func CekSelfieMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	if err != nil {
 		return "Wah kak mohon maaf kakak belum cekin share live location hari ini " + err.Error()
 	}
-	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
+	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+	}
+	dtmsg := &itmodel.TextMessage{
+		To:       Pesan.Chat_number,
+		IsGroup:  Pesan.Is_group,
+		Messages: "pap di lokasi: " + pstoday.Lokasi.Nama,
+	}
+	_, resp, err := atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dtmsg, Profile.URLAPIText)
+	if err != nil {
+		return "Response dari waapi : " + resp.Response + " " + err.Error()
 	}
 	statuscode, faceinfo, err := atapi.PostStructWithToken[FaceInfo]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
 	if err != nil {

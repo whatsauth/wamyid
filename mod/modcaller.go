@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Caller(Modulename string, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	switch Modulename {
 	case "idgrup":
 		reply = idgrup.IDGroup(Pesan)
@@ -16,7 +16,7 @@ func Caller(Modulename string, Pesan itmodel.IteungMessage, db *mongo.Database) 
 	case "presensi-pulang":
 		reply = presensi.PresensiPulang(Pesan, db)
 	case "selfie-masuk":
-		reply = presensi.CekSelfieMasuk(Pesan, db)
+		reply = presensi.CekSelfieMasuk(Profile, Pesan, db)
 	case "selfie-pulang":
 		reply = presensi.CekSelfiePulang(Pesan, db)
 	}
