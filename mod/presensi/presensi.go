@@ -36,7 +36,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	}
 	if statuscode != http.StatusOK {
 		if statuscode == http.StatusFailedDependency {
-			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kasih foto bekas dong. Terus tunjukin dong ekspresinya... jangan gitu gitu terus gayanya"
+			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kasih foto bekas dong. Terus tunjukin dong ekspresinya... jangan gitu gitu terus gayanya\n" + faceinfo.Error
 
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf: " + strconv.Itoa(statuscode)
@@ -65,11 +65,17 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	// Dapatkan waktu saat ini
 	currentTime := time.Now()
 	// Hitung selisih waktu dalam detik
-	diff := currentTime.Sub(objectIDTimestamp).Seconds()
-	skor := diff / 28800 //selisih waktu dibagi 8 jam
+	diff := currentTime.Sub(objectIDTimestamp) //.Seconds()
+	// Konversi selisih waktu ke jam, menit, dan detik
+	hours := int(diff.Hours())
+	minutes := int(diff.Minutes()) % 60
+	seconds := int(diff.Seconds()) % 60
+	KetJam := fmt.Sprintf("%d jam, %d menit, %d detik", hours, minutes, seconds)
+
+	skor := diff.Seconds() / 28800 //selisih waktu dibagi 8 jam
 	skorValue := fmt.Sprintf("%f", skor)
 
-	return "Hai kak, " + Pesan.Alias_name + "\nBerhasil Presensi Pulang di lokasi:" + pstoday.Lokasi.Nama + "\n*Skor: " + skorValue + "*"
+	return "Hai kak, " + Pesan.Alias_name + "\nBerhasil Presensi Pulang di lokasi:" + pstoday.Lokasi.Nama + "\nHadir selama: " + KetJam + "\n*Skor: " + skorValue + "*"
 
 }
 
