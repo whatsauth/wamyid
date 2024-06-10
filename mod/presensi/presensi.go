@@ -36,7 +36,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	}
 	if statuscode != http.StatusOK {
 		if statuscode == http.StatusFailedDependency {
-			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kaku gitu dong. Tunjukin dong ekspresinya... jangan gitu gitu terus mukanya\nFileHash: " + faceinfo.FileHash + "\n" + faceinfo.Error
+			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kaku gitu dong. Ekspresi wajahnya ga boleh sama dengan selfie sebelumnya ya kak. Senyumnya yang lebar, giginya dilihatin, matanya pelototin, hidungnya keatasin."
 
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf: " + strconv.Itoa(statuscode)
@@ -102,8 +102,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	}
 	if statuscode != http.StatusOK {
 		if statuscode == http.StatusFailedDependency {
-			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kasih foto bekas dong. Terus tunjukin dong ekspresinya... jangan gitu gitu terus gayanya"
-
+			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kaku gitu dong. Ekspresi wajahnya ga boleh sama dengan selfie sebelumnya ya kak. Senyumnya yang lebar, giginya dilihatin, matanya pelototin, hidungnya keatasin."
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf: " + strconv.Itoa(statuscode)
 		}
