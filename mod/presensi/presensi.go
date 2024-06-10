@@ -116,7 +116,7 @@ func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		return "Gagal insert ke database kak"
 	}
 
-	return "Hai.. hai.. kakak atas nama:\n" + Pesan.Alias_name + "\nLongitude: " + longitude + "\nLatitude: " + latitude + "\nLokasi:" + lokasiuser.Nama + "\nberhasil absen\nmakasih"
+	return "Hai.. hai.. kakak atas nama:\n" + Pesan.Alias_name + "\nLongitude: " + longitude + "\nLatitude: " + latitude + "\nLokasi:" + lokasiuser.Nama + "\nsilahkan dilanjutkan dengan selfie di lokasi ya maximal 5 menit setelah share live location, jangan lupa ditambah keyword\n*myika selfie presensi masuk*"
 }
 
 func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
