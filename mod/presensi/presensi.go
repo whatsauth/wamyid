@@ -36,7 +36,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	}
 	if statuscode != http.StatusOK {
 		if statuscode == http.StatusFailedDependency {
-			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kaku gitu dong. Tunjukin dong ekspresinya... jangan gitu gitu terus mukanya\n" + faceinfo.Error
+			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kaku gitu dong. Tunjukin dong ekspresinya... jangan gitu gitu terus mukanya\nFileHash: " + faceinfo.FileHash + "\n" + faceinfo.Error
 
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf: " + strconv.Itoa(statuscode)
