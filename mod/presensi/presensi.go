@@ -108,16 +108,16 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 
 func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	if !Pesan.LiveLoc {
-		return "Minimal share live location dulu lah kak."
+		return "Minimal share live location dulu lah kak " + Pesan.Alias_name
 	}
 	longitude := fmt.Sprintf("%f", Pesan.Longitude)
 	latitude := fmt.Sprintf("%f", Pesan.Latitude)
 	lokasiuser, err := GetLokasi(db, Pesan.Longitude, Pesan.Latitude)
 	if err != nil {
-		return "Mohon maaf kak, kakak belum berada di lokasi presensi, silahkan menuju lokasi presensi dahulu baru cekin masuk."
+		return "Mohon maaf kak, kakak " + Pesan.Alias_name + " belum berada di lokasi presensi, silahkan menuju lokasi presensi dahulu baru cekin masuk."
 	}
 	if lokasiuser.Nama == "" {
-		return "Nama nya kosong kak"
+		return "Nama nya kosong kak " + Pesan.Alias_name
 	}
 	dtuser := &PresensiLokasi{
 		PhoneNumber: Pesan.Phone_number,
@@ -127,7 +127,7 @@ func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 	}
 	_, err = atdb.InsertOneDoc(db, "presensi", dtuser)
 	if err != nil {
-		return "Gagal insert ke database kak"
+		return "Gagal insert ke database kak " + Pesan.Alias_name
 	}
 
 	return "Hai.. hai.. kakak atas nama:\n" + Pesan.Alias_name + "\nLongitude: " + longitude + "\nLatitude: " + latitude + "\nLokasi:" + lokasiuser.Nama + "\nsilahkan dilanjutkan dengan selfie di lokasi ya maximal 5 menit setelah share live location, jangan lupa ditambah keyword\n*myika selfie presensi masuk*"
@@ -135,16 +135,16 @@ func PresensiMasuk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 
 func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	if !Pesan.LiveLoc {
-		return "Minimal share live location dulu lah kak."
+		return "Minimal share live location dulu lah kak " + Pesan.Alias_name
 	}
 	longitude := fmt.Sprintf("%f", Pesan.Longitude)
 	latitude := fmt.Sprintf("%f", Pesan.Latitude)
 	lokasiuser, err := GetLokasi(db, Pesan.Longitude, Pesan.Latitude)
 	if err != nil {
-		return "Mohon maaf kak, kakak belum berada di lokasi presensi, silahkan menuju lokasi presensi dahulu baru cekin pulang."
+		return "Mohon maaf kak " + Pesan.Alias_name + ", kakak belum berada di lokasi presensi, silahkan menuju lokasi presensi dahulu baru cekin pulang."
 	}
 	if lokasiuser.Nama == "" {
-		return "Nama nya kosong kak"
+		return "Nama nya kosong kak " + Pesan.Alias_name
 	}
 	dtuser := &PresensiLokasi{
 		PhoneNumber: Pesan.Phone_number,
@@ -155,14 +155,14 @@ func PresensiPulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	filter := bson.M{"_id": atdb.TodayFilter(), "cekinlokasi.phonenumber": Pesan.Phone_number, "ismasuk": true}
 	docselfie, err := atdb.GetOneLatestDoc[PresensiSelfie](db, "selfie", filter)
 	if err != nil {
-		return "Kakak belum selfie masuk ini " + err.Error()
+		return "Kakak " + Pesan.Alias_name + " belum selfie masuk ini " + err.Error()
 	}
 	if docselfie.CekInLokasi.Lokasi.ID != lokasiuser.ID {
-		return "Lokasi pulang nya harus sama dengan lokasi masuknya kak: " + lokasiuser.Nama
+		return "Lokasi pulang nya harus sama dengan lokasi masuknya kak " + Pesan.Alias_name + ".\nLokasi : " + lokasiuser.Nama
 	}
 	_, err = atdb.InsertOneDoc(db, "presensi", dtuser)
 	if err != nil {
-		return "Gagal insert ke database kak"
+		return "Gagal insert ke database kak " + Pesan.Alias_name
 	}
 
 	return "Hai.. hai.. kakak atas nama:\n" + Pesan.Alias_name + "\nLongitude: " + longitude + "\nLatitude: " + latitude + "\nLokasi:" + lokasiuser.Nama + "\nsilahkan dilanjutkan dengan selfie di lokasi ya maximal 5 menit setelah share live location, jangan lupa ditambah keyword\n*myika selfie presensi pulang*"
