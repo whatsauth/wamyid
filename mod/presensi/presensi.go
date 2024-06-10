@@ -74,7 +74,21 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 
 	skor := diff.Seconds() / 28800 //selisih waktu dibagi 8 jam
 	skorValue := fmt.Sprintf("%f", skor)
-
+	//post ke backedn domyikado
+	datapresensi := PresensiDomyikado{
+		ID:          selfiemasuk.ID,
+		PhoneNumber: Pesan.Phone_number,
+		Skor:        skor,
+		KetJam:      KetJam,
+		LamaDetik:   diff.Seconds(),
+	}
+	statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datapresensi, conf.DomyikadoPresensiURL)
+	if err != nil {
+		return "Akses ke endpoint domyikado gagal: " + err.Error()
+	}
+	if statuscode != http.StatusOK {
+		return "Salah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+	}
 	return "Hai kak, " + Pesan.Alias_name + "\nBerhasil Presensi Pulang di lokasi:" + pstoday.Lokasi.Nama + "\nHadir selama: " + KetJam + "\n*Skor: " + skorValue + "*"
 
 }
