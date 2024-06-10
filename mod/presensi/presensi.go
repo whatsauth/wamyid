@@ -69,15 +69,6 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
-	dtmsg := &itmodel.TextMessage{
-		To:       Pesan.Chat_number,
-		IsGroup:  Pesan.Is_group,
-		Messages: "pap di lokasi: " + pstoday.Lokasi.Nama,
-	}
-	_, resp, err := atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dtmsg, Profile.URLAPIText)
-	if err != nil {
-		return "Response dari waapi : " + resp.Response + " " + err.Error()
-	}
 	statuscode, faceinfo, err := atapi.PostStructWithToken[FaceInfo]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan pemanggilan API leafly " + err.Error()
@@ -97,7 +88,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
 	}
-	return
+	return "Berhasil Presensi Masuk di lokasi:" + pstoday.Lokasi.Nama
 
 }
 
