@@ -63,7 +63,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number, "ismasuk": true}
 	pstoday, err := atdb.GetOneDoc[PresensiLokasi](db, "presensi", filter)
 	if err != nil {
-		return "Wah kak mohon maaf kakak belum cekin share live location hari ini " + err.Error()
+		return "Wah kak mohon maaf kakak belum cekin share live location hari ini, silahkan share live loc dengan ditambah keyword\n*cekin presensi masuk*\n_" + err.Error() + "_"
 	}
 	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
 	if err != nil {
