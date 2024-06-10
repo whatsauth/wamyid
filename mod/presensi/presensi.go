@@ -48,7 +48,8 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
 	}
-	return
+
+	return "Hai kak," + pstoday.PhoneNumber + "\nBerhasil Presensi Masuk di lokasi:" + pstoday.Lokasi.Nama
 
 }
 
@@ -88,7 +89,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	if err != nil {
 		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
 	}
-	return "Berhasil Presensi Masuk di lokasi:" + pstoday.Lokasi.Nama
+	return "Hai kak," + pstoday.PhoneNumber + "\nBerhasil Presensi Masuk di lokasi:" + pstoday.Lokasi.Nama
 
 }
 
