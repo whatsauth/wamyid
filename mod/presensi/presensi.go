@@ -20,7 +20,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 		IDUser:    Pesan.Phone_number,
 		Base64Str: Pesan.Filedata,
 	}
-	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number, "ismasuk": false}
+	filter := bson.M{"_id": atdb.TodayFilter(), "phonenumber": Pesan.Phone_number} //, "ismasuk": false}
 	pstoday, err := atdb.GetOneDoc[PresensiLokasi](db, "presensi", filter)
 	if err != nil {
 		return "Wah kak mohon maaf kakak belum cekin share live location hari ini " + err.Error()
