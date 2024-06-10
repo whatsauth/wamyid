@@ -49,7 +49,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 		return "Wah kak mohon maaf ada kesalahan input ke database " + err.Error()
 	}
 
-	return "Hai kak," + pstoday.PhoneNumber + "\nBerhasil Presensi Masuk di lokasi:" + pstoday.Lokasi.Nama
+	return "Hai kak," + pstoday.PhoneNumber + "\nBerhasil Presensi Pulang di lokasi:" + pstoday.Lokasi.Nama
 
 }
 
