@@ -134,7 +134,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 	if err != nil {
 		return "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan input ke database " + err.Error()
 	}
-	return "Hai kak, " + Pesan.Alias_name + "\nBerhasil Presensi Masuk di lokasi:" + pstoday.Lokasi.Nama
+	return "Hai kak, " + Pesan.Alias_name + "\nCekin Masuk di lokasi:" + pstoday.Lokasi.Nama + "\n*Jangan lupa _cekin presensi pulang_ ya kak biar dapat skor*"
 
 }
 
