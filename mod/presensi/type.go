@@ -66,4 +66,5 @@ type PresensiDomyikado struct {
 	Skor        float64            `json:"skor,omitempty" bson:"skor,omitempty"`
 	KetJam      string             `json:"ketjam,omitempty" bson:"ketjam,omitempty"`
 	LamaDetik   float64            `json:"lamadetik,omitempty" bson:"lamadetik,omitempty"`
+	Lokasi      string             `json:"lokasi,omitempty" bson:"lokasi,omitempty"`
 }

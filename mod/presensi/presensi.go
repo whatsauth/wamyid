@@ -80,6 +80,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 		Skor:        skor,
 		KetJam:      KetJam,
 		LamaDetik:   diff.Seconds(),
+		Lokasi:      pstoday.Lokasi.Nama,
 	}
 	statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datapresensi, conf.DomyikadoPresensiURL)
 	if err != nil {
