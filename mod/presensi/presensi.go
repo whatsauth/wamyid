@@ -71,7 +71,7 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	seconds := int(diff.Seconds()) % 60
 	KetJam := fmt.Sprintf("%d jam, %d menit, %d detik", hours, minutes, seconds)
 
-	skor := diff.Seconds() / 28800 //selisih waktu dibagi 8 jam
+	skor := diff.Seconds() / 18000 //selisih waktu dibagi 8 jam
 	skorValue := fmt.Sprintf("%f", skor)
 	//post ke backedn domyikado
 	datapresensi := PresensiDomyikado{
