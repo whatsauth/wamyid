@@ -82,29 +82,61 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
-			dt := &itmodel.TextMessage{
-				To:       msg.Chat_number,
-				IsGroup:  false,
-				Messages: msgstr,
+			//
+			if strings.Contains(msgstr, "IM$G#M$Gui76557u|||") {
+				strdt := strings.Split(msgstr, "|||")
+				dt := &itmodel.ImageMessage{
+					To:          msg.Chat_number,
+					Base64Image: strdt[1],
+					Caption:     strdt[2],
+					IsGroup:     false,
+				}
+				urlpost := "https://api.wa.my.id/api/send/message/image"
+				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, urlpost)
+				if err != nil {
+					return
+				}
+			} else {
+				dt := &itmodel.TextMessage{
+					To:       msg.Chat_number,
+					IsGroup:  false,
+					Messages: msgstr,
+				}
+				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
+				if err != nil {
+					return
+				}
 			}
-			resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
-			if err != nil {
-				return
-			}
+
 		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //chat group
 			if group && modname != "" {
 				msgstr = mod.Caller(profile, modname, msg, db)
 			} else {
 				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 			}
-			dt := &itmodel.TextMessage{
-				To:       msg.Chat_number,
-				IsGroup:  true,
-				Messages: msgstr,
-			}
-			resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
-			if err != nil {
-				return
+			if strings.Contains(msgstr, "IM$G#M$Gui76557u|||") {
+				strdt := strings.Split(msgstr, "|||")
+				dt := &itmodel.ImageMessage{
+					To:          msg.Chat_number,
+					Base64Image: strdt[1],
+					Caption:     strdt[2],
+					IsGroup:     true,
+				}
+				urlpost := "https://api.wa.my.id/api/send/message/image"
+				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, urlpost)
+				if err != nil {
+					return
+				}
+			} else {
+				dt := &itmodel.TextMessage{
+					To:       msg.Chat_number,
+					IsGroup:  true,
+					Messages: msgstr,
+				}
+				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
+				if err != nil {
+					return
+				}
 			}
 
 		}
