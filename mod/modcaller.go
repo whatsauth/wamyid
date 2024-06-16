@@ -3,6 +3,7 @@ package mod
 import (
 	"github.com/gocroot/mod/idgrup"
 	"github.com/gocroot/mod/presensi"
+	"github.com/gocroot/mod/tasklist"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -19,6 +20,12 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = presensi.CekSelfieMasuk(Profile, Pesan, db)
 	case "selfie-pulang":
 		reply = presensi.CekSelfiePulang(Pesan, db)
+	case "tasklist-append":
+		reply = tasklist.TaskListAppend(Pesan, db)
+	case "tasklist-reset":
+		reply = tasklist.TaskListReset(Pesan, db)
+	case "tasklist-save":
+		reply = tasklist.TaskListSave(Pesan, db)
 	}
 	return
 }

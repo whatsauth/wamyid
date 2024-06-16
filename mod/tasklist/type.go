@@ -10,3 +10,12 @@ type TaskList struct {
 	Task        string             `json:"task,omitempty" bson:"task,omitempty"`
 	IsDone      bool               `json:"isdone,omitempty" bson:"isdone,omitempty"`
 }
+
+type Config struct {
+	PhoneNumber          string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	LeaflyURL            string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
+	LeaflySecret         string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+	DomyikadoPresensiURL string `json:"domyikadopresensiurl,omitempty" bson:"domyikadopresensiurl,omitempty"`
+	DomyikadoTaskListURL string `json:"domyikadotasklisturl,omitempty" bson:"domyikadotasklisturl,omitempty"`
+	DomyikadoSecret      string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
+}

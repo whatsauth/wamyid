@@ -2,8 +2,10 @@ package tasklist
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
+	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,8 +13,38 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+	id, _ := GetIDandTask(Pesan.Message)
+	idp, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return "gagal mendapatkan id laporan kak"
+	}
+	taskall, err := atdb.GetAllDoc[[]TaskList](db, "tasklist", bson.M{"laporanid": idp})
+	if err != nil {
+		return "Data task tidak ditemukan kak"
+	}
+	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
+	if err != nil {
+		return "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+	}
+	statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, taskall, conf.DomyikadoTaskListURL)
+	if err != nil {
+		return "Akses ke endpoint domyikado gagal: " + err.Error()
+	}
+	if statuscode != http.StatusOK {
+		return "Salah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+	}
+	msg := "Pertemuan " + id + "\nTask Lisk:\n"
+	// Loop melalui slice menggunakan range tanpa indeks
+	for _, taskone := range taskall {
+		msg += taskone.Task + "\n"
+	}
+	msg += "\n*Sudah disimpan permanen*"
+	return msg
+}
+
 // input := "https://wa.me/62895800006000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++task list pertama ini"
-func TaskListAppend(db *mongo.Database, Pesan itmodel.IteungMessage) (reply string) {
+func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	id, task := GetIDandTask(Pesan.Message)
 	idp, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -41,7 +73,7 @@ func TaskListAppend(db *mongo.Database, Pesan itmodel.IteungMessage) (reply stri
 	return msg
 }
 
-func TaskListReset(db *mongo.Database, Pesan itmodel.IteungMessage) (reply string) {
+func TaskListReset(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	id, _ := GetIDandTask(Pesan.Message)
 	idp, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
