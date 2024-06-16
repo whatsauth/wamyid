@@ -75,6 +75,11 @@ func GetRandomDoc[T any](db *mongo.Database, collection string, size uint) (resu
 	return
 }
 
+func DeleteManyDocs(db *mongo.Database, collection string, filter bson.M) (deleteresult *mongo.DeleteResult, err error) {
+	deleteresult, err = db.Collection(collection).DeleteMany(context.Background(), filter)
+	return
+}
+
 func GetAllDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc T, err error) {
 	ctx := context.Background()
 	cur, err := db.Collection(collection).Find(ctx, filter)
