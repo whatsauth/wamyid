@@ -40,7 +40,7 @@ func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string
 	for i, taskone := range taskall {
 		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
 	}
-	msg += "\n*💾💾Sudah disimpan permanen💾💾*"
+	msg += "\n💾💾*Sudah disimpan permanen*💾💾"
 	return msg
 }
 
