@@ -37,10 +37,10 @@ func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string
 	}
 	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task Lisk " + Pesan.Alias_name + "*:\n"
 	// Loop melalui slice menggunakan range tanpa indeks
-	for _, taskone := range taskall {
-		msg += taskone.Task + "\n"
+	for i, taskone := range taskall {
+		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
 	}
-	msg += "\n*Sudah disimpan permanen*"
+	msg += "\n*💾💾Sudah disimpan permanen💾💾*"
 	return msg
 }
 
