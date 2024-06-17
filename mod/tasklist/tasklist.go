@@ -65,10 +65,10 @@ func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	if err != nil {
 		return "Data task tidak ditemukan kak"
 	}
-	msg := "Pertemuan " + id + "\n*Task Lisk:*\n"
+	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task Lisk:*\n"
 	// Loop melalui slice menggunakan range tanpa indeks
 	for i, taskone := range taskall {
-		msg += strconv.Itoa(i+1) + taskone.Task + "\n"
+		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
 	}
 	msg += "\n======================\nUntuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-98suf8usdf0s98dfoi0sid9f|||++"
 	return msg
