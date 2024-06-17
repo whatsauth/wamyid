@@ -102,7 +102,7 @@ func GetIDandTask(input string) (cleanedStrBefore, cleanedStrAfter string) {
 	substrAfter := input[pos+len("|||"):]
 
 	// Remove newline characters from the substring after "|||"
-	cleanedStrAfter = strings.ReplaceAll(substrAfter, "\n", "")
+	cleanedStrAfter = strings.TrimSpace(substrAfter)
 
 	// Extract the substring before the delimiter "|||"
 	substrBefore := input[:pos]
