@@ -35,7 +35,7 @@ func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string
 	if statuscode != http.StatusOK {
 		return "Salah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
 	}
-	msg := "Pertemuan " + id + "\nTask Lisk:\n"
+	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task Lisk " + Pesan.Alias_name + "*:\n"
 	// Loop melalui slice menggunakan range tanpa indeks
 	for _, taskone := range taskall {
 		msg += taskone.Task + "\n"
@@ -65,7 +65,7 @@ func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	if err != nil {
 		return "Data task tidak ditemukan kak"
 	}
-	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task Lisk:*\n"
+	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task Lisk " + Pesan.Alias_name + "*:\n"
 	// Loop melalui slice menggunakan range tanpa indeks
 	for i, taskone := range taskall {
 		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
@@ -84,8 +84,8 @@ func TaskListReset(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 	if err != nil {
 		return "gagal hapus db kak"
 	}
-	msg := "Pertemuan " + id + "\nTask Lisk:0\n"
-	msg += "Untuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-98suf8usdf0s98dfoi0sid9f|||++"
+	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task List Anda Sudah di Reset*\n"
+	msg += "\n======================\nUntuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
 	return msg
 }
 
