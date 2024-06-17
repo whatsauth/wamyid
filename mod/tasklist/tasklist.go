@@ -70,7 +70,7 @@ func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	for i, taskone := range taskall {
 		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
 	}
-	msg += "\n======================\nUntuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
+	msg += "\n======================\nUntuk menambah task klik:\n✔️" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n❌" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n💾" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
 	return msg
 }
 
@@ -85,7 +85,7 @@ func TaskListReset(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		return "gagal hapus db kak"
 	}
 	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task List Anda Sudah di Reset*\n"
-	msg += "\n======================\nUntuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
+	msg += "\n======================\nUntuk menambah task klik:\n✔️" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n❌" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n💾" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
 	return msg
 }
 
