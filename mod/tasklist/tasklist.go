@@ -43,7 +43,7 @@ func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string
 	return msg
 }
 
-// input := "https://wa.me/62895800006000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++task list pertama ini"
+// input := "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++task list pertama ini"
 func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	id, task := GetIDandTask(Pesan.Message)
 	idp, err := primitive.ObjectIDFromHex(id)
@@ -69,7 +69,7 @@ func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	for _, taskone := range taskall {
 		msg += taskone.Task + "\n"
 	}
-	msg += "Untuk menambah task klik:\n" + "https://wa.me/62895800006000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895800006000?text=-.-T@$kl1$tR35t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895800006000?text=-.-T@$kl1$tS@v3-.-98suf8usdf0s98dfoi0sid9f|||++"
+	msg += "Untuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-98suf8usdf0s98dfoi0sid9f|||++"
 	return msg
 }
 
@@ -84,7 +84,7 @@ func TaskListReset(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		return "gagal hapus db kak"
 	}
 	msg := "Pertemuan " + id + "\nTask Lisk:0\n"
-	msg += "Untuk menambah task klik:\n" + "https://wa.me/62895800006000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895800006000?text=-.-T@$kl1$tR35t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895800006000?text=-.-T@$kl1$tS@v3-.-98suf8usdf0s98dfoi0sid9f|||++"
+	msg += "Untuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-98suf8usdf0s98dfoi0sid9f|||++"
 	return msg
 }
 
