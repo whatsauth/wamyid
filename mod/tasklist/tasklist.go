@@ -70,7 +70,7 @@ func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	for i, taskone := range taskall {
 		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
 	}
-	msg += "\n======================\nUntuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-98suf8usdf0s98dfoi0sid9f|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-98suf8usdf0s98dfoi0sid9f|||++"
+	msg += "\n======================\nUntuk menambah task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
 	return msg
 }
 
