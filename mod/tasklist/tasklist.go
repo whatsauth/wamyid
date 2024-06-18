@@ -41,6 +41,11 @@ func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string
 		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
 	}
 	msg += "\n💾💾*Sudah disimpan permanen*💾💾"
+	//reset setelah di simpan permanen
+	_, err = atdb.DeleteManyDocs(db, "tasklist", bson.M{"laporanid": idp})
+	if err != nil {
+		return "gagal hapus db kak"
+	}
 	return msg
 }
 
