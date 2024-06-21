@@ -30,6 +30,14 @@ type Update struct {
 			LastName    string `json:"last_name,omitempty"`
 			UserID      int    `json:"user_id,omitempty"`
 		} `json:"contact,omitempty"`
+		Location *struct {
+			Longitude float64 `json:"longitude"`
+			Latitude  float64 `json:"latitude"`
+		} `json:"location,omitempty"`
+		LiveLocation *struct {
+			Longitude float64 `json:"longitude"`
+			Latitude  float64 `json:"latitude"`
+		} `json:"live_location,omitempty"`
 	} `json:"message"`
 }
 
