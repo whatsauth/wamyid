@@ -30,9 +30,9 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
 		return
 	}
-	docs, err := atdb.GetOneDoc[telebot.Contact](config.Mongoconn, "teleuser", bson.M{"user_id": update.Message.From.ID})
+	updt, err := atdb.GetOneDoc[telebot.Update](config.Mongoconn, "teleuser", bson.M{"message.from.id": update.Message.From.ID})
 	if err == nil {
-		update.Message.Contact = &docs
+		update.Message.Contact = updt.Message.Contact
 	}
 	if update.Message.Contact != nil && update.Message.Contact.PhoneNumber != "" {
 		text := "Hello, " + update.Message.From.FirstName + " nomor handphone " + update.Message.Contact.PhoneNumber
@@ -41,8 +41,7 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 			helper.WriteResponse(w, http.StatusConflict, resp)
 			return
 		}
-		dtuser := update.Message.Contact
-		_, err := atdb.InsertOneDoc(config.Mongoconn, "teleuser", dtuser)
+		_, err := atdb.InsertOneDoc(config.Mongoconn, "teleuser", update)
 		if err != nil {
 			resp.Response = err.Error()
 			helper.WriteResponse(w, http.StatusEarlyHints, resp)
