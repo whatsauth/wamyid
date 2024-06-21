@@ -20,14 +20,19 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	chatID := update.Message.Chat.ID
-	text := "Hello, " + update.Message.From.FirstName
-
 	prof, err := helper.GetAppProfile(waphonenumber, config.Mongoconn)
 	if err != nil {
 		resp.Response = err.Error()
 		helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
 		return
 	}
+	if update.Message.Contact.PhoneNumber == "" {
+		telebot.RequestPhoneNumber(chatID, prof.TelegramToken)
+		helper.WriteResponse(w, http.StatusOK, resp)
+		return
+	}
+	text := "Hello, " + update.Message.From.FirstName + " nomor hanphone " + update.Message.Contact.PhoneNumber
+
 	if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
 		resp.Response = err.Error()
 		helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
