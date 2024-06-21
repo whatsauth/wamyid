@@ -25,10 +25,10 @@ type Update struct {
 			Type   string `json:"type"`
 		} `json:"entities"`
 		Contact *struct {
-			PhoneNumber string `json:"phone_number"`
-			FirstName   string `json:"first_name"`
-			LastName    string `json:"last_name"`
-			UserID      int    `json:"user_id"`
+			PhoneNumber string `json:"phone_number,omitempty"`
+			FirstName   string `json:"first_name,omitempty"`
+			LastName    string `json:"last_name,omitempty"`
+			UserID      int    `json:"user_id,omitempty"`
 		} `json:"contact,omitempty"`
 	} `json:"message"`
 }
