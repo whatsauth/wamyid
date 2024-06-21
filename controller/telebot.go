@@ -26,22 +26,22 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
 		return
 	}
-	if update.Message.Contact.PhoneNumber == "" {
+	if update.Message.Contact != nil && update.Message.Contact.PhoneNumber != "" {
+		text := "Hello, " + update.Message.From.FirstName + " nomor handphone " + update.Message.Contact.PhoneNumber
+
+		if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
+			resp.Response = err.Error()
+			helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
+			return
+		}
+	} else {
 		err := telebot.RequestPhoneNumber(chatID, prof.TelegramToken)
 		if err != nil {
 			resp.Response = err.Error()
 			helper.WriteResponse(w, http.StatusExpectationFailed, resp)
 			return
 		}
-		helper.WriteResponse(w, http.StatusOK, resp)
-		return
 	}
-	text := "Hello, " + update.Message.From.FirstName + " nomor hanphone " + update.Message.Contact.PhoneNumber
 
-	if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
-		resp.Response = err.Error()
-		helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
-		return
-	}
 	helper.WriteResponse(w, http.StatusOK, resp)
 }
