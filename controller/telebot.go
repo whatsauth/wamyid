@@ -27,7 +27,12 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if update.Message.Contact.PhoneNumber == "" {
-		telebot.RequestPhoneNumber(chatID, prof.TelegramToken)
+		err := telebot.RequestPhoneNumber(chatID, prof.TelegramToken)
+		if err != nil {
+			resp.Response = err.Error()
+			helper.WriteResponse(w, http.StatusExpectationFailed, resp)
+			return
+		}
 		helper.WriteResponse(w, http.StatusOK, resp)
 		return
 	}
