@@ -32,7 +32,7 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 
 			if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
 				resp.Response = err.Error()
-				helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
+				helper.WriteResponse(w, http.StatusAlreadyReported, resp)
 				return
 			}
 		} else {
@@ -40,7 +40,7 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 
 			if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
 				resp.Response = err.Error()
-				helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
+				helper.WriteResponse(w, http.StatusConflict, resp)
 				return
 			}
 		}

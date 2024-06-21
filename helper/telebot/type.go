@@ -18,12 +18,12 @@ type Update struct {
 			Type      string `json:"type"`
 		} `json:"chat"`
 		Date     int    `json:"date"`
-		Text     string `json:"text"`
+		Text     string `json:"text,omitempty"`
 		Entities []struct {
 			Offset int    `json:"offset"`
 			Length int    `json:"length"`
 			Type   string `json:"type"`
-		} `json:"entities"`
+		} `json:"entities,omitempty"`
 		Contact *struct {
 			PhoneNumber string `json:"phone_number,omitempty"`
 			FirstName   string `json:"first_name,omitempty"`
