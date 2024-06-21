@@ -33,7 +33,7 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		text := "Hello, " + update.Message.From.FirstName + " nomor handphone " + update.Message.Contact.PhoneNumber
 		if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
 			resp.Response = err.Error()
-			helper.WriteResponse(w, http.StatusInternalServerError, resp)
+			helper.WriteResponse(w, http.StatusConflict, resp)
 			return
 		}
 	} else {
