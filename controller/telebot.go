@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gocroot/config"
@@ -20,9 +19,6 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		helper.WriteResponse(w, http.StatusBadRequest, resp)
 		return
 	}
-
-	log.Printf("Message from %s: %s", update.Message.From.Username, update.Message.Text)
-
 	chatID := update.Message.Chat.ID
 	text := "Hello, " + update.Message.From.FirstName
 
