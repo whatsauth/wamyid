@@ -30,12 +30,9 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
 		return
 	}
-	updt, err := atdb.GetOneDoc[telebot.Update](config.Mongoconn, "teleuser", bson.M{"message.from.id": update.Message.From.ID})
-	if err == nil {
-		update.Message.Contact = updt.Message.Contact
-	}
+
 	if update.Message.Contact != nil && update.Message.Contact.PhoneNumber != "" {
-		text := "Hello, " + update.Message.From.FirstName + " nomor handphone " + update.Message.Contact.PhoneNumber
+		text := "Hello, " + update.Message.From.FirstName + " nomor handphone " + update.Message.Contact.PhoneNumber + " disimpan"
 		if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
 			resp.Response = err.Error()
 			helper.WriteResponse(w, http.StatusConflict, resp)
@@ -48,18 +45,23 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		text := "Hello, " + update.Message.From.FirstName + " nomor handphone tidak tersedia"
+		updt, err := atdb.GetOneDoc[telebot.Update](config.Mongoconn, "teleuser", bson.M{"message.from.id": update.Message.From.ID})
+		if err != nil {
+			err := telebot.RequestPhoneNumber(chatID, prof.TelegramToken)
+			if err != nil {
+				resp.Response = err.Error()
+				helper.WriteResponse(w, http.StatusExpectationFailed, resp)
+				return
+			}
+		}
+		update.Message.Contact = updt.Message.Contact
+		text := "hi, kak " + update.Message.From.FirstName + " nomor handphone" + update.Message.Contact.PhoneNumber
 		if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
 			resp.Response = err.Error()
 			helper.WriteResponse(w, http.StatusInternalServerError, resp)
 			return
 		}
-		err := telebot.RequestPhoneNumber(chatID, prof.TelegramToken)
-		if err != nil {
-			resp.Response = err.Error()
-			helper.WriteResponse(w, http.StatusExpectationFailed, resp)
-			return
-		}
+
 	}
 
 	helper.WriteResponse(w, http.StatusOK, resp)
