@@ -42,9 +42,9 @@ func SetWebhook(webhookURL, botToken string) error {
 
 func SendMessage(chatID int64, text, botToken string) error {
 	url := fmt.Sprintf("%s%s/sendMessage", telegramAPI, botToken)
-	payload := SendMessagePayload{
-		ChatID: chatID,
-		Text:   text,
+	payload := map[string]interface{}{
+		"chat_id": chatID,
+		"text":    text,
 	}
 	body, err := json.Marshal(payload)
 	if err != nil {
