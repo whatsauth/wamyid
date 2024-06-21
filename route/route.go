@@ -22,6 +22,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetNewToken(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):
 		controller.PostInboxNomor(w, r)
+	case method == "POST" && helper.URLParam(path, "/webhook/telebot/:nomorwa"):
+		controller.TelebotWebhook(w, r)
 	default:
 		controller.NotFound(w, r)
 	}
