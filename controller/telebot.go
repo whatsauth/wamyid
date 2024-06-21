@@ -45,7 +45,7 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		updt, err := atdb.GetOneDoc[telebot.Update](config.Mongoconn, "teleuser", bson.M{"message.from.id": update.Message.From.ID})
+		updt, err := atdb.GetOneLatestDoc[telebot.Update](config.Mongoconn, "teleuser", bson.M{"message.from.id": update.Message.From.ID})
 		if err != nil {
 			err := telebot.RequestPhoneNumber(chatID, prof.TelegramToken)
 			if err != nil {
