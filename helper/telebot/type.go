@@ -25,12 +25,7 @@ type Update struct {
 			Length int    `json:"length"`
 			Type   string `json:"type"`
 		} `json:"entities,omitempty"`
-		Contact *struct {
-			PhoneNumber string `json:"phone_number,omitempty"`
-			FirstName   string `json:"first_name,omitempty"`
-			LastName    string `json:"last_name,omitempty"`
-			UserID      int    `json:"user_id,omitempty"`
-		} `json:"contact,omitempty"`
+		Contact  *Contact `json:"contact,omitempty"`
 		Location *struct {
 			Longitude float64 `json:"longitude"`
 			Latitude  float64 `json:"latitude"`
@@ -40,6 +35,13 @@ type Update struct {
 			Latitude  float64 `json:"latitude"`
 		} `json:"live_location,omitempty"`
 	} `json:"message"`
+}
+
+type Contact struct {
+	PhoneNumber string `json:"phone_number,omitempty"`
+	FirstName   string `json:"first_name,omitempty"`
+	LastName    string `json:"last_name,omitempty"`
+	UserID      int    `json:"user_id,omitempty"`
 }
 
 type SendMessagePayload struct {

@@ -6,8 +6,10 @@ import (
 
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
+	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/helper/telebot"
 	"github.com/whatsauth/itmodel"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
@@ -28,12 +30,22 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		helper.WriteResponse(w, http.StatusServiceUnavailable, resp)
 		return
 	}
-
+	docs, err := atdb.GetOneDoc[telebot.Contact](config.Mongoconn, "teleuser", bson.M{"user_id": update.Message.From.ID})
+	if err == nil {
+		update.Message.Contact = &docs
+	}
 	if update.Message.Contact != nil && update.Message.Contact.PhoneNumber != "" {
 		text := "Hello, " + update.Message.From.FirstName + " nomor handphone " + update.Message.Contact.PhoneNumber
 		if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
 			resp.Response = err.Error()
 			helper.WriteResponse(w, http.StatusConflict, resp)
+			return
+		}
+		dtuser := update.Message.Contact
+		_, err := atdb.InsertOneDoc(config.Mongoconn, "teleuser", dtuser)
+		if err != nil {
+			resp.Response = err.Error()
+			helper.WriteResponse(w, http.StatusEarlyHints, resp)
 			return
 		}
 	} else {
