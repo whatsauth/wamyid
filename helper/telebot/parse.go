@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -47,10 +47,12 @@ func ParseUpdateToIteungMessage(update Update, botToken string) itmodel.IteungMe
 				// Convert the photo to base64
 				iteungMessage.Filedata = base64.StdEncoding.EncodeToString(fileBytes)
 				iteungMessage.Filename = largestPhoto.FileID
+				if update.Message.Caption != "" {
+					iteungMessage.Message = update.Message.Caption
+				}
 			}
 		}
 	}
-
 	return iteungMessage
 }
 
@@ -101,7 +103,7 @@ func DownloadFile(fileURL string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to download file: %s", resp.Status)
 	}
 
-	fileBytes, err := ioutil.ReadAll(resp.Body)
+	fileBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

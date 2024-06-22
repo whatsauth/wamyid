@@ -20,6 +20,7 @@ type Update struct {
 		} `json:"chat"`
 		Date     int    `json:"date"`
 		Text     string `json:"text,omitempty"`
+		Caption  string `json:"caption,omitempty"`
 		Entities []struct {
 			Offset int    `json:"offset"`
 			Length int    `json:"length"`
