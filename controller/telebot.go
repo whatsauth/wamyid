@@ -58,7 +58,9 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		//handler message
 		if !update.Message.From.IsBot {
 			msg := telebot.ParseUpdateToIteungMessage(update, prof.TelegramToken)
-			telebot.HandlerIncomingMessage(msg, prof, config.Mongoconn)
+			if msg.Message != "" {
+				telebot.HandlerIncomingMessage(msg, prof, config.Mongoconn)
+			}
 
 		}
 	}
