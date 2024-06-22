@@ -19,22 +19,20 @@ func ParseUpdateToIteungMessage(update Update, botToken string) itmodel.IteungMe
 	if update.Message.Contact != nil {
 		iteungMessage.Reply_phone_number = update.Message.Contact.PhoneNumber
 	}
-	iteungMessage.Phone_number = strconv.FormatInt(update.Message.From.ID, 10)
-	iteungMessage.Chat_number = strconv.FormatInt(update.Message.Chat.ID, 10)
+	iteungMessage.Phone_number = strconv.Itoa(update.Message.From.ID)
+	iteungMessage.Chat_number = strconv.Itoa(update.Message.Chat.ID)
 	iteungMessage.Alias_name = update.Message.From.FirstName + " " + update.Message.From.LastName
 	iteungMessage.Message = update.Message.Text
 	iteungMessage.Is_group = update.Message.Chat.Type == "group"
-	iteungMessage.Group_id = strconv.FormatInt(update.Message.Chat.ID, 10)
+	iteungMessage.Group_id = strconv.Itoa(update.Message.Chat.ID)
 	iteungMessage.Group_name = update.Message.Chat.Username
 
 	if update.Message.Location != nil {
 		iteungMessage.Latitude = update.Message.Location.Latitude
 		iteungMessage.Longitude = update.Message.Location.Longitude
-	}
-	if update.Message.LiveLocation != nil {
-		iteungMessage.LiveLoc = true
-		iteungMessage.Latitude = update.Message.LiveLocation.Latitude
-		iteungMessage.Longitude = update.Message.LiveLocation.Longitude
+		if update.Message.Location.LivePeriod > 0 {
+			iteungMessage.LiveLoc = true
+		}
 	}
 	if update.Message.Photo != nil && len(update.Message.Photo) > 0 {
 		// Handle the received photo, for example, store the file_id of the largest size
@@ -60,7 +58,9 @@ func ParseUpdateToIteungMessage(update Update, botToken string) itmodel.IteungMe
 		if update.Message.From.ID == update.Message.ReplyToMessage.From.ID {
 			// Check if the replied message has location
 			if update.Message.ReplyToMessage.Location != nil {
-				iteungMessage.LiveLoc = true
+				if update.Message.ReplyToMessage.Location.LivePeriod > 0 {
+					iteungMessage.LiveLoc = true
+				}
 				iteungMessage.Latitude = update.Message.ReplyToMessage.Location.Latitude
 				iteungMessage.Longitude = update.Message.ReplyToMessage.Location.Longitude
 				iteungMessage.Message = update.Message.Text

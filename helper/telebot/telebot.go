@@ -42,7 +42,7 @@ func SetWebhook(webhookURL, botToken string) error {
 	return nil
 }
 
-func SendTextMessage(chatID int64, text, botToken string) error {
+func SendTextMessage(chatID int, text, botToken string) error {
 	url := fmt.Sprintf("%s%s/sendMessage", telegramAPI, botToken)
 	payload := map[string]interface{}{
 		"chat_id": chatID,
@@ -134,7 +134,7 @@ func SendImageMessage(chatID int64, photo, caption, botToken string) error {
 	return nil
 }
 
-func RequestPhoneNumber(chatID int64, botToken string) error {
+func RequestPhoneNumber(chatID int, botToken string) error {
 	url := fmt.Sprintf("%s%s/sendMessage", telegramAPI, botToken)
 	payload := SendMessagePayload{
 		ChatID: chatID,

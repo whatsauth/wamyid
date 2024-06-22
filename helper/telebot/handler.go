@@ -36,8 +36,8 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, profile itmodel.Profile, 
 				return
 			}
 		} else {
-			var chatID int64
-			chatID, err = strconv.ParseInt(msg.Chat_number, 10, 64)
+			var chatID int
+			chatID, err = strconv.Atoi(msg.Chat_number)
 			if err != nil {
 				resp.Response = err.Error()
 				resp.Info = "Error converting string to int64"
@@ -70,8 +70,8 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, profile itmodel.Profile, 
 				return
 			}
 		} else {
-			var chatID int64
-			chatID, err = strconv.ParseInt(msg.Chat_number, 10, 64)
+			var chatID int
+			chatID, err = strconv.Atoi(msg.Chat_number)
 			if err != nil {
 				resp.Response = err.Error()
 				resp.Info = "Error converting string to int64"
