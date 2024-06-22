@@ -109,7 +109,7 @@ func CekKTP(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Data
 	}
 	statuscode, faceinfo, err := atapi.PostStructWithToken[FaceInfo]("secret", conf.LeaflySecret, dt, conf.LeaflyURLKTP)
 	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan pemanggilan API leafly :" + err.Error()
+		return "Wah kak " + strconv.Itoa(statuscode) + " " + Pesan.Alias_name + " mohon maaf ada kesalahan pemanggilan API leafly :" + err.Error()
 	}
 	if statuscode != http.StatusOK {
 		if statuscode == http.StatusFailedDependency {
