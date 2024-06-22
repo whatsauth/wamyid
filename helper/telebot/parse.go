@@ -58,11 +58,11 @@ func ParseUpdateToIteungMessage(update Update, botToken string) itmodel.IteungMe
 	if update.Message.ReplyToMessage != nil {
 		// Check if the user who replied is the same as the user who sent the original message
 		if update.Message.From.ID == update.Message.ReplyToMessage.From.ID {
-			// Check if the replied message has live location
-			if update.Message.ReplyToMessage.LiveLocation != nil {
+			// Check if the replied message has location
+			if update.Message.ReplyToMessage.Location != nil {
 				iteungMessage.LiveLoc = true
-				iteungMessage.Latitude = update.Message.ReplyToMessage.LiveLocation.Latitude
-				iteungMessage.Longitude = update.Message.ReplyToMessage.LiveLocation.Longitude
+				iteungMessage.Latitude = update.Message.ReplyToMessage.Location.Latitude
+				iteungMessage.Longitude = update.Message.ReplyToMessage.Location.Longitude
 				iteungMessage.Message = update.Message.Text
 			}
 		}
