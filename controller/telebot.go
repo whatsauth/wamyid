@@ -57,6 +57,12 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 		update.Message.Contact = updt.Message.Contact
 		//handler message
 		if !update.Message.From.IsBot {
+			_, err := atdb.InsertOneDoc(config.Mongoconn, "logtele", update)
+			if err != nil {
+				resp.Response = err.Error()
+				helper.WriteResponse(w, http.StatusExpectationFailed, resp)
+				return
+			}
 			msg := telebot.ParseUpdateToIteungMessage(update, prof.TelegramToken)
 			if msg.Message != "" {
 				telebot.HandlerIncomingMessage(msg, prof, config.Mongoconn)
