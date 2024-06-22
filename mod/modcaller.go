@@ -2,6 +2,7 @@ package mod
 
 import (
 	"github.com/gocroot/mod/idgrup"
+	"github.com/gocroot/mod/kyc"
 	"github.com/gocroot/mod/presensi"
 	"github.com/gocroot/mod/tasklist"
 	"github.com/whatsauth/itmodel"
@@ -16,6 +17,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = presensi.PresensiMasuk(Pesan, db)
 	case "presensi-pulang":
 		reply = presensi.PresensiPulang(Pesan, db)
+	case "cek-ktp":
+		reply = kyc.CekKTP(Profile, Pesan, db)
 	case "selfie-masuk":
 		reply = presensi.CekSelfieMasuk(Profile, Pesan, db)
 	case "selfie-pulang":
