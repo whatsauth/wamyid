@@ -35,7 +35,8 @@ type Update struct {
 			Longitude float64 `json:"longitude"`
 			Latitude  float64 `json:"latitude"`
 		} `json:"live_location,omitempty"`
-		Photo []PhotoSize `json:"photo,omitempty"`
+		Photo          []PhotoSize `json:"photo,omitempty"`
+		ReplyToMessage *Update     `json:"reply_to_message,omitempty"`
 	} `json:"message"`
 }
 
