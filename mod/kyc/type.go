@@ -54,6 +54,7 @@ type KTPProps struct {
 type Config struct {
 	PhoneNumber          string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
 	LeaflyURL            string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
+	LeaflyURLKTP         string `json:"leaflyurlktp,omitempty" bson:"leaflyurlktp,omitempty"`
 	LeaflySecret         string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
 	DomyikadoPresensiURL string `json:"domyikadopresensiurl,omitempty" bson:"domyikadopresensiurl,omitempty"`
 	DomyikadoSecret      string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
