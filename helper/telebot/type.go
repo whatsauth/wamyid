@@ -36,8 +36,34 @@ type Update struct {
 			Latitude  float64 `json:"latitude"`
 		} `json:"live_location,omitempty"`
 		Photo          []PhotoSize `json:"photo,omitempty"`
-		ReplyToMessage *Update     `json:"reply_to_message,omitempty"`
+		ReplyToMessage *Message    `json:"reply_to_message,omitempty"` // Perubahan di sini
+
 	} `json:"message"`
+}
+type Message struct {
+	MessageID int `json:"message_id"`
+	From      struct {
+		ID           int64  `json:"id"`
+		IsBot        bool   `json:"is_bot"`
+		FirstName    string `json:"first_name"`
+		LastName     string `json:"last_name"`
+		Username     string `json:"username"`
+		LanguageCode string `json:"language_code"`
+	} `json:"from"`
+	Date     int           `json:"date"`
+	Text     string        `json:"text,omitempty"`
+	Caption  string        `json:"caption,omitempty"`
+	Entities []interface{} `json:"entities,omitempty"`
+	Contact  *Contact      `json:"contact,omitempty"`
+	Location *struct {
+		Longitude float64 `json:"longitude"`
+		Latitude  float64 `json:"latitude"`
+	} `json:"location,omitempty"`
+	LiveLocation *struct {
+		Longitude float64 `json:"longitude"`
+		Latitude  float64 `json:"latitude"`
+	} `json:"live_location,omitempty"`
+	Photo []PhotoSize `json:"photo,omitempty"`
 }
 
 type Contact struct {
