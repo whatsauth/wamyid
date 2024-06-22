@@ -34,6 +34,7 @@ type Update struct {
 			Longitude float64 `json:"longitude"`
 			Latitude  float64 `json:"latitude"`
 		} `json:"live_location,omitempty"`
+		Photo []PhotoSize `json:"photo,omitempty"`
 	} `json:"message"`
 }
 
@@ -42,6 +43,15 @@ type Contact struct {
 	FirstName   string `json:"first_name,omitempty"`
 	LastName    string `json:"last_name,omitempty"`
 	UserID      int    `json:"user_id,omitempty"`
+}
+
+// PhotoSize represents one size of a photo or a file/sticker thumbnail.
+type PhotoSize struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+	Width        int    `json:"width"`
+	Height       int    `json:"height"`
+	FileSize     int    `json:"file_size,omitempty"`
 }
 
 type SendMessagePayload struct {

@@ -33,7 +33,7 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 
 	if update.Message.Contact != nil && update.Message.Contact.PhoneNumber != "" {
 		text := "Hello, " + update.Message.From.FirstName + " nomor handphone " + update.Message.Contact.PhoneNumber + " disimpan"
-		if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
+		if err := telebot.SendTextMessage(chatID, text, prof.TelegramToken); err != nil {
 			resp.Response = err.Error()
 			helper.WriteResponse(w, http.StatusConflict, resp)
 			return
@@ -55,13 +55,12 @@ func TelebotWebhook(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		update.Message.Contact = updt.Message.Contact
-		text := "hi, kak " + update.Message.From.FirstName + " nomor handphone" + update.Message.Contact.PhoneNumber
-		if err := telebot.SendMessage(chatID, text, prof.TelegramToken); err != nil {
-			resp.Response = err.Error()
-			helper.WriteResponse(w, http.StatusInternalServerError, resp)
-			return
-		}
+		//handler message
+		if !update.Message.From.IsBot {
+			msg := telebot.ParseUpdateToIteungMessage(update, prof.TelegramToken)
+			telebot.HandlerIncomingMessage(msg, prof, config.Mongoconn)
 
+		}
 	}
 
 	helper.WriteResponse(w, http.StatusOK, resp)
