@@ -1,6 +1,7 @@
 package mod
 
 import (
+	"github.com/gocroot/mod/daftar"
 	"github.com/gocroot/mod/idgrup"
 	"github.com/gocroot/mod/kyc"
 	"github.com/gocroot/mod/lmsdesa"
@@ -34,6 +35,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = tasklist.TaskListReset(Pesan, db)
 	case "tasklist-save":
 		reply = tasklist.TaskListSave(Pesan, db)
+	case "domyikado-user":
+		reply = daftar.DaftarDomyikado(Pesan, db)
 	}
 	return
 }

@@ -57,6 +57,7 @@ type Config struct {
 	LeaflyURLKTP         string `json:"leaflyurlktp,omitempty" bson:"leaflyurlktp,omitempty"`
 	LeaflySecret         string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
 	DomyikadoPresensiURL string `json:"domyikadopresensiurl,omitempty" bson:"domyikadopresensiurl,omitempty"`
+	DomyikadoUserURL     string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
 	DomyikadoSecret      string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
 }
 

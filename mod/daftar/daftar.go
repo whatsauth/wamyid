@@ -32,7 +32,7 @@ func DaftarDomyikado(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 		Email:       email,
 	}
 
-	statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, calonuser, conf.DomyikadoPresensiURL)
+	statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, calonuser, conf.DomyikadoUserURL)
 	if err != nil {
 		return "Akses ke endpoint domyikado gagal: " + err.Error()
 	}
