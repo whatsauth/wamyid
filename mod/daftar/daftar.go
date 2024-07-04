@@ -19,6 +19,8 @@ func DaftarDomyikado(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	email := re.FindString(Pesan.Message)
 	if email == "user@email.com" {
 		return "Emailnya di ubah dulu dong kak, jadi emailnya kak " + Pesan.Alias_name
+	} else if email == "" {
+		return "Emailnya di sertakan dulu dong kak " + Pesan.Alias_name + " di akhir pesan nya"
 	}
 
 	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
