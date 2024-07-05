@@ -1,6 +1,6 @@
 package siakad
 
-type Config struct {
+type config struct {
 	SiakadLoginURL string `bson:"siakad_login_url"`
 }
 
