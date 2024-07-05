@@ -57,7 +57,7 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Rolenya di sertakan dulu dong kak " + message.Alias_name + " di akhir pesan nya dengan format 'role: [dosen/mhs]'"
 	}
 
-	var conf config
+	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
 		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()

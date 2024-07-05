@@ -1,7 +1,8 @@
 package siakad
 
-type config struct {
-	SiakadLoginURL string `bson:"siakad_login_url"`
+type Config struct {
+	PhoneNumber    string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	SiakadLoginURL string `json:"siakadloginurl,omitempty" bson:"siakadloginurl,omitempty"`
 }
 
 type LoginRequest struct {
