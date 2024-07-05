@@ -63,6 +63,13 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
 
+	// Logging the SiakadLoginURL
+	fmt.Println("SiakadLoginURL:", conf.SiakadLoginURL)
+
+	if conf.SiakadLoginURL == "" {
+		return "URL untuk login tidak ditemukan dalam konfigurasi."
+	}
+
 	loginRequest := LoginRequest{
 		Email:    email,
 		Password: password,
