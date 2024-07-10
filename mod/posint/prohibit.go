@@ -75,7 +75,7 @@ func ExtractKeywords(message string, commonWordsAdd []string) string {
 
 	// Hapus kata-kata umum dari pesan
 	for _, word := range commonWords {
-		message = strings.ReplaceAll(message, word, "")
+		message = strings.ReplaceAll(message, strings.ToLower(word), "")
 	}
 
 	// Hapus spasi berlebih
