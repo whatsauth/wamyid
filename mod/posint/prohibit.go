@@ -42,17 +42,8 @@ func GetCountryFromMessage(message string, db *mongo.Database) (country string, 
 	for _, country := range countries {
 		lowerCountry := strings.ToLower(country.(string))
 		if strings.Contains(lowerMessage, lowerCountry) {
-			return toSentenceCase(country.(string)), nil
+			return country.(string), nil
 		}
 	}
 	return "", nil
-}
-
-// Fungsi untuk mengubah teks menjadi sentence case
-func toSentenceCase(input string) string {
-	if len(input) == 0 {
-		return ""
-	}
-	lower := strings.ToLower(input)
-	return strings.ToUpper(string(lower[0])) + lower[1:]
 }
