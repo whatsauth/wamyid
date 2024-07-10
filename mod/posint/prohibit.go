@@ -33,6 +33,9 @@ func GetProhibitedItems(Pesan itmodel.IteungMessage, db *mongo.Database) (reply 
 	if err != nil {
 		return "Terdapat kesalahan pada  GetAllDoc " + err.Error()
 	}
+	if len(listprob) == 0 {
+		return "Tidak ada prohibited items yang ditemukan untuk negara " + country
+	}
 	msg := "ini dia list prohibited item dari negara yang kakak minta:\n"
 	for i, probitem := range listprob {
 		msg += strconv.Itoa(i+1) + ". " + probitem.ProhibitedItems + "\n"
@@ -47,7 +50,7 @@ func GetCountryFromMessage(message string, db *mongo.Database) (country string, 
 	// Mendapatkan nama negara
 	countries, err := atdb.GetAllDistinctDoc(db, bson.M{}, "Destination", "prohibited_items")
 	if err != nil {
-		return
+		return "", err
 	}
 	// Iterasi melalui daftar negara
 	for _, country := range countries {
