@@ -1,6 +1,7 @@
 package posint
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -18,7 +19,17 @@ func GetProhibitedItems(Pesan itmodel.IteungMessage, db *mongo.Database) (reply 
 	if country == "" {
 		return "Nama negara tidak ada kak di database kita"
 	}
-	listprob, err := atdb.GetAllDoc[[]Item](db, "prohibited_items", bson.M{"Destination": country})
+	keyword := ExtractKeywords(Pesan.Message, []string{country})
+	var filter bson.M
+	if keyword != "" {
+		filter = bson.M{
+			"Destination":      country,
+			"Prohibited Items": bson.M{"$regex": keyword, "$options": "i"},
+		}
+	} else {
+		filter = bson.M{"Destination": country}
+	}
+	listprob, err := atdb.GetAllDoc[[]Item](db, "prohibited_items", filter)
 	if err != nil {
 		return "Terdapat kesalahan pada  GetAllDoc " + err.Error()
 	}
@@ -46,4 +57,27 @@ func GetCountryFromMessage(message string, db *mongo.Database) (country string, 
 		}
 	}
 	return "", nil
+}
+
+// Fungsi untuk menghilangkan semua kata kecuali keyword yang diinginkan
+func ExtractKeywords(message string, commonWordsAdd []string) string {
+	// Daftar kata umum yang mungkin ingin dihilangkan
+	commonWords := []string{"list", "prohibited", "items", "myika"}
+
+	// Gabungkan commonWords dengan commonWordsAdd
+	commonWords = append(commonWords, commonWordsAdd...)
+
+	// Ubah pesan menjadi huruf kecil
+	message = strings.ToLower(message)
+
+	// Hapus kata-kata umum dari pesan
+	for _, word := range commonWords {
+		message = strings.ReplaceAll(message, word, "")
+	}
+
+	// Hapus spasi berlebih
+	message = strings.TrimSpace(message)
+	message = regexp.MustCompile(`\s+`).ReplaceAllString(message, " ")
+
+	return message
 }
