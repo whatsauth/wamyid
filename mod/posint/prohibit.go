@@ -34,7 +34,7 @@ func GetProhibitedItems(Pesan itmodel.IteungMessage, db *mongo.Database) (reply 
 		return "Terdapat kesalahan pada  GetAllDoc " + err.Error()
 	}
 	if len(listprob) == 0 {
-		return "Tidak ada prohibited items yang ditemukan untuk negara " + country
+		return "Tidak ada prohibited items yang ditemukan untuk negara " + country + " dengan keyword " + keyword
 	}
 	msg := "ini dia list prohibited item dari negara yang kakak minta:\n"
 	for i, probitem := range listprob {
