@@ -5,6 +5,7 @@ import (
 	"github.com/gocroot/mod/idgrup"
 	"github.com/gocroot/mod/kyc"
 	"github.com/gocroot/mod/lmsdesa"
+	"github.com/gocroot/mod/posint"
 	"github.com/gocroot/mod/presensi"
 	"github.com/gocroot/mod/siakad"
 	"github.com/gocroot/mod/tasklist"
@@ -40,6 +41,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = daftar.DaftarDomyikado(Pesan, db)
 	case "login-siakad":
 		reply = siakad.LoginSiakad(Pesan, db)
+	case "prohibited-items":
+		reply = posint.GetProhibitedItems(Pesan, db)
 	}
 
 	return

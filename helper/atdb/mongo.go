@@ -94,6 +94,15 @@ func GetAllDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc
 	return
 }
 
+func GetAllDistinctDoc(db *mongo.Database, filter bson.M, fieldname, collection string) (doc []any, err error) {
+	ctx := context.TODO()
+	doc, err = db.Collection(collection).Distinct(ctx, fieldname, filter)
+	if err != nil {
+		return nil, err
+	}
+	return doc, nil
+}
+
 func GetOneDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc T, err error) {
 	err = db.Collection(collection).FindOne(context.Background(), filter).Decode(&doc)
 	if err != nil {
