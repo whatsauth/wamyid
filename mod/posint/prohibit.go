@@ -1,6 +1,7 @@
 package posint
 
 import (
+	"errors"
 	"regexp"
 	"strconv"
 	"strings"
@@ -52,14 +53,16 @@ func GetCountryFromMessage(message string, db *mongo.Database) (country string, 
 	if err != nil {
 		return "", err
 	}
+	var strcountry string
 	// Iterasi melalui daftar negara
 	for _, country := range countries {
+		strcountry += country.(string) + ","
 		lowerCountry := strings.ToLower(country.(string))
 		if strings.Contains(lowerMessage, lowerCountry) {
 			return country.(string), nil
 		}
 	}
-	return "", nil
+	return "", errors.New("tidak ditemukan nama negara di pesan berikut:" + lowerMessage + "|" + strcountry)
 }
 
 // Fungsi untuk menghilangkan semua kata kecuali keyword yang diinginkan
