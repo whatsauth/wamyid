@@ -56,8 +56,8 @@ func GetCountryFromMessage(message string, db *mongo.Database) (country string, 
 	var strcountry string
 	// Iterasi melalui daftar negara
 	for _, country := range countries {
-		strcountry += country.(string) + ","
 		lowerCountry := strings.ToLower(country.(string))
+		strcountry += lowerCountry + ","
 		if strings.Contains(lowerMessage, lowerCountry) {
 			return country.(string), nil
 		}
