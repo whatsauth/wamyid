@@ -15,11 +15,15 @@ import (
 func GetProhibitedItems(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	country, err := GetCountryFromMessage(Pesan.Message, db)
 	if err != nil {
-		return "Terdapat kesalahan pada  GetCountryFromMessage " + err.Error()
+		countryandkeyword := ExtractKeywords(Pesan.Message, []string{})
+		return countryandkeyword + "|" + err.Error()
 	}
 	if country == "" {
 		return "Nama negara tidak ada kak di database kita"
+		//countryandkeyword := ExtractKeywords(Pesan.Message, []string{})
+		//countryname, err := atdb.GetOneDoc[Item](db, "prohibited_items", bson.M{"Destination": bson.M{"$regex": countryandkeyword, "$options": "i"}})
 	}
+
 	keyword := ExtractKeywords(Pesan.Message, []string{country})
 	var filter bson.M
 	if keyword != "" {
@@ -56,7 +60,7 @@ func GetCountryFromMessage(message string, db *mongo.Database) (country string, 
 	var strcountry string
 	// Iterasi melalui daftar negara
 	for _, country := range countries {
-		lowerCountry := strings.ToLower(country.(string))
+		lowerCountry := strings.ToLower(strings.TrimSpace(country.(string)))
 		strcountry += lowerCountry + ","
 		if strings.Contains(lowerMessage, lowerCountry) {
 			return country.(string), nil
