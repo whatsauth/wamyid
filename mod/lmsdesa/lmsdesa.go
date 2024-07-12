@@ -2,6 +2,7 @@ package lmsdesa
 
 import (
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gocroot/helper/atapi"
@@ -69,6 +70,7 @@ func ArsipFile(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 		}
 
 	}
-	return "Hai kak, " + Pesan.Alias_name + "\nBerhasil simpan gambar dengan hash:" + faceinfo.FileHash + "\nNomor Commit: " + faceinfo.Commit + "\n*Remaining: " + strconv.Itoa(faceinfo.Remaining) + "*"
+	tagmdimg := "![image](" + filepath.Base(faceinfo.FileHash) + ")"
+	return "Hai kak, " + Pesan.Alias_name + "\nSilahkan tempelkan script berikut pada resume notulen meeting untuk menyisipkan gambar ini:\n\n*" + tagmdimg + "*\n\nNomor Commit: " + faceinfo.Commit + "\nRemaining: " + strconv.Itoa(faceinfo.Remaining)
 
 }
