@@ -41,6 +41,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = daftar.DaftarDomyikado(Pesan, db)
 	case "login-siakad":
 		reply = siakad.LoginSiakad(Pesan, db)
+	case "minta-bap":
+		reply = siakad.RequestBAP(Pesan, db)
 	case "prohibited-items":
 		reply = posint.GetProhibitedItems(Pesan, db)
 	}

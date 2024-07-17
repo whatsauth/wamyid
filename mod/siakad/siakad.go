@@ -100,3 +100,64 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 
 	return "Hai kak, " + message.Alias_name + "\nBerhasil login dengan email:" + email
 }
+
+func RequestBAP(message itmodel.IteungMessage, db *mongo.Database) string {
+	noHp := message.Phone_number
+	if noHp == "" {
+		return "Nomor HP tidak ditemukan."
+	}
+
+	// Pastikan data login berhasil sebelum memanggil fungsi ini
+	loginResponse := LoginSiakad(message, db)
+	if !strings.Contains(loginResponse, "Berhasil login") {
+		return loginResponse
+	}
+
+	// Ambil periode dan kelas dari message
+	var requestData struct {
+		Periode string `json:"periode"`
+		Kelas   string `json:"kelas"`
+	}
+
+	err := json.Unmarshal([]byte(message.Message), &requestData)
+	if err != nil || requestData.Periode == "" || requestData.Kelas == "" {
+		return "Periode atau kelas tidak ditemukan dalam pesan."
+	}
+
+	// Definisikan data request untuk BAP
+	requestBody, err := json.Marshal(requestData)
+	if err != nil {
+		return "Gagal membuat request body untuk BAP: " + err.Error()
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("POST", "conf.BapURL", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "Gagal membuat request untuk BAP: " + err.Error()
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("nohp", noHp)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "Gagal mengirim request untuk BAP: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Sprintf("Gagal mendapatkan BAP, status code: %d", resp.StatusCode)
+	}
+
+	var response map[string]string
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return "Gagal membaca respons BAP: " + err.Error()
+	}
+
+	url, ok := response["url"]
+	if !ok {
+		return "Respons BAP tidak mengandung URL."
+	}
+
+	return "Berikut adalah URL BAP yang diminta: " + url
+}
