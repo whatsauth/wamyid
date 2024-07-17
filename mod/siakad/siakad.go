@@ -101,7 +101,14 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 	return "Hai kak, " + message.Alias_name + "\nBerhasil login dengan email:" + email
 }
 
-func RequestBAP(message itmodel.IteungMessage, db *mongo.Database) string {
+func extractClassAndPeriod(message string) (string, string) {
+	// Function to extract class and period from the message
+	var kelas, periode string
+	fmt.Sscanf(message, "minta bap kelas %s periode %s", &kelas, &periode)
+	return kelas, periode
+}
+
+func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	kelas, periode := extractClassAndPeriod(message.Message)
 	if kelas == "" || periode == "" {
@@ -158,9 +165,133 @@ func RequestBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	return "Berikut adalah URL BAP yang diminta: " + responseMap["url"]
 }
 
-func extractClassAndPeriod(message string) (string, string) {
-	// Function to extract class and period from the message
-	var kelas, periode string
-	fmt.Sscanf(message, "minta bap kelas %s periode %s", &kelas, &periode)
-	return kelas, periode
+func extractNimandTopik(message string) (string, string) {
+	// Function to extract NIM and topik from the message
+	var nim, topik string
+	fmt.Sscanf(message, "approve bimbingan nim %s dengan topik %s", &nim, &topik)
+	return nim, topik
+}
+
+func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string {
+	// Extract information from the message
+	nim, topik := extractNimandTopik(message.Message)
+	if nim == "" || topik == "" {
+		return "Pesan tidak sesuai format. Gunakan format 'approve bimbingan nim [nim] topik [topik]'"
+	}
+
+	// Get the phone number from the message
+	noHp := message.Phone_number
+	if noHp == "" {
+		return "Nomor telepon tidak ditemukan dalam pesan."
+	}
+
+	// Get the API URL from the database
+	var conf Config
+	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+	}
+
+	// Prepare the request body
+	requestBody, err := json.Marshal(map[string]string{
+		"nim":   nim,
+		"topik": topik,
+	})
+	if err != nil {
+		return "Gagal membuat request body: " + err.Error()
+	}
+
+	// Create and send the HTTP request
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("POST", conf.ApproveBimbinganURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "Gagal membuat request: " + err.Error()
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("nohp", noHp)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "Gagal mengirim request: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return "Token tidak ditemukan! Silahkan Login Kembali"
+		} else if resp.StatusCode == http.StatusForbidden {
+			return "Bimbingan Telah disetujui!"
+		}
+		return fmt.Sprintf("Gagal Approve Bimbingan, status code: %d", resp.StatusCode)
+	}
+
+	var responseMap map[string]string
+	err = json.NewDecoder(resp.Body).Decode(&responseMap)
+	if err != nil {
+		return "Gagal memproses response: " + err.Error()
+	}
+
+	return responseMap["message"]
+}
+
+func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) string {
+	// Extract information from the message
+	nim, topik := extractNimandTopik(message.Message)
+	if nim == "" || topik == "" {
+		return "Pesan tidak sesuai format. Gunakan format 'approve bimbingan nim [nim] topik [topik]'"
+	}
+
+	// Get the phone number from the message
+	noHp := message.Phone_number
+	if noHp == "" {
+		return "Nomor telepon tidak ditemukan dalam pesan."
+	}
+
+	// Get the API URL from the database
+	var conf Config
+	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+	}
+
+	// Prepare the request body
+	requestBody, err := json.Marshal(map[string]string{
+		"nim":   nim,
+		"topik": topik,
+	})
+	if err != nil {
+		return "Gagal membuat request body: " + err.Error()
+	}
+
+	// Create and send the HTTP request
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("POST", conf.ApproveBimbinganByPoinURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "Gagal membuat request: " + err.Error()
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("nohp", noHp)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "Gagal mengirim request: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return "Token tidak ditemukan! Silahkan Login Kembali"
+		} else if resp.StatusCode == http.StatusForbidden {
+			return "Bimbingan Telah disetujui!"
+		}
+		return fmt.Sprintf("Gagal Approve Bimbingan, status code: %d", resp.StatusCode)
+	}
+
+	var responseMap map[string]string
+	err = json.NewDecoder(resp.Body).Decode(&responseMap)
+	if err != nil {
+		return "Gagal memproses response: " + err.Error()
+	}
+
+	return fmt.Sprintf("Bimbingan berhasil di approve! Poin mahasiswa telah berkurang menjadi: %s", responseMap["poin_mahasiswa"])
 }
