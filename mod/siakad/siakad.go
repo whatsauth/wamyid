@@ -101,13 +101,6 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 	return "Hai kak, " + message.Alias_name + "\nBerhasil login dengan email:" + email
 }
 
-func extractClassAndPeriod(message string) (string, string) {
-	// Function to extract class and period from the message
-	var kelas, periode string
-	fmt.Sscanf(message, "minta bap kelas %s periode %s", &kelas, &periode)
-	return kelas, periode
-}
-
 func RequestBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	kelas, periode := extractClassAndPeriod(message.Message)
@@ -121,15 +114,13 @@ func RequestBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
+	// Get the API URL from the database
 	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
 		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
 
-	if conf.BapURL == "" {
-		return "URL untuk login tidak ditemukan dalam konfigurasi."
-	}
 	// Prepare the request body
 	requestBody, err := json.Marshal(map[string]string{
 		"periode": periode,
@@ -165,4 +156,11 @@ func RequestBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 
 	return "Berikut adalah URL BAP yang diminta: " + responseMap["url"]
+}
+
+func extractClassAndPeriod(message string) (string, string) {
+	// Function to extract class and period from the message
+	var kelas, periode string
+	fmt.Sscanf(message, "minta bap kelas %s periode %s", &kelas, &periode)
+	return kelas, periode
 }
