@@ -229,12 +229,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			return "Topik tidak ditemukan!"
-		} else if resp.StatusCode == http.StatusForbidden {
-			return "Bimbingan Telah disetujui!"
-		}
-		return fmt.Sprintf("Gagal Approve Bimbingan, status code: %d", resp.StatusCode)
+		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
 	}
 
 	var responseMap map[string]string
@@ -291,12 +286,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			return "Topik tidak ditemukan!"
-		} else if resp.StatusCode == http.StatusForbidden {
-			return "Bimbingan Telah disetujui!"
-		}
-		return fmt.Sprintf("Gagal Approve Bimbingan, status code: %d", resp.StatusCode)
+		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
 	}
 
 	var responseMap map[string]string
