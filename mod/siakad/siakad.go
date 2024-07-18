@@ -167,14 +167,14 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 
 func extractNimandTopik(message string) (string, string) {
 	var nim, topik string
-	// Memisahkan pesan menjadi bagian-bagian menggunakan delimiter yang lebih fleksibel
-	_, err := fmt.Sscanf(message, "approve bimbingan nim %s dengan topik %s", &nim, &topik)
-	if err != nil {
-		// Memisahkan berdasarkan spasi dan menggabungkan kembali untuk menangani topik yang memiliki spasi
-		parts := strings.Fields(message)
-		if len(parts) > 4 {
-			nim = parts[3]
-			topik = strings.Join(parts[5:], " ")
+	parts := strings.Fields(message)
+	if len(parts) > 4 {
+		nim = parts[3]
+		// Gabungkan bagian setelah "dengan topik" menjadi satu string
+		topik = strings.Join(parts[5:], " ")
+		// Jika topik mengandung "menggunakan poin", hapus bagian tersebut
+		if strings.Contains(topik, "menggunakan poin") {
+			topik = strings.TrimSpace(strings.Replace(topik, "menggunakan poin", "", 1))
 		}
 	}
 	return nim, topik
