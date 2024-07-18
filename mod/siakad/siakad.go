@@ -167,16 +167,23 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 
 func extractNimandTopik(message string) (string, string) {
 	var nim, topik string
-	parts := strings.Fields(message)
-	if len(parts) > 4 {
-		nim = parts[3]
-		topik = strings.Join(parts[5:], " ")
-		if strings.Contains(topik, "menggunakan poin") {
-			topik = strings.TrimSpace(strings.Replace(topik, "menggunakan poin", "", 1))
-		}
+	nimPattern := regexp.MustCompile(`(?i)nim\s+(\d+)`)
+	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+?)(?:\s+menggunakan poin|$)`)
+
+	nimMatch := nimPattern.FindStringSubmatch(message)
+	topikMatch := topikPattern.FindStringSubmatch(message)
+
+	if len(nimMatch) > 1 {
+		nim = nimMatch[1]
 	}
+	if len(topikMatch) > 1 {
+		topik = strings.TrimSpace(topikMatch[1])
+	}
+
+	fmt.Printf("Extracted NIM: %s, Topik: %s\n", nim, topik)
 	return nim, topik
 }
+
 func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	nim, topik := extractNimandTopik(message.Message)
@@ -285,7 +292,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
-			return "Token tidak ditemukan! Silahkan Login Kembali"
+			return "Topik tidak ditemukan!"
 		} else if resp.StatusCode == http.StatusForbidden {
 			return "Bimbingan Telah disetujui!"
 		}
