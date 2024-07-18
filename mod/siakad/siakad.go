@@ -204,6 +204,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
+		fmt.Printf("Error fetching config: %s\n", err.Error())
 		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
@@ -213,6 +214,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 		"topik": topik,
 	})
 	if err != nil {
+		fmt.Printf("Error creating request body: %s\n", err.Error())
 		return "Gagal membuat request body: " + err.Error()
 	}
 
@@ -220,6 +222,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("POST", conf.ApproveBimbinganURL, bytes.NewBuffer(requestBody))
 	if err != nil {
+		fmt.Printf("Error creating HTTP request: %s\n", err.Error())
 		return "Gagal membuat request: " + err.Error()
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -227,17 +230,20 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("Error sending HTTP request: %s\n", err.Error())
 		return "Gagal mengirim request: " + err.Error()
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error response status code: %d\n", resp.StatusCode)
 		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
 	}
 
 	var responseMap map[string]string
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {
+		fmt.Printf("Error decoding response: %s\n", err.Error())
 		return "Gagal memproses response: " + err.Error()
 	}
 
@@ -261,6 +267,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
+		fmt.Printf("Error fetching config: %s\n", err.Error())
 		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
@@ -270,6 +277,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 		"topik": topik,
 	})
 	if err != nil {
+		fmt.Printf("Error creating request body: %s\n", err.Error())
 		return "Gagal membuat request body: " + err.Error()
 	}
 
@@ -277,6 +285,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("POST", conf.ApproveBimbinganByPoinURL, bytes.NewBuffer(requestBody))
 	if err != nil {
+		fmt.Printf("Error creating HTTP request: %s\n", err.Error())
 		return "Gagal membuat request: " + err.Error()
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -284,17 +293,20 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("Error sending HTTP request: %s\n", err.Error())
 		return "Gagal mengirim request: " + err.Error()
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error response status code: %d\n", resp.StatusCode)
 		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
 	}
 
 	var responseMap map[string]string
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {
+		fmt.Printf("Error decoding response: %s\n", err.Error())
 		return "Gagal memproses response: " + err.Error()
 	}
 
