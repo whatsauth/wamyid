@@ -168,7 +168,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 func extractNimandTopik(message string) (string, string) {
 	var nim, topik string
 	nimPattern := regexp.MustCompile(`(?i)nim\s+(\d+)`)
-	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+?)$`)
+	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+)`)
 
 	nimMatch := nimPattern.FindStringSubmatch(message)
 	topikMatch := topikPattern.FindStringSubmatch(message)
@@ -178,81 +178,36 @@ func extractNimandTopik(message string) (string, string) {
 	}
 	if len(topikMatch) > 1 {
 		topik = strings.TrimSpace(topikMatch[1])
+		// Menghapus kata "poin" dari topik jika ada
+		topik = strings.ReplaceAll(topik, "poin", "")
+		topik = strings.TrimSpace(topik)
 	}
 
 	fmt.Printf("Extracted NIM: %s, Topik: %s\n", nim, topik)
 	return nim, topik
 }
 
-func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) string {
-	nim, topik := extractNimandTopik(message.Message)
-	if nim == "" || topik == "" {
-		return "Pesan tidak sesuai format. Gunakan format 'approve bimbingan nim [nim] topik [topik]'"
-	}
-
-	noHp := message.Phone_number
-	if noHp == "" {
-		return "Nomor telepon tidak ditemukan dalam pesan."
-	}
-
-	var conf Config
-	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
-	if err != nil {
-		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
-	}
-
-	requestBody, err := json.Marshal(map[string]string{
-		"nim":   nim,
-		"topik": topik,
-	})
-	if err != nil {
-		return "Gagal membuat request body: " + err.Error()
-	}
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("POST", conf.ApproveBimbinganByPoinURL, bytes.NewBuffer(requestBody))
-	if err != nil {
-		return "Gagal membuat request: " + err.Error()
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("nohp", noHp)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "Gagal mengirim request: " + err.Error()
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
-	}
-
-	var responseMap map[string]string
-	err = json.NewDecoder(resp.Body).Decode(&responseMap)
-	if err != nil {
-		return "Gagal memproses response: " + err.Error()
-	}
-
-	return fmt.Sprintf("Bimbingan berhasil di approve! Poin mahasiswa telah berkurang menjadi: %s", responseMap["poin_mahasiswa"])
-}
-
 func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string {
+	// Extract information from the message
 	nim, topik := extractNimandTopik(message.Message)
 	if nim == "" || topik == "" {
 		return "Pesan tidak sesuai format. Gunakan format 'approve bimbingan nim [nim] topik [topik]'"
 	}
 
+	// Get the phone number from the message
 	noHp := message.Phone_number
 	if noHp == "" {
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
+	// Get the API URL from the database
 	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
 		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
+	// Prepare the request body
 	requestBody, err := json.Marshal(map[string]string{
 		"nim":   nim,
 		"topik": topik,
@@ -261,6 +216,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 		return "Gagal membuat request body: " + err.Error()
 	}
 
+	// Create and send the HTTP request
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("POST", conf.ApproveBimbinganURL, bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -288,10 +244,59 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 	return responseMap["message"]
 }
 
-func HandleApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string {
-	if strings.Contains(strings.ToLower(message.Message), "poin") {
-		return ApproveBimbinganbyPoin(message, db)
-	} else {
-		return ApproveBimbingan(message, db)
+func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) string {
+	// Extract information from the message
+	nim, topik := extractNimandTopik(message.Message)
+	if nim == "" || topik == "" {
+		return "Pesan tidak sesuai format. Gunakan format 'approve bimbingan nim [nim] topik [topik]'"
 	}
+
+	// Get the phone number from the message
+	noHp := message.Phone_number
+	if noHp == "" {
+		return "Nomor telepon tidak ditemukan dalam pesan."
+	}
+
+	// Get the API URL from the database
+	var conf Config
+	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+	}
+
+	// Prepare the request body
+	requestBody, err := json.Marshal(map[string]string{
+		"nim":   nim,
+		"topik": topik,
+	})
+	if err != nil {
+		return "Gagal membuat request body: " + err.Error()
+	}
+
+	// Create and send the HTTP request
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("POST", conf.ApproveBimbinganByPoinURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "Gagal membuat request: " + err.Error()
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("nohp", noHp)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "Gagal mengirim request: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
+	}
+
+	var responseMap map[string]string
+	err = json.NewDecoder(resp.Body).Decode(&responseMap)
+	if err != nil {
+		return "Gagal memproses response: " + err.Error()
+	}
+
+	return fmt.Sprintf("Bimbingan berhasil di approve! Poin mahasiswa telah berkurang menjadi: %s", responseMap["poin_mahasiswa"])
 }

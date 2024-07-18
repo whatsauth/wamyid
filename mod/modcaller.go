@@ -44,7 +44,9 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "minta-bap":
 		reply = siakad.MintaBAP(Pesan, db)
 	case "approve-bimbingan":
-		reply = siakad.HandleApproveBimbingan(Pesan, db)
+		reply = siakad.ApproveBimbingan(Pesan, db)
+	case "approve-bimbinganbypoin":
+		reply = siakad.ApproveBimbinganbyPoin(Pesan, db)
 	case "prohibited-items":
 		reply = posint.GetProhibitedItems(Pesan, db)
 	}
