@@ -167,18 +167,26 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 
 func extractNimandTopik(message string) (string, string) {
 	var nim, topik string
+	// Handle non-breaking spaces
+	message = strings.ReplaceAll(message, "\u00A0", " ")
+
+	// Regex patterns to extract NIM and topik
 	nimPattern := regexp.MustCompile(`(?i)nim\s+(\d+)`)
 	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+)`)
 
+	// Find matches in the message
 	nimMatch := nimPattern.FindStringSubmatch(message)
 	topikMatch := topikPattern.FindStringSubmatch(message)
 
+	// Extract NIM
 	if len(nimMatch) > 1 {
 		nim = nimMatch[1]
 	}
+
+	// Extract Topik
 	if len(topikMatch) > 1 {
 		topik = strings.TrimSpace(topikMatch[1])
-		// Menghapus kata "poin" dari topik jika ada
+		// Remove the word "poin" from topik if it exists
 		topik = strings.ReplaceAll(topik, "poin", "")
 		topik = strings.TrimSpace(topik)
 	}
