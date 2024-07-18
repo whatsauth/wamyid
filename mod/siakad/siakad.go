@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -168,7 +169,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 func extractNimandTopik(message string) (string, string) {
 	var nim, topik string
 	nimPattern := regexp.MustCompile(`(?i)nim\s+(\d+)`)
-	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+?)(?:\s+ poin|$)`)
+	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+?)(?:\s+poin|$)`)
 
 	nimMatch := nimPattern.FindStringSubmatch(message)
 	topikMatch := topikPattern.FindStringSubmatch(message)
@@ -285,12 +286,15 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Printf("Status Code: %d, Response Body: %s\n", resp.StatusCode, string(body))
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
 	}
 
 	var responseMap map[string]string
-	err = json.NewDecoder(resp.Body).Decode(&responseMap)
+	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&responseMap)
 	if err != nil {
 		return "Gagal memproses response: " + err.Error()
 	}
