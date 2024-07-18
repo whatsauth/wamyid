@@ -168,7 +168,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 func extractNimandTopik(message string) (string, string) {
 	var nim, topik string
 	nimPattern := regexp.MustCompile(`(?i)nim\s+(\d+)`)
-	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+?)(?:\s+poin|$)`)
+	topikPattern := regexp.MustCompile(`(?i)topik\s+(.+?)$`)
 
 	nimMatch := nimPattern.FindStringSubmatch(message)
 	topikMatch := topikPattern.FindStringSubmatch(message)
@@ -177,12 +177,7 @@ func extractNimandTopik(message string) (string, string) {
 		nim = nimMatch[1]
 	}
 	if len(topikMatch) > 1 {
-		// Check if the match contains "poin"
 		topik = strings.TrimSpace(topikMatch[1])
-		if strings.Contains(strings.ToLower(topik), "poin") {
-			// If "poin" is found, trim it from the topik
-			topik = strings.TrimSpace(strings.ReplaceAll(topik, "poin", ""))
-		}
 	}
 
 	fmt.Printf("Extracted NIM: %s, Topik: %s\n", nim, topik)
