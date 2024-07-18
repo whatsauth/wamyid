@@ -170,16 +170,13 @@ func extractNimandTopik(message string) (string, string) {
 	parts := strings.Fields(message)
 	if len(parts) > 4 {
 		nim = parts[3]
-		// Gabungkan bagian setelah "dengan topik" menjadi satu string
 		topik = strings.Join(parts[5:], " ")
-		// Jika topik mengandung "menggunakan poin", hapus bagian tersebut
 		if strings.Contains(topik, "menggunakan poin") {
 			topik = strings.TrimSpace(strings.Replace(topik, "menggunakan poin", "", 1))
 		}
 	}
 	return nim, topik
 }
-
 func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	nim, topik := extractNimandTopik(message.Message)
@@ -226,7 +223,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
-			return "Token tidak ditemukan! Silahkan Login Kembali"
+			return "Topik tidak ditemukan!"
 		} else if resp.StatusCode == http.StatusForbidden {
 			return "Bimbingan Telah disetujui!"
 		}
