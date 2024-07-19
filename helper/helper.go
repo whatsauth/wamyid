@@ -50,7 +50,7 @@ func removeInvisibleChars(text string) string {
 
 func removeZeroWidthSpaces(text string) string {
 	// Create a regular expression to match specific zero-width characters
-	re := regexp.MustCompile(`[\u200B\u200C\u200D\uFEFF]`)
+	re := regexp.MustCompile(`\p{Cf}`)
 
 	// Replace all matches with an empty string
 	return re.ReplaceAllString(text, "")
