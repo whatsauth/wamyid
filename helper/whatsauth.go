@@ -1,11 +1,12 @@
 package helper
 
 import (
+	"strings"
+
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/mod/presensi"
 	"github.com/gocroot/model"
-	"strings"
 
 	"github.com/gocroot/mod"
 
@@ -77,7 +78,7 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 		if err != nil {
 			return
 		}
-		msg.Message = NormalizeHiddenChar(msg.Message)
+		// msg.Message = NormalizeHiddenChar(msg.Message)
 		module.NormalizeAndTypoCorrection(&msg.Message, db, "typo")
 		modname, group, personal := module.GetModuleName(WAPhoneNumber, msg, db, "module")
 		var msgstr string
