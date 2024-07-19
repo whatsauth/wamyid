@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"re"
+	"regexp"
 	"strings"
 )
 
@@ -41,24 +41,23 @@ func GetAddress() (ipport string, network string) {
 }
 
 func removeInvisibleChars(text string) string {
-    // Create a regular expression to match invisible characters
-    re := regexp.MustCompile(`\p{C}`)
-    
-    // Replace all matches with an empty string
-    return re.ReplaceAllString(text, "")
+	// Create a regular expression to match invisible characters
+	re := regexp.MustCompile(`\p{C}`)
+
+	// Replace all matches with an empty string
+	return re.ReplaceAllString(text, "")
 }
 
 func removeZeroWidthSpaces(text string) string {
-    // Create a regular expression to match specific zero-width characters
-    re := regexp.MustCompile(`[\u200B\u200C\u200D\uFEFF]`)
-    
-    // Replace all matches with an empty string
-    return re.ReplaceAllString(text, "")
+	// Create a regular expression to match specific zero-width characters
+	re := regexp.MustCompile(`[\u200B\u200C\u200D\uFEFF]`)
+
+	// Replace all matches with an empty string
+	return re.ReplaceAllString(text, "")
 }
 
-
 func NormalizeHiddenChar(text string) string {
-	return removeZeroWidthSpaces(removeInvisibleChars(text)) 
+	return removeZeroWidthSpaces(removeInvisibleChars(text))
 }
 
 func GetIPaddress() string {
