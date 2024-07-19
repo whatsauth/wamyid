@@ -167,7 +167,7 @@ func GetMessageFromKimseokgis(msg itmodel.IteungMessage, botname string, db *mon
 		return "data config gagal di ambil " + err.Error()
 	}
 	dt := model.Requests{Messages: msg.Message}
-	_, msgreply, err := atapi.PostStructWithToken[model.Chats]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
+	_, msgreply, err := atapi.PostStructWithToken[model.Chats]("secret", conf.LeaflySecret, dt, conf.KimseokgisURL)
 	if err != nil {
 		return "Wah kak kayaknya salah pas ngepost reply deh " + err.Error()
 	}
