@@ -318,5 +318,5 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 		return "Gagal memproses response: " + err.Error()
 	}
 
-	return fmt.Sprintf("Bimbingan berhasil di approve! Poin mahasiswa telah berkurang menjadi: %s", responseMap["poin_mahasiswa"])
+	return fmt.Sprintf("Bimbingan berhasil di approve! %s", responseMap["poin_mahasiswa"])
 }
