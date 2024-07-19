@@ -1,6 +1,11 @@
 package helper
 
 import (
+	"github.com/gocroot/config"
+	"github.com/gocroot/helper/atapi"
+	"github.com/gocroot/helper/atdb"
+	"github.com/gocroot/mod/presensi"
+	"github.com/gocroot/model"
 	"strings"
 
 	"github.com/gocroot/mod"
@@ -153,6 +158,19 @@ func GetRandomReplyFromMongo(msg itmodel.IteungMessage, botname string, db *mong
 	replymsg := strings.ReplaceAll(rply[0].Message, "#BOTNAME#", botname)
 	replymsg = strings.ReplaceAll(replymsg, "\\n", "\n")
 	return replymsg
+}
+
+func GetMessageFromKimseokgis(msg itmodel.IteungMessage, botname string, db *mongo.Database) string {
+	conf, err := atdb.GetOneDoc[presensi.Config](db, "config", bson.M{"phonenumber": "62895601060000"})
+	if err != nil {
+		return "data config gagal di ambil " + err.Error()
+	}
+	dt := model.Requests{Messages: msg.Message}
+	_, msgreply, err := atapi.PostStructWithToken[model.Chats]("secret", conf.LeaflySecret, dt, config.KimseokGisMessage)
+	if err != nil {
+		return "Wah kak kayaknya salah pas ngepost reply deh " + err.Error()
+	}
+	return msgreply.Responses
 }
 
 func GetAppProfile(phonenumber string, db *mongo.Database) (apitoken itmodel.Profile, err error) {
