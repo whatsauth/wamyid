@@ -73,6 +73,7 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 		if err != nil {
 			return
 		}
+		msg.Message = NormalizeHiddenChar(msg.Message)
 		module.NormalizeAndTypoCorrection(&msg.Message, db, "typo")
 		modname, group, personal := module.GetModuleName(WAPhoneNumber, msg, db, "module")
 		var msgstr string
