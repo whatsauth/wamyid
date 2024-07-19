@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"github.com/gocroot/config"
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/gocroot/mod/presensi"
@@ -166,7 +165,7 @@ func GetMessageFromKimseokgis(msg itmodel.IteungMessage, botname string, db *mon
 		return "data config gagal di ambil " + err.Error()
 	}
 	dt := model.Requests{Messages: msg.Message}
-	_, msgreply, err := atapi.PostStructWithToken[model.Chats]("secret", conf.LeaflySecret, dt, config.KimseokGisMessage)
+	_, msgreply, err := atapi.PostStructWithToken[model.Chats]("secret", conf.LeaflySecret, dt, conf.LeaflyURL)
 	if err != nil {
 		return "Wah kak kayaknya salah pas ngepost reply deh " + err.Error()
 	}

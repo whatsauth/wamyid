@@ -50,6 +50,7 @@ type Config struct {
 	LeaflySecret         string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
 	DomyikadoPresensiURL string `json:"domyikadopresensiurl,omitempty" bson:"domyikadopresensiurl,omitempty"`
 	DomyikadoSecret      string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
+	KimseokgisURL        string `json:"urlkimseokgis" bson:"urlkimseokgis"`
 }
 
 type FaceInfo struct {
