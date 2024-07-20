@@ -30,7 +30,7 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "selfie-masuk":
 		reply = presensi.CekSelfieMasuk(Profile, Pesan, db)
 	case "selfie-pulang":
-		reply = presensi.CekSelfiePulang(Pesan, db)
+		reply = presensi.CekSelfiePulang(Profile, Pesan, db)
 	case "tasklist-append":
 		reply = tasklist.TaskListAppend(Pesan, db)
 	case "tasklist-reset":

@@ -4,9 +4,9 @@ go 1.22.3
 
 require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	github.com/whatsauth/itmodel v0.0.4
-	go.mongodb.org/mongo-driver v1.15.1
-	golang.org/x/crypto v0.24.0
+	github.com/whatsauth/itmodel v0.0.5
+	go.mongodb.org/mongo-driver v1.16.0
+	golang.org/x/crypto v0.25.0
 )
 
 require (

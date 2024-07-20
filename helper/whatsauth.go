@@ -118,7 +118,8 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 			if group && modname != "" {
 				msgstr = mod.Caller(profile, modname, msg, db)
 			} else {
-				msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
+				//msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
+				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
 			}
 			if strings.Contains(msgstr, "IM$G#M$Gui76557u|||") {
 				strdt := strings.Split(msgstr, "|||")

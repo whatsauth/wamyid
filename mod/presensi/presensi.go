@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+func CekSelfiePulang(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	if Pesan.Filedata == "" {
 		return "Kirim pap nya dulu dong kak.. " + Pesan.Alias_name
 	}
@@ -38,7 +38,18 @@ func CekSelfiePulang(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 		if statuscode == http.StatusFailedDependency {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kaku gitu dong. Ekspresi wajahnya ga boleh sama dengan selfie sebelumnya ya kak. Senyumnya yang lebar, giginya dilihatin, matanya pelototin, hidungnya keatasin.\n\n" + faceinfo.Error
 		} else if statuscode == http.StatusMultipleChoices {
-			return "IM$G#M$Gui76557u|||" + faceinfo.FileHash + "|||" + faceinfo.Error
+			dt := &itmodel.ImageMessage{
+				To:          Pesan.Chat_number,
+				Base64Image: faceinfo.FileHash,
+				Caption:     faceinfo.Error,
+				IsGroup:     true,
+			}
+			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dt, Profile.URLAPIImage)
+			if err != nil {
+				strconv.Itoa(statuscode)
+				return "Akses ke endpoint whatsaut gagal: " + err.Error() + strconv.Itoa(statuscode) + httpresp.Info + httpresp.Response
+			}
+			return ""
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf:\n" + faceinfo.Error + "\nCode: " + strconv.Itoa(statuscode)
 		}
@@ -120,7 +131,18 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 		if statuscode == http.StatusFailedDependency {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf, jangan kaku gitu dong. Ekspresi wajahnya ga boleh sama dengan selfie sebelumnya ya kak. Senyumnya yang lebar, giginya dilihatin, matanya pelototin, hidungnya keatasin.\n\n" + faceinfo.Error
 		} else if statuscode == http.StatusMultipleChoices {
-			return "IM$G#M$Gui76557u|||" + faceinfo.FileHash + "|||" + faceinfo.Error
+			dt := &itmodel.ImageMessage{
+				To:          Pesan.Chat_number,
+				Base64Image: faceinfo.FileHash,
+				Caption:     faceinfo.Error,
+				IsGroup:     true,
+			}
+			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dt, Profile.URLAPIImage)
+			if err != nil {
+				strconv.Itoa(statuscode)
+				return "Akses ke endpoint whatsaut gagal: " + err.Error() + strconv.Itoa(statuscode) + httpresp.Info + httpresp.Response
+			}
+			return ""
 		} else {
 			return "Wah kak " + Pesan.Alias_name + " mohon maaf:\n" + faceinfo.Error + "\nCode: " + strconv.Itoa(statuscode)
 		}
