@@ -82,43 +82,30 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 		module.NormalizeAndTypoCorrection(&msg.Message, db, "typo")
 		modname, group, personal := module.GetModuleName(WAPhoneNumber, msg, db, "module")
 		var msgstr string
+		var isgrup bool
 		if msg.Chat_server != "g.us" { //chat personal
 			if personal && modname != "" {
 				msgstr = mod.Caller(profile, modname, msg, db)
 			} else {
 				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
 			}
-			if msgstr != "" {
-				dt := &itmodel.TextMessage{
-					To:       msg.Chat_number,
-					IsGroup:  true,
-					Messages: msgstr,
-				}
-				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
-				if err != nil {
-					return
-				}
-			}
+			isgrup = true
 
 		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //chat group
 			if group && modname != "" {
 				msgstr = mod.Caller(profile, modname, msg, db)
 			} else {
-				//msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
 			}
-			if msgstr != "" {
-				dt := &itmodel.TextMessage{
-					To:       msg.Chat_number,
-					IsGroup:  true,
-					Messages: msgstr,
-				}
-				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
-				if err != nil {
-					return
-				}
-			}
-
+		}
+		dt := &itmodel.TextMessage{
+			To:       msg.Chat_number,
+			IsGroup:  isgrup,
+			Messages: msgstr,
+		}
+		resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
+		if err != nil {
+			return
 		}
 
 	}
