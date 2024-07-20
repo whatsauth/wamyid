@@ -88,24 +88,10 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 			} else {
 				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
 			}
-			//
-			if strings.Contains(msgstr, "IM$G#M$Gui76557u|||") {
-				strdt := strings.Split(msgstr, "|||")
-				dt := &itmodel.ImageMessage{
-					To:          msg.Chat_number,
-					Base64Image: strdt[1],
-					Caption:     strdt[2],
-					IsGroup:     false,
-				}
-				urlpost := "https://api.wa.my.id/api/send/message/image"
-				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, urlpost)
-				if err != nil {
-					return
-				}
-			} else {
+			if msgstr != "" {
 				dt := &itmodel.TextMessage{
 					To:       msg.Chat_number,
-					IsGroup:  false,
+					IsGroup:  true,
 					Messages: msgstr,
 				}
 				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, WAAPIMessage)
@@ -121,20 +107,7 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 				//msgstr = GetRandomReplyFromMongo(msg, profile.Botname, db)
 				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
 			}
-			if strings.Contains(msgstr, "IM$G#M$Gui76557u|||") {
-				strdt := strings.Split(msgstr, "|||")
-				dt := &itmodel.ImageMessage{
-					To:          msg.Chat_number,
-					Base64Image: strdt[1],
-					Caption:     strdt[2],
-					IsGroup:     true,
-				}
-				urlpost := "https://api.wa.my.id/api/send/message/image"
-				resp, err = PostStructWithToken[itmodel.Response]("Token", profile.Token, dt, urlpost)
-				if err != nil {
-					return
-				}
-			} else {
+			if msgstr != "" {
 				dt := &itmodel.TextMessage{
 					To:       msg.Chat_number,
 					IsGroup:  true,
