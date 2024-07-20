@@ -89,9 +89,9 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 			} else {
 				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
 			}
-			isgrup = true
 
 		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //chat group
+			isgrup = true
 			if group && modname != "" {
 				msgstr = mod.Caller(profile, modname, msg, db)
 			} else {
