@@ -13,7 +13,7 @@ import (
 func TestExampleFunction(t *testing.T) {
 	// Setup MongoDB connection
 	// Setup MongoDB connection
-	mongostring := "mongodb+srv://penerbit:u2cC2MwwS42yKxub@webhook.jej9ieu.mongodb.net/?retryWrites=true&w=majority&appName=webhook"
+	mongostring := ""
 	dbname := "webhook"
 	clientOptions := options.Client().ApplyURI(mongostring)
 	client, err := mongo.Connect(context.TODO(), clientOptions)

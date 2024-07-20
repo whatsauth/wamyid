@@ -56,7 +56,7 @@ func GetMessage(msg itmodel.IteungMessage, botname string, db *mongo.Database) s
 	if err != nil {
 		return err.Error()
 	}
-	return dt.Answer
+	return strings.TrimSpace(dt.Answer)
 }
 
 func QueriesDataRegexpALL(db *mongo.Database, queries string) (dest Datasets, err error) {
