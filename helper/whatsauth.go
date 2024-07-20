@@ -5,6 +5,7 @@ import (
 
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
+	"github.com/gocroot/helper/kimseok"
 	"github.com/gocroot/mod/presensi"
 	"github.com/gocroot/model"
 
@@ -87,7 +88,7 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 			if personal && modname != "" {
 				msgstr = mod.Caller(profile, modname, msg, db)
 			} else {
-				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
+				msgstr = kimseok.GetMessage(msg, profile.Botname, db)
 			}
 
 		} else if strings.Contains(strings.ToLower(msg.Message), profile.Triggerword) { //chat group
@@ -95,7 +96,7 @@ func HandlerIncomingMessage(msg itmodel.IteungMessage, WAPhoneNumber string, db 
 			if group && modname != "" {
 				msgstr = mod.Caller(profile, modname, msg, db)
 			} else {
-				msgstr = GetMessageFromKimseokgis(msg, profile.Botname, db)
+				msgstr = kimseok.GetMessage(msg, profile.Botname, db)
 			}
 		}
 		dt := &itmodel.TextMessage{
