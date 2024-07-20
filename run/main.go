@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/gocroot/helper/kimseok"
 )
 
-func extractNimandTopik(message string) (string, string) {
+func ExtractNimandTopik(message string) (string, string) {
 	var nim, topik string
 	// Handle non-breaking spaces
 	message = strings.ReplaceAll(message, "\u00A0", " ")
@@ -37,8 +39,9 @@ func extractNimandTopik(message string) (string, string) {
 }
 
 func main() {
+	kimseok.StammingQuestioninDB("", "")
 	// Example message
-	message := "NIM 123456789 topik Machine Learning poin"
-	nim, topik := extractNimandTopik(message)
-	fmt.Printf("Final Extracted NIM: %s, Topik: %s\n", nim, topik)
+	//message := "NIM 123456789 topik Machine Learning poin"
+	//nim, topik := extractNimandTopik(message)
+	//fmt.Printf("Final Extracted NIM: %s, Topik: %s\n", nim, topik)
 }

@@ -80,8 +80,9 @@ func DeleteManyDocs(db *mongo.Database, collection string, filter bson.M) (delet
 	return
 }
 
+// kalo doc kosong maka tidak error cek len nya saja
 func GetAllDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc T, err error) {
-	ctx := context.Background()
+	ctx := context.TODO()
 	cur, err := db.Collection(collection).Find(ctx, filter)
 	if err != nil {
 		return
