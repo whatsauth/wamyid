@@ -42,7 +42,7 @@ func CekSelfiePulang(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *m
 				To:          Pesan.Chat_number,
 				Base64Image: faceinfo.FileHash,
 				Caption:     faceinfo.Error,
-				IsGroup:     true,
+				IsGroup:     Pesan.Is_group,
 			}
 			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dt, Profile.URLAPIImage)
 			if err != nil {
@@ -135,7 +135,7 @@ func CekSelfieMasuk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mo
 				To:          Pesan.Chat_number,
 				Base64Image: faceinfo.FileHash,
 				Caption:     faceinfo.Error,
-				IsGroup:     true,
+				IsGroup:     Pesan.Is_group,
 			}
 			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dt, Profile.URLAPIImage)
 			if err != nil {
