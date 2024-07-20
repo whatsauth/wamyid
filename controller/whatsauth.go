@@ -32,10 +32,10 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 			helper.WriteResponse(respw, http.StatusBadRequest, resp)
 			return
 		} else if msg.Message != "" {
-			_, err = helper.InsertOneDoc(config.Mongoconn, "inbox", msg)
+			/* _, err = helper.InsertOneDoc(config.Mongoconn, "inbox", msg)
 			if err != nil {
 				resp.Response = err.Error()
-			}
+			} */
 			resp, err = helper.WebHook(prof.QRKeyword, waphonenumber, config.WAAPIQRLogin, config.WAAPIMessageText, msg, config.Mongoconn)
 			if err != nil {
 				resp.Response = err.Error()
