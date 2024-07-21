@@ -2,6 +2,7 @@ package mod
 
 import (
 	"github.com/gocroot/mod/daftar"
+	"github.com/gocroot/mod/helpdesk"
 	"github.com/gocroot/mod/idgrup"
 	"github.com/gocroot/mod/kyc"
 	"github.com/gocroot/mod/lmsdesa"
@@ -17,6 +18,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	switch Modulename {
 	case "idgrup":
 		reply = idgrup.IDGroup(Pesan)
+	case "helpdesk":
+		reply = helpdesk.PenugasanOperator(Pesan)
 	case "presensi-masuk":
 		reply = presensi.PresensiMasuk(Pesan, db)
 	case "presensi-pulang":
