@@ -30,7 +30,7 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "upload-lmsdesa-gambar":
 		reply = lmsdesa.ArsipGambar(Pesan, db)
 	case "lms":
-		reply = lms.ReplyRekapUsers(db)
+		reply = lms.ReplyRekapUsers(Profile, Pesan, db)
 	case "cek-ktp":
 		reply = kyc.CekKTP(Profile, Pesan, db)
 	case "selfie-masuk":

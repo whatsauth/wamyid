@@ -7,11 +7,22 @@ import (
 
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
+	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func ReplyRekapUsers(db *mongo.Database) (msg string) {
+func ReplyRekapUsers(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (msg string) {
+	//kasih pesan dulu biar nunggu
+	msgstr := "Hai kak " + Pesan.Alias_name + " permintaannya sedang di proses nih. mohon tunggu sekitar 3 menit ya kak."
+	dt := &itmodel.TextMessage{
+		To:       Pesan.Chat_number,
+		IsGroup:  Pesan.Is_group,
+		Messages: msgstr,
+	}
+	go atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dt, Profile.URLAPIText)
+
+	//lanjutkan rekap
 	rkp, err := GetRekapPendaftaranUsers(db)
 	if err != nil {
 		msg = "Gagal mendapatkan rekap pendaftaran user:" + err.Error()
