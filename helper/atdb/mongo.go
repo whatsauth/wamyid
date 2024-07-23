@@ -75,6 +75,19 @@ func GetRandomDoc[T any](db *mongo.Database, collection string, size uint) (resu
 	return
 }
 
+func GetCountDoc(db *mongo.Database, collection string, filter bson.M) (count int64, err error) {
+	count, err = db.Collection(collection).CountDocuments(context.TODO(), filter)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// Fungsi untuk menghapus koleksi lmsusers
+func DropCollection(db *mongo.Database, collection string) error {
+	return db.Collection(collection).Drop(context.TODO())
+}
+
 func DeleteManyDocs(db *mongo.Database, collection string, filter bson.M) (deleteresult *mongo.DeleteResult, err error) {
 	deleteresult, err = db.Collection(collection).DeleteMany(context.Background(), filter)
 	return
@@ -127,6 +140,21 @@ func InsertOneDoc(db *mongo.Database, collection string, doc interface{}) (inser
 		return
 	}
 	return insertResult.InsertedID, nil
+}
+
+// Fungsi untuk menyisipkan banyak dokumen ke dalam koleksi: insertedIDs, err := InsertManyDocs(db, collection, docs)
+func InsertManyDocs[T any](db *mongo.Database, collection string, docs []T) (insertedIDs []interface{}, err error) {
+	// Konversi []T ke []interface{}
+	interfaceDocs := make([]interface{}, len(docs))
+	for i, v := range docs {
+		interfaceDocs[i] = v
+	}
+
+	insertResult, err := db.Collection(collection).InsertMany(context.TODO(), interfaceDocs)
+	if err != nil {
+		return nil, err
+	}
+	return insertResult.InsertedIDs, nil
 }
 
 // With replaceOne() you can only replace the entire document,

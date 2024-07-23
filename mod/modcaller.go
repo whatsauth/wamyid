@@ -5,6 +5,7 @@ import (
 	"github.com/gocroot/mod/helpdesk"
 	"github.com/gocroot/mod/idgrup"
 	"github.com/gocroot/mod/kyc"
+	"github.com/gocroot/mod/lms"
 	"github.com/gocroot/mod/lmsdesa"
 	"github.com/gocroot/mod/posint"
 	"github.com/gocroot/mod/presensi"
@@ -28,6 +29,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = lmsdesa.ArsipFile(Pesan, db)
 	case "upload-lmsdesa-gambar":
 		reply = lmsdesa.ArsipGambar(Pesan, db)
+	case "lms":
+		reply = lms.ReplyRekapUsers(db)
 	case "cek-ktp":
 		reply = kyc.CekKTP(Profile, Pesan, db)
 	case "selfie-masuk":
