@@ -244,8 +244,16 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error response status code: %d\n", resp.StatusCode)
-		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
+		var errorResponse map[string]string
+		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		switch resp.StatusCode {
+		case http.StatusNotFound:
+			return "Token tidak ditemukan! Silahkan Login Kembali"
+		case http.StatusForbidden:
+			return "Gagal, Bimbingan telah disetujui!"
+		default:
+			return fmt.Sprintf("Gagal approve bimbingan, status code: %d, error: %s", resp.StatusCode, errorResponse["error"])
+		}
 	}
 
 	var responseMap map[string]string
@@ -307,8 +315,16 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error response status code: %d\n", resp.StatusCode)
-		return fmt.Sprintf("Gagal approve bimbingan, status code: %d", resp.StatusCode)
+		var errorResponse map[string]string
+		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		switch resp.StatusCode {
+		case http.StatusNotFound:
+			return "Token tidak ditemukan! Silahkan Login Kembali"
+		case http.StatusForbidden:
+			return "Gagal, Bimbingan telah disetujui!"
+		default:
+			return fmt.Sprintf("Gagal approve bimbingan, status code: %d, error: %s", resp.StatusCode, errorResponse["error"])
+		}
 	}
 
 	var responseMap map[string]string
