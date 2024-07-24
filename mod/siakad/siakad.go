@@ -248,7 +248,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
 		switch resp.StatusCode {
 		case http.StatusNotFound:
-			return "Token tidak ditemukan! Silahkan Login Kembali"
+			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa"
 		case http.StatusForbidden:
 			return "Gagal, Bimbingan telah disetujui!"
 		default:
@@ -319,7 +319,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
 		switch resp.StatusCode {
 		case http.StatusNotFound:
-			return "Token tidak ditemukan! Silahkan Login Kembali"
+			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa"
 		case http.StatusForbidden:
 			return "Gagal, Bimbingan telah disetujui!"
 		default:
