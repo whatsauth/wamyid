@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
@@ -121,7 +122,7 @@ func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 }
 
 // handling non key word
-func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string, err error) {
+func PenugasanOperator(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string, err error) {
 	user, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"phonenumbers": Pesan.Phone_number})
 	if err != nil {
 		return
@@ -138,6 +139,14 @@ func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply s
 		if err != nil {
 			return
 		}
+		msgstr := "User " + user.Name + " (" + user.Phonenumbers + ")\nMeminta tolong kakak untuk mencarikan solusi dari masalahnya:\n" + user.Masalah + "\nSilahkan langsung kontak di nomor wa.me/" + user.Phonenumbers
+		msgstr += "\n\nJika sudah teratasi mohon inputkan solusi yang sudah di berikan ke user melalui link berikut:\nwa.me/62895601060000?text=solusidarioperatorhelpdesk:"
+		dt := &itmodel.TextMessage{
+			To:       op.Phonenumbers,
+			IsGroup:  false,
+			Messages: msgstr,
+		}
+		go atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dt, Profile.URLAPIText)
 		reply = "Kakak kami hubungkan dengan operator kami yang bernama *" + op.Name + "* di nomor wa.me/" + op.Phonenumbers + "\nMohon tunggu sebentar kami akan kontak kakak melalui nomor tersebut.\n_Terima kasih_"
 
 	}

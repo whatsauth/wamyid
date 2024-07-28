@@ -19,5 +19,6 @@ type User struct {
 	Terlayani    bool               `json:"terlayani,omitempty" bson:"terlayani,omitempty"`
 	Masalah      string             `json:"masalah,omitempty" bson:"masalah,omitempty"`
 	Solusi       string             `json:"solusi,omitempty" bson:"solusi,omitempty"`
+	RateLayanan  int                `json:"ratelayanan,omitempty" bson:"ratelayanan,omitempty"`
 	Operator     Helpdesk           `json:"operator,omitempty" bson:"operator,omitempty"`
 }
