@@ -20,7 +20,7 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "idgrup":
 		reply = idgrup.IDGroup(Pesan)
 	case "helpdesk":
-		reply = helpdesk.PenugasanOperator(Pesan, db)
+		reply = helpdesk.StartHelpdesk(Pesan, db)
 	case "presensi-masuk":
 		reply = presensi.PresensiMasuk(Pesan, db)
 	case "presensi-pulang":

@@ -51,6 +51,7 @@ func GetQnAfromSliceWithJaro(q string, qnas []Datasets) (dt Datasets) {
 
 }
 
+// balasan jika tidak ditemukan key word
 func GetMessage(msg itmodel.IteungMessage, botname string, db *mongo.Database) string {
 	dt, err := QueriesDataRegexpALL(db, msg.Message)
 	if err != nil {

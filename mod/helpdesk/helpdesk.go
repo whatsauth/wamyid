@@ -77,7 +77,8 @@ func GetOperatorFromScopeandTeam(Pesan itmodel.IteungMessage, scope, team string
 	return
 }
 
-func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+// handling key word
+func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	namateam, helpdeskslist, err := GetNamaTeamFromPesan(Pesan, db)
 	if err != nil {
 		return err.Error()
@@ -120,4 +121,11 @@ func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply s
 	reply = "Silahkan kak " + Pesan.Alias_name + " mengetik pertanyaan atau bantuan yang ingin dijawab oleh operator: "
 
 	return
+}
+
+// handling non key word
+func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string, err error) {
+	atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"phonenumbers": Pesan.Phone_number})
+	return
+
 }
