@@ -75,12 +75,21 @@ func QueriesDataRegexpALL(db *mongo.Database, queries string) (dest Datasets, er
 		return
 	}
 
-	words := strings.Fields(queries) // Tokenization
+	wordsdepan := strings.Fields(queries) // Tokenization
+	wordsbelakang := wordsdepan
 	//pencarian dengan pengurangan kata dari belakang
-	for len(words) > 0 {
-		// Join remaining elements back into a string
-		remainingMessage := strings.Join(words, " ")
-		filter := bson.M{"question": primitive.Regex{Pattern: remainingMessage, Options: "i"}}
+	for len(wordsdepan) > 0 || len(wordsbelakang) > 0 {
+		// Join remaining elements back into a string for wordsdepan
+		filter := bson.M{"question": primitive.Regex{Pattern: strings.Join(wordsdepan, " "), Options: "i"}}
+		qnas, err = atdb.GetAllDoc[[]Datasets](db, "qna", filter)
+		if err != nil {
+			return
+		} else if len(qnas) > 0 {
+			dest = GetQnAfromSliceWithJaro(queries, qnas)
+			return
+		}
+		// Join remaining elements back into a string for wordsbelakang
+		filter = bson.M{"question": primitive.Regex{Pattern: strings.Join(wordsbelakang, " "), Options: "i"}}
 		qnas, err = atdb.GetAllDoc[[]Datasets](db, "qna", filter)
 		if err != nil {
 			return
@@ -89,25 +98,9 @@ func QueriesDataRegexpALL(db *mongo.Database, queries string) (dest Datasets, er
 			return
 		}
 		// Remove the last element
-		words = words[:len(words)-1]
-	}
-	// Reset words untuk pencarian dengan pengurangan kata dari depan
-	words = strings.Fields(queries)
-
-	// Pencarian dengan pengurangan kata dari depan
-	for len(words) > 0 {
-		// Gabungkan elemen yang tersisa menjadi satu string
-		remainingMessage := strings.Join(words, " ")
-		filter := bson.M{"question": primitive.Regex{Pattern: remainingMessage, Options: "i"}}
-		qnas, err = atdb.GetAllDoc[[]Datasets](db, "qna", filter)
-		if err != nil {
-			return
-		} else if len(qnas) > 0 {
-			dest = GetQnAfromSliceWithJaro(queries, qnas)
-			return
-		}
-		// Hapus elemen pertama
-		words = words[1:]
+		wordsdepan = wordsdepan[:len(wordsdepan)-1]
+		// remove element pertama
+		wordsbelakang = wordsbelakang[1:]
 	}
 
 	return
