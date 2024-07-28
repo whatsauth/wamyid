@@ -8,6 +8,7 @@ import (
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -125,14 +126,20 @@ func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 func EndHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	msgs := strings.Split(Pesan.Message, "|")
 	id := msgs[0]
-	helpdeskuser, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"_id": id, "operator.phonenumbers": Pesan.Phone_number})
+	// Mengonversi id string ke primitive.ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		reply = "Invalid ID format: " + err.Error()
+		return
+	}
+	helpdeskuser, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"_id": objectID, "operator.phonenumbers": Pesan.Phone_number})
 	if err != nil {
 		reply = err.Error()
 		return
 	}
 	helpdeskuser.Solusi = strings.Split(msgs[1], ":")[1]
 	helpdeskuser.Terlayani = true
-	_, err = atdb.ReplaceOneDoc(db, "helpdeskuser", bson.M{"_id": id}, helpdeskuser)
+	_, err = atdb.ReplaceOneDoc(db, "helpdeskuser", bson.M{"_id": objectID}, helpdeskuser)
 	if err != nil {
 		reply = err.Error()
 		return
@@ -167,7 +174,13 @@ func EndHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo
 func FeedbackHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	msgs := strings.Split(Pesan.Message, "|")
 	id := msgs[0]
-	helpdeskuser, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"_id": id, "phonenumbers": Pesan.Phone_number})
+	// Mengonversi id string ke primitive.ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		reply = "Invalid ID format: " + err.Error()
+		return
+	}
+	helpdeskuser, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"_id": objectID, "phonenumbers": Pesan.Phone_number})
 	if err != nil {
 		reply = err.Error()
 		return
@@ -180,7 +193,7 @@ func FeedbackHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *
 		return
 	}
 	helpdeskuser.RateLayanan = rt
-	_, err = atdb.ReplaceOneDoc(db, "helpdeskuser", bson.M{"_id": id}, helpdeskuser)
+	_, err = atdb.ReplaceOneDoc(db, "helpdeskuser", bson.M{"_id": objectID}, helpdeskuser)
 	if err != nil {
 		reply = err.Error()
 		return
