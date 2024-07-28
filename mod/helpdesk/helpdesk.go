@@ -91,6 +91,9 @@ func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply s
 	}
 	//suruh pilih scope dari bantuan team
 	scope, scopelist, err := GetScopeFromTeam(Pesan, namateam, db)
+	if err != nil {
+		return err.Error()
+	}
 	//pilih scope jika belum
 	if scope == "" {
 		reply = "Silakan memilih jenis bantuan yang anda butuhkan:\n"
