@@ -104,12 +104,12 @@ func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply s
 		return
 	}
 	//menuliskan pertanyaan bantuan
-	user := Helpdesk{
+	user := User{
 		Scope:        scope,
 		Team:         namateam,
 		Name:         Pesan.Alias_name,
 		Phonenumbers: Pesan.Phone_number,
-		Occupied:     false, //false kalo belum dilayani
+		Terlayani:    false, //false kalo belum dilayani
 	}
 	_, err = atdb.InsertOneDoc(db, "helpdeskuser", user)
 	if err != nil {
