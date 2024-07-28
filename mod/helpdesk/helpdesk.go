@@ -112,7 +112,6 @@ func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		Team:         namateam,
 		Name:         Pesan.Alias_name,
 		Phonenumbers: Pesan.Phone_number,
-		Terlayani:    false, //false kalo belum dilayani
 	}
 	_, err = atdb.InsertOneDoc(db, "helpdeskuser", user)
 	if err != nil {
