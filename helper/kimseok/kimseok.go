@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gocroot/helper/atdb"
+	"github.com/gocroot/mod/helpdesk"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -52,12 +53,22 @@ func GetQnAfromSliceWithJaro(q string, qnas []Datasets) (dt Datasets) {
 }
 
 // balasan jika tidak ditemukan key word
-func GetMessage(msg itmodel.IteungMessage, botname string, db *mongo.Database) string {
-	dt, err := QueriesDataRegexpALL(db, msg.Message)
+func GetMessage(Profile itmodel.Profile, msg itmodel.IteungMessage, botname string, db *mongo.Database) string {
+	//check apakah ada permintaan operator masuk
+	reply, err := helpdesk.PenugasanOperator(Profile, msg, db)
 	if err != nil {
 		return err.Error()
 	}
-	return strings.TrimSpace(dt.Answer)
+	//jika tidak ada di db komplain lanjut ke selanjutnya
+	if reply == "" {
+		dt, err := QueriesDataRegexpALL(db, msg.Message)
+		if err != nil {
+			return err.Error()
+		}
+		reply = strings.TrimSpace(dt.Answer)
+
+	}
+	return reply
 }
 
 func QueriesDataRegexpALL(db *mongo.Database, queries string) (dest Datasets, err error) {
