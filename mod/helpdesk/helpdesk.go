@@ -87,7 +87,7 @@ func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		reply = "Silakan memilih helpdesk yang anda tuju:\n"
 		for i, helpdesk := range helpdeskslist {
 			no := strconv.Itoa(i + 1)
-			reply += no + ". " + helpdesk + "\n" + "https://wa.me/62895601060000?text=bantuan+operator+" + helpdesk + "\n"
+			reply += no + ". " + helpdesk + "\n" + "wa.me/62895601060000?text=bantuan+operator+" + helpdesk + "\n"
 		}
 		return
 	}
@@ -101,7 +101,7 @@ func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		reply = "Silakan memilih jenis bantuan yang anda butuhkan dari operator " + namateam + ":\n"
 		for i, scope := range scopelist {
 			no := strconv.Itoa(i + 1)
-			reply += no + ". " + scope + "\n" + "https://wa.me/62895601060000?text=bantuan+operator+" + namateam + "+" + scope + "\n"
+			reply += no + ". " + scope + "\n" + "wa.me/62895601060000?text=bantuan+operator+" + namateam + "+" + scope + "\n"
 		}
 		return
 	}
