@@ -143,7 +143,7 @@ func PenugasanOperator(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db 
 		}
 
 		msgstr := "User " + user.Name + " (" + user.Phonenumbers + ")\nMeminta tolong kakak " + user.Operator.Name + " untuk mencarikan solusi dari masalahnya:\n" + user.Masalah + "\nSilahkan langsung kontak di nomor wa.me/" + user.Phonenumbers
-		msgstr += "\n\nJika sudah teratasi mohon inputkan solusi yang sudah di berikan ke user melalui link berikut:\nwa.me/62895601060000?text=solusidarioperatorhelpdesk:"
+		msgstr += "\n\nJika sudah teratasi mohon inputkan solusi yang sudah di berikan ke user melalui link berikut:\nwa.me/62895601060000?text=solusi+dari+operator+helpdesk+:+"
 		dt := &itmodel.TextMessage{
 			To:       user.Operator.Phonenumbers,
 			IsGroup:  false,
