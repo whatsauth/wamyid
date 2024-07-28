@@ -21,8 +21,9 @@ func GetNamaTeamFromPesan(Pesan itmodel.IteungMessage, db *mongo.Database) (team
 	}
 	//mendapatkan keyword masuk ke team yang mana
 	for _, helpdesk := range helpdesks {
-		team = helpdesk.(string)
-		if strings.Contains(msg, team) {
+		tim := helpdesk.(string)
+		if strings.Contains(msg, tim) {
+			team = tim
 			return
 		}
 		helpdeskslist = append(helpdeskslist, team)
@@ -41,8 +42,9 @@ func GetScopeFromTeam(Pesan itmodel.IteungMessage, team string, db *mongo.Databa
 	}
 	//mendapatkan keyword masuk ke team yang mana
 	for _, scp := range scopes {
-		scope = scp.(string)
-		if strings.Contains(Pesan.Message, scope) {
+		scpe := scp.(string)
+		if strings.Contains(Pesan.Message, scpe) {
+			scope = scpe
 			return
 		}
 		scopeslist = append(scopeslist, scope)
