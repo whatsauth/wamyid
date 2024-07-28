@@ -125,7 +125,7 @@ func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 func EndHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	msgs := strings.Split(Pesan.Message, "|")
 	id := msgs[0]
-	helpdeskuser, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"_id": id})
+	helpdeskuser, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"_id": id, "operator.phonenumbers": Pesan.Phone_number})
 	if err != nil {
 		reply = err.Error()
 		return
