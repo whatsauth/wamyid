@@ -98,10 +98,10 @@ func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply s
 	}
 	//pilih scope jika belum
 	if scope == "" {
-		reply = "Silakan memilih jenis bantuan yang anda butuhkan:\n"
+		reply = "Silakan memilih jenis bantuan yang anda butuhkan dari operator " + namateam + ":\n"
 		for i, scope := range scopelist {
 			no := strconv.Itoa(i + 1)
-			reply += no + ". " + scope + "\n" + "https://wa.me/62895601060000?text=bantuan+operator+" + scope + "\n"
+			reply += no + ". " + scope + "\n" + "https://wa.me/62895601060000?text=bantuan+operator+" + namateam + "+" + scope + "\n"
 		}
 		return
 	}
