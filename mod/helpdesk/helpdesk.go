@@ -148,7 +148,7 @@ func EndHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo
 	op.JumlahAntrian -= 1
 	filter := bson.M{
 		"scope":        op.Scope,
-		"team":         op.Name,
+		"team":         op.Team,
 		"phonenumbers": op.Phonenumbers,
 	}
 	_, err = atdb.ReplaceOneDoc(db, "helpdesk", filter, op)
