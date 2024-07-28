@@ -53,22 +53,20 @@ func GetScopeFromTeam(Pesan itmodel.IteungMessage, team string, db *mongo.Databa
 }
 
 // mendapatkan scope helpdesk dari pesan
-func GetOperatorFromScopeandTeam(Pesan itmodel.IteungMessage, scope, team string, db *mongo.Database) (operator Helpdesk, err error) {
+func GetOperatorFromScopeandTeam(scope, team string, db *mongo.Database) (operator Helpdesk, err error) {
 	filter := bson.M{
-		"scope":    scope,
-		"team":     team,
-		"occupied": false,
+		"scope": scope,
+		"team":  team,
 	}
-	operator, err = atdb.GetOneDoc[Helpdesk](db, "helpdesk", filter)
+	operator, err = atdb.GetOneLowestDoc[Helpdesk](db, "helpdesk", filter, "jumlahantrian")
 	if err != nil {
 		return
 	}
-	operator.Occupied = true
+	operator.JumlahAntrian += 1
 	filter = bson.M{
 		"scope":        scope,
 		"team":         team,
 		"phonenumbers": operator.Phonenumbers,
-		"occupied":     false,
 	}
 	_, err = atdb.ReplaceOneDoc(db, "helpdesk", filter, operator)
 	if err != nil {
@@ -124,7 +122,25 @@ func StartHelpdesk(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 
 // handling non key word
 func PenugasanOperator(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string, err error) {
-	atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"phonenumbers": Pesan.Phone_number})
+	user, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"phonenumbers": Pesan.Phone_number})
+	if err != nil {
+		return
+	}
+	if !user.Terlayani {
+		user.Masalah += "\n" + Pesan.Message
+		var op Helpdesk
+		op, err = GetOperatorFromScopeandTeam(user.Scope, user.Team, db)
+		if err != nil {
+			return
+		}
+		user.Operator = op
+		_, err = atdb.ReplaceOneDoc(db, "helpdeskuser", bson.M{"_id": user.ID}, user)
+		if err != nil {
+			return
+		}
+		reply = "Kakak kami hubungkan dengan operator kami yang bernama *" + op.Name + "* di nomor wa.me/" + op.Phonenumbers + "\nMohon tunggu sebentar kami akan kontak kakak melalui nomor tersebut.\n_Terima kasih_"
+
+	}
 	return
 
 }
