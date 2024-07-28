@@ -26,7 +26,7 @@ func GetNamaTeamFromPesan(Pesan itmodel.IteungMessage, db *mongo.Database) (team
 			team = tim
 			return
 		}
-		helpdeskslist = append(helpdeskslist, team)
+		helpdeskslist = append(helpdeskslist, tim)
 	}
 	return
 }
@@ -47,7 +47,7 @@ func GetScopeFromTeam(Pesan itmodel.IteungMessage, team string, db *mongo.Databa
 			scope = scpe
 			return
 		}
-		scopeslist = append(scopeslist, scope)
+		scopeslist = append(scopeslist, scpe)
 	}
 	return
 }
