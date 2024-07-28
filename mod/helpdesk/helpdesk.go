@@ -129,17 +129,19 @@ func PenugasanOperator(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db 
 	}
 	if !user.Terlayani {
 		user.Masalah += "\n" + Pesan.Message
-		var op Helpdesk
-		op, err = GetOperatorFromScopeandTeam(user.Scope, user.Team, db)
-		if err != nil {
-			return
+		if user.Operator.Name == "" || user.Operator.Phonenumbers == "" {
+			var op Helpdesk
+			op, err = GetOperatorFromScopeandTeam(user.Scope, user.Team, db)
+			if err != nil {
+				return
+			}
+			user.Operator = op
+			_, err = atdb.ReplaceOneDoc(db, "helpdeskuser", bson.M{"_id": user.ID}, user)
+			if err != nil {
+				return
+			}
 		}
-		user.Operator = op
-		_, err = atdb.ReplaceOneDoc(db, "helpdeskuser", bson.M{"_id": user.ID}, user)
-		if err != nil {
-			return
-		}
-		msgstr := "User " + user.Name + " (" + user.Phonenumbers + ")\nMeminta tolong kakak untuk mencarikan solusi dari masalahnya:\n" + user.Masalah + "\nSilahkan langsung kontak di nomor wa.me/" + user.Phonenumbers
+		msgstr := "User " + user.Name + " (" + user.Phonenumbers + ")\nMeminta tolong kakak " + user.Operator.Name + " untuk mencarikan solusi dari masalahnya:\n" + user.Masalah + "\nSilahkan langsung kontak di nomor wa.me/" + user.Phonenumbers
 		msgstr += "\n\nJika sudah teratasi mohon inputkan solusi yang sudah di berikan ke user melalui link berikut:\nwa.me/62895601060000?text=solusidarioperatorhelpdesk:"
 		dt := &itmodel.TextMessage{
 			To:       op.Phonenumbers,
@@ -147,7 +149,7 @@ func PenugasanOperator(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db 
 			Messages: msgstr,
 		}
 		go atapi.PostStructWithToken[itmodel.Response]("Token", Profile.Token, dt, Profile.URLAPIText)
-		reply = "Kakak kami hubungkan dengan operator kami yang bernama *" + op.Name + "* di nomor wa.me/" + op.Phonenumbers + "\nMohon tunggu sebentar kami akan kontak kakak melalui nomor tersebut.\n_Terima kasih_"
+		reply = "Kakak kami hubungkan dengan operator kami yang bernama *" + user.Operator.Name + "* di nomor wa.me/" + user.Operator.Phonenumbers + "\nMohon tunggu sebentar kami akan kontak kakak melalui nomor tersebut.\n_Terima kasih_"
 
 	}
 	return
