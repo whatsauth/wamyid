@@ -217,6 +217,11 @@ func FeedbackHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *
 func PenugasanOperator(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string, err error) {
 	user, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"phonenumbers": Pesan.Phone_number})
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			err = nil
+			reply = ""
+			return
+		}
 		err = errors.New("galat di collection helpdeskuser: " + err.Error())
 		return
 	}

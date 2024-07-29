@@ -125,6 +125,7 @@ func GetOneDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc
 	return
 }
 
+// jika document tidak di temukan maka akan keluar error : mongo.ErrNoDocuments
 func GetOneLatestDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc T, err error) {
 	opts := options.FindOne().SetSort(bson.M{"$natural": -1})
 	err = db.Collection(collection).FindOne(context.TODO(), filter, opts).Decode(&doc)
