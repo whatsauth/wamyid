@@ -215,14 +215,28 @@ func FeedbackHelpdesk(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *
 
 // handling non key word
 func PenugasanOperator(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string, err error) {
+	//check apakah tiket dari user sudah di tutup atau belum
 	user, err := atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"phonenumbers": Pesan.Phone_number})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			err = nil
-			reply = ""
+			//check apakah dia operator yang belum tutup tiketnya
+			user, err = atdb.GetOneLatestDoc[User](db, "helpdeskuser", bson.M{"terlayani": bson.M{"$exists": false}, "operator.phonenumbers": Pesan.Phone_number})
+			if err != nil {
+				if err == mongo.ErrNoDocuments {
+					err = nil
+					reply = ""
+					return
+				}
+				err = errors.New("galat di collection helpdeskuser operator: " + err.Error())
+				return
+			}
+			//jika ada tiket yang statusnya belum closed
+			reply = "User " + user.Name + " (" + user.Phonenumbers + ")\nMeminta tolong kakak " + user.Operator.Name + " untuk mencarikan solusi dari masalahnya:\n" + user.Masalah + "\nSilahkan langsung kontak di nomor wa.me/" + user.Phonenumbers
+			reply += "\n\nJika sudah teratasi mohon inputkan solusi yang sudah di berikan ke user melalui link berikut:\nwa.me/62895601060000?text=" + user.ID.Hex() + "|+solusi+dari+operator+helpdesk+:+"
 			return
+
 		}
-		err = errors.New("galat di collection helpdeskuser: " + err.Error())
+		err = errors.New("galat di collection helpdeskuser user: " + err.Error())
 		return
 	}
 	if !user.Terlayani {
