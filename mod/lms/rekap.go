@@ -53,7 +53,7 @@ func GetRekapPendaftaranUsers(db *mongo.Database) (rkp RekapitulasiUser, err err
 	if err != nil {
 		return
 	}
-	count5, err := atdb.GetCountDoc(db, "lmsusers", bson.M{"roles": "User"})
+	count5, err := atdb.GetCountDoc(db, "lmsusers", bson.M{"roles": "Sebagai Pengguna LMS"})
 	if err != nil {
 		return
 	}
