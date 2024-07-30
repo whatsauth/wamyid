@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/cookiejar"
-	"regexp"
+	"strings"
 
 	"github.com/gocroot/helper/atdb"
 	"go.mongodb.org/mongo-driver/bson"
@@ -68,8 +68,10 @@ func GetNewCookie(xsrfToken string, laravelSession string, db *mongo.Database) (
 	}
 	content := string(respBody)
 	// Regex untuk mencari token
-	re := regexp.MustCompile(`eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+`)
-	bearer := re.FindString(content)
+	splits := strings.Split(content, "Bearer ")
+	bearerxx := splits[1]
+	bearerxx = strings.Split(bearerxx, ",")[0]
+	bearer := strings.Replace(bearerxx, "\"", "", 1)
 
 	// Menangkap set cookies dari response header
 	var newXSRFToken, newLaravelSession string
