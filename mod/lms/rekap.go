@@ -23,7 +23,7 @@ func GetRekapPendaftaranUsers(db *mongo.Database) (rkp RekapitulasiUser, err err
 	//hitung setiap kelompok status user
 	filter := bson.M{
 		"profileapproved": 1,
-		"roles":           "User",
+		"roles":           "Sebagai Pengguna LMS",
 	}
 	count1, err := atdb.GetCountDoc(db, "lmsusers", filter)
 	if err != nil {
