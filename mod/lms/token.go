@@ -70,8 +70,7 @@ func GetNewCookie(xsrfToken string, laravelSession string, db *mongo.Database) (
 	// Regex untuk mencari token
 	splits := strings.Split(content, "Bearer ")
 	bearerxx := splits[1]
-	bearerxx = strings.Split(bearerxx, ",")[0]
-	bearer := strings.Replace(bearerxx, "\"", "", 1)
+	bearer := strings.Split(bearerxx, ",")[0]
 
 	// Menangkap set cookies dari response header
 	var newXSRFToken, newLaravelSession string
