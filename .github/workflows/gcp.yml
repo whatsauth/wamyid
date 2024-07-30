@@ -33,6 +33,7 @@ jobs:
             --gen2 \
             --runtime=go122 \
             --trigger-http \
+            --timeout=540s \
             --set-env-vars=MONGOSTRING='${{ secrets.MONGOSTRING }}'
       - name: 'Cek eksistensi fungsi'
         run: 'gcloud functions describe wamyid --region=asia-southeast1'
