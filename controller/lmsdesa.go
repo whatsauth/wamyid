@@ -20,12 +20,18 @@ func GetNewTokenLMSDesa(respw http.ResponseWriter, req *http.Request) {
 		helper.WriteResponse(respw, httpstatus, resp)
 		return
 	}
-	newxsrf, newlses, newbear, err := lms.GetNewCookie(profile.Xsrf, profile.Lsession, config.Mongoconn)
+	profile.Xsrf, profile.Lsession, profile.Bearer, err = lms.GetNewCookie(profile.Xsrf, profile.Lsession, config.Mongoconn)
 	if err != nil {
 		resp.Response = err.Error()
 		helper.WriteResponse(respw, httpstatus, resp)
 		return
 	}
-	resp.Info = newxsrf + "|" + newlses + "|" + newbear
-	helper.WriteResponse(respw, httpstatus, resp)
+	_, err = atdb.ReplaceOneDoc(config.Mongoconn, "lmscreds", bson.M{"user": profile.Username}, profile)
+	if err != nil {
+		resp.Response = err.Error()
+		helper.WriteResponse(respw, httpstatus, resp)
+		return
+	}
+	resp.Info = "ok"
+	helper.WriteResponse(respw, http.StatusOK, resp)
 }
