@@ -1,6 +1,7 @@
 package lms
 
 import (
+	"compress/gzip"
 	"fmt"
 	"io"
 	"net/http"
@@ -62,7 +63,20 @@ func GetNewCookie(xsrfToken string, laravelSession string, db *mongo.Database) (
 	defer resp.Body.Close()
 
 	// Membaca response body
-	respBody, err := io.ReadAll(resp.Body)
+
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+
+	respBody, err := io.ReadAll(reader)
 	if err != nil {
 		return "", "", "", fmt.Errorf("error reading response body: %w", err)
 	}
