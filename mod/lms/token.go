@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/cookiejar"
-	"strconv"
 	"strings"
 
 	"github.com/gocroot/helper/atdb"
@@ -82,13 +81,9 @@ func GetNewCookie(xsrfToken string, laravelSession string, db *mongo.Database) (
 		return "", "", "", fmt.Errorf("error reading response body: %w", err)
 	}
 	content := string(respBody)
-	//mendekode Unicode escape sequences
-	decodedStr, err := strconv.Unquote(`"` + content + `"`)
-	if err != nil {
-		return "", "", "", fmt.Errorf("error Unquote response body: %w", err)
-	}
+
 	// Regex untuk mencari token
-	splits := strings.Split(decodedStr, "Bearer ")
+	splits := strings.Split(content, "Bearer ")
 	bearerxx := splits[1]
 	bearer := strings.Split(bearerxx, ",")[0]
 	bearer = strings.Replace(bearer, "\"", "", 1)
