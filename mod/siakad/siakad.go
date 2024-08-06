@@ -104,7 +104,7 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 func extractClassAndPeriod(message string) (string, string) {
 	// Function to extract class and period from the message
 	var kelas, periode string
-	fmt.Sscanf(message, "minta bap kelas %s periode %s", &kelas, &periode)
+	fmt.Sscanf(message, "minta bap periode %s", &periode)
 	return kelas, periode
 }
 
