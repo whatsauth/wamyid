@@ -138,7 +138,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 
 	// Create and send the HTTP request
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 540 * time.Second}
 	req, err := http.NewRequest("POST", conf.BapURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return "Gagal membuat request: " + err.Error()
@@ -153,7 +153,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Sprintf("Gagal mendapatkan BAP, status code: %d", resp.StatusCode)
+		return "Gagal mendapatkan BAP, kamu bukan dosen."
 	}
 
 	var responseMap []map[string]string
