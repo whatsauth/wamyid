@@ -101,17 +101,18 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 	return "Hai kak, " + message.Alias_name + "\nBerhasil login dengan email:" + email
 }
 
-func extractClassAndPeriod(message string) (string, string) {
+func extractPeriod(message string) string {
 	// Function to extract class and period from the message
-	var kelas, periode string
+	var periode string
 	fmt.Sscanf(message, "minta bap periode %s", &periode)
-	return kelas, periode
+	return periode
 }
 
+// MintaBAP processes the request for BAP
 func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
-	kelas, periode := extractClassAndPeriod(message.Message)
-	if kelas == "" || periode == "" {
+	periode := extractPeriod(message.Message)
+	if periode == "" {
 		return "Pesan tidak sesuai format. Gunakan format 'minta bap periode [periode]'"
 	}
 
@@ -125,7 +126,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
-		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
 	// Prepare the request body
@@ -162,10 +163,12 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 
 	// Format the response message
-	responseMessage := "Berikut adalah BAP Bapak/ibu:\n"
+	responseMessage := "Berikut adalah BAP Bapak/Ibu:\n"
 	for _, item := range responseMap {
-		if item["kelas"] == kelas {
-			responseMessage += fmt.Sprintf("Kelas %s: %s\n", item["kelas"], item["url"])
+		k := item["kelas"]
+		u := item["url"]
+		if k != "" && u != "" {
+			responseMessage += fmt.Sprintf("Kelas %s: %s\n", k, u)
 		}
 	}
 
