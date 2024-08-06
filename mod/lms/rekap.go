@@ -23,7 +23,7 @@ func GetRekapPendaftaranUsers(db *mongo.Database) (rkp RekapitulasiUser, err err
 	//hitung setiap kelompok status user
 	filter := bson.M{
 		"profileapproved": 1,
-		"roles":           "User",
+		"roles":           "Sebagai Pengguna LMS",
 	}
 	count1, err := atdb.GetCountDoc(db, "lmsusers", filter)
 	if err != nil {
@@ -31,7 +31,7 @@ func GetRekapPendaftaranUsers(db *mongo.Database) (rkp RekapitulasiUser, err err
 	}
 	filter = bson.M{
 		"profileapproved": 2,
-		"roles":           "User",
+		"roles":           "Sebagai Pengguna LMS",
 	}
 	count2, err := atdb.GetCountDoc(db, "lmsusers", filter)
 	if err != nil {
@@ -39,7 +39,7 @@ func GetRekapPendaftaranUsers(db *mongo.Database) (rkp RekapitulasiUser, err err
 	}
 	filter = bson.M{
 		"profileapproved": 3,
-		"roles":           "User",
+		"roles":           "Sebagai Pengguna LMS",
 	}
 	count3, err := atdb.GetCountDoc(db, "lmsusers", filter)
 	if err != nil {
@@ -47,13 +47,13 @@ func GetRekapPendaftaranUsers(db *mongo.Database) (rkp RekapitulasiUser, err err
 	}
 	filter = bson.M{
 		"profileapproved": 4,
-		"roles":           "User",
+		"roles":           "Sebagai Pengguna LMS",
 	}
 	count4, err := atdb.GetCountDoc(db, "lmsusers", filter)
 	if err != nil {
 		return
 	}
-	count5, err := atdb.GetCountDoc(db, "lmsusers", bson.M{"roles": "User"})
+	count5, err := atdb.GetCountDoc(db, "lmsusers", bson.M{"roles": "Sebagai Pengguna LMS"})
 	if err != nil {
 		return
 	}

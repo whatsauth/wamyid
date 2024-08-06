@@ -19,8 +19,12 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	switch Modulename {
 	case "idgrup":
 		reply = idgrup.IDGroup(Pesan)
+	case "feedbackhelpdesk":
+		reply = helpdesk.FeedbackHelpdesk(Profile, Pesan, db)
+	case "endhelpdesk":
+		reply = helpdesk.EndHelpdesk(Profile, Pesan, db)
 	case "helpdesk":
-		reply = helpdesk.PenugasanOperator(Pesan)
+		reply = helpdesk.StartHelpdesk(Pesan, db)
 	case "presensi-masuk":
 		reply = presensi.PresensiMasuk(Pesan, db)
 	case "presensi-pulang":

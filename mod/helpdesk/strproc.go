@@ -9,15 +9,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetHelpdeskName(WAPhoneNumber string, im itmodel.IteungMessage, MongoConn *mongo.Database, ModuleCollection string) (modulename string, group bool, personal bool) {
-	modules, _ := atdb.GetAllDoc[[]Helpdesk](MongoConn, ModuleCollection, bson.M{"phonenumbers": WAPhoneNumber})
-	for _, mod := range modules {
-		complete, _ := IsMatch(strings.ToLower(im.Message), mod.Keyword...)
-		if complete {
-			modulename = mod.Name
-			group = mod.Group
-			personal = mod.Personal
-		}
+func GetHelpdeskName(WAPhoneNumber string, im itmodel.IteungMessage, MongoConn *mongo.Database, ModuleCollection string) (helpdesk Helpdesk, err error) {
+	helpdesk, err = atdb.GetOneDoc[Helpdesk](MongoConn, ModuleCollection, bson.M{"occupied": false})
+	if err != nil {
+		return
 	}
 	return
 }

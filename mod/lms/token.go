@@ -1,11 +1,12 @@
 package lms
 
 import (
+	"compress/gzip"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
-	"regexp"
+	"strings"
 
 	"github.com/gocroot/helper/atdb"
 	"go.mongodb.org/mongo-driver/bson"
@@ -62,14 +63,30 @@ func GetNewCookie(xsrfToken string, laravelSession string, db *mongo.Database) (
 	defer resp.Body.Close()
 
 	// Membaca response body
-	respBody, err := io.ReadAll(resp.Body)
+
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+
+	respBody, err := io.ReadAll(reader)
 	if err != nil {
 		return "", "", "", fmt.Errorf("error reading response body: %w", err)
 	}
 	content := string(respBody)
+
 	// Regex untuk mencari token
-	re := regexp.MustCompile(`eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+`)
-	bearer := re.FindString(content)
+	splits := strings.Split(content, "Bearer ")
+	bearerxx := splits[1]
+	bearer := strings.Split(bearerxx, ",")[0]
+	bearer = strings.Replace(bearer, "\"", "", 1)
 
 	// Menangkap set cookies dari response header
 	var newXSRFToken, newLaravelSession string

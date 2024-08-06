@@ -18,6 +18,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case method == "GET" && path == "/":
 		controller.GetHome(w, r)
+	case method == "GET" && path == "/refresh/token/lmsdesa":
+		controller.GetNewTokenLMSDesa(w, r)
 	case method == "GET" && path == "/refresh/token":
 		controller.GetNewToken(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/nomor/:nomorwa"):

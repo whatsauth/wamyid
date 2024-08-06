@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gocroot/helper/atdb"
+	"github.com/gocroot/mod/helpdesk"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -51,12 +52,23 @@ func GetQnAfromSliceWithJaro(q string, qnas []Datasets) (dt Datasets) {
 
 }
 
-func GetMessage(msg itmodel.IteungMessage, botname string, db *mongo.Database) string {
-	dt, err := QueriesDataRegexpALL(db, msg.Message)
+// balasan jika tidak ditemukan key word
+func GetMessage(Profile itmodel.Profile, msg itmodel.IteungMessage, botname string, db *mongo.Database) string {
+	//check apakah ada permintaan operator masuk
+	reply, err := helpdesk.PenugasanOperator(Profile, msg, db)
 	if err != nil {
 		return err.Error()
 	}
-	return strings.TrimSpace(dt.Answer)
+	//jika tidak ada di db komplain lanjut ke selanjutnya
+	if reply == "" {
+		dt, err := QueriesDataRegexpALL(db, msg.Message)
+		if err != nil {
+			return err.Error()
+		}
+		reply = strings.TrimSpace(dt.Answer)
+
+	}
+	return reply
 }
 
 func QueriesDataRegexpALL(db *mongo.Database, queries string) (dest Datasets, err error) {
@@ -75,12 +87,21 @@ func QueriesDataRegexpALL(db *mongo.Database, queries string) (dest Datasets, er
 		return
 	}
 
-	words := strings.Fields(queries) // Tokenization
+	wordsdepan := strings.Fields(queries) // Tokenization
+	wordsbelakang := wordsdepan
 	//pencarian dengan pengurangan kata dari belakang
-	for len(words) > 0 {
-		// Join remaining elements back into a string
-		remainingMessage := strings.Join(words, " ")
-		filter := bson.M{"question": primitive.Regex{Pattern: remainingMessage, Options: "i"}}
+	for len(wordsdepan) > 0 || len(wordsbelakang) > 0 {
+		// Join remaining elements back into a string for wordsdepan
+		filter := bson.M{"question": primitive.Regex{Pattern: strings.Join(wordsdepan, " "), Options: "i"}}
+		qnas, err = atdb.GetAllDoc[[]Datasets](db, "qna", filter)
+		if err != nil {
+			return
+		} else if len(qnas) > 0 {
+			dest = GetQnAfromSliceWithJaro(queries, qnas)
+			return
+		}
+		// Join remaining elements back into a string for wordsbelakang
+		filter = bson.M{"question": primitive.Regex{Pattern: strings.Join(wordsbelakang, " "), Options: "i"}}
 		qnas, err = atdb.GetAllDoc[[]Datasets](db, "qna", filter)
 		if err != nil {
 			return
@@ -89,25 +110,9 @@ func QueriesDataRegexpALL(db *mongo.Database, queries string) (dest Datasets, er
 			return
 		}
 		// Remove the last element
-		words = words[:len(words)-1]
-	}
-	// Reset words untuk pencarian dengan pengurangan kata dari depan
-	words = strings.Fields(queries)
-
-	// Pencarian dengan pengurangan kata dari depan
-	for len(words) > 0 {
-		// Gabungkan elemen yang tersisa menjadi satu string
-		remainingMessage := strings.Join(words, " ")
-		filter := bson.M{"question": primitive.Regex{Pattern: remainingMessage, Options: "i"}}
-		qnas, err = atdb.GetAllDoc[[]Datasets](db, "qna", filter)
-		if err != nil {
-			return
-		} else if len(qnas) > 0 {
-			dest = GetQnAfromSliceWithJaro(queries, qnas)
-			return
-		}
-		// Hapus elemen pertama
-		words = words[1:]
+		wordsdepan = wordsdepan[:len(wordsdepan)-1]
+		// remove element pertama
+		wordsbelakang = wordsbelakang[1:]
 	}
 
 	return
