@@ -112,7 +112,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	kelas, periode := extractClassAndPeriod(message.Message)
 	if kelas == "" || periode == "" {
-		return "Pesan tidak sesuai format. Gunakan format 'minta bap kelas [kelas] periode [periode]'"
+		return "Pesan tidak sesuai format. Gunakan format 'minta bap periode [periode]'"
 	}
 
 	// Get the phone number from the message
