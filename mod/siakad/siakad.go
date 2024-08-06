@@ -131,7 +131,6 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Prepare the request body
 	requestBody, err := json.Marshal(map[string]string{
 		"periode": periode,
-		"kelas":   kelas,
 	})
 	if err != nil {
 		return "Gagal membuat request body: " + err.Error()
@@ -156,13 +155,21 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return fmt.Sprintf("Gagal mendapatkan BAP, status code: %d", resp.StatusCode)
 	}
 
-	var responseMap map[string]string
+	var responseMap []map[string]string
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {
 		return "Gagal memproses response: " + err.Error()
 	}
 
-	return "Berikut adalah URL BAP yang diminta: " + responseMap["url"]
+	// Format the response message
+	responseMessage := "Berikut adalah BAP Bapak/ibu:\n"
+	for _, item := range responseMap {
+		if item["kelas"] == kelas {
+			responseMessage += fmt.Sprintf("Kelas %s: %s\n", item["kelas"], item["url"])
+		}
+	}
+
+	return responseMessage
 }
 
 func extractNimandTopik(message string) (string, string) {
