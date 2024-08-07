@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -19,13 +20,19 @@ import (
 )
 
 func PanduanDosen(message itmodel.IteungMessage) string {
-	// Path file panduan_dosen.txt
-	const filePath = "./mod/siakad/panduan_dosen.txt"
-
-	content, err := ioutil.ReadFile(filePath)
+	// Path absolut file panduan_dosen.txt
+	absPath, err := filepath.Abs("./mod/siakad/panduan_dosen.txt")
 	if err != nil {
-		log.Printf("Error reading file: %v", err)
+		log.Printf("Error getting absolute path: %v", err)
 		return "Maaf, terjadi kesalahan saat mengambil panduan dosen."
+	}
+
+	log.Printf("Path absolut dari file panduan_dosen.txt: %s", absPath)
+
+	content, err := ioutil.ReadFile(absPath)
+	if err != nil {
+		log.Printf("Error reading file %s: %v", absPath, err)
+		return fmt.Sprintf("Maaf, terjadi kesalahan saat mengambil panduan dosen: %v", err)
 	}
 	return string(content)
 }
