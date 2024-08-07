@@ -15,11 +15,12 @@ import (
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func PanduanDosen(message itmodel.IteungMessage) string {
 	// Path file panduan_dosen.txt
-	const filePath = "./siakad/panduan_dosen.txt"
+	const filePath = "../mod/siakad/panduan_dosen.txt"
 
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -112,7 +113,26 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 		return fmt.Sprintf("Gagal login, status code: %d", resp.StatusCode)
 	}
 
-	return "Hai kak, " + message.Alias_name + "\nBerhasil login dengan email:" + email
+	noHp := message.Phone_number
+	if noHp == "" {
+		return "Nomor telepon tidak ditemukan dalam pesan."
+	}
+
+	// Save or update login information to the database
+	loginInfo := bson.M{
+		"$set": bson.M{
+			"nohp":       noHp,
+			"email":      email,
+			"login_time": time.Now(),
+		},
+	}
+	opts := options.Update().SetUpsert(true)
+	_, err = db.Collection("siakad").UpdateOne(context.TODO(), bson.M{"email": email}, loginInfo, opts)
+	if err != nil {
+		return "Berhasil login, tetapi terjadi kesalahan saat menyimpan informasi login: " + err.Error()
+	}
+
+	return "Hai kak, " + message.Alias_name + "\nBerhasil login dengan email: " + email
 }
 
 func ApproveBAP(message itmodel.IteungMessage, db *mongo.Database) string {
@@ -175,6 +195,7 @@ func extractPeriod(message string) string {
 }
 
 // MintaBAP processes the request for BAP
+// MintaBAP processes the request for BAP
 func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	periode := extractPeriod(message.Message)
@@ -217,6 +238,19 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Gagal mengirim request: " + err.Error()
 	}
 	defer resp.Body.Close()
+
+	// Get the email based on noHp from the siakad collection
+	var loginInfo LoginInfo
+	err = db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
+	if err != nil {
+		return "Nomor telepon tidak ditemukan dalam database siakad: " + err.Error()
+	}
+	email := loginInfo.Email
+
+	if resp.StatusCode == http.StatusForbidden {
+		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", email)
+		return fmt.Sprintf("Gagal mendapatkan BAP, kamu bukan dosen. Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return "Gagal mendapatkan BAP, kamu bukan dosen."

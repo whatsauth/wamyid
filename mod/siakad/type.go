@@ -1,5 +1,9 @@
 package siakad
 
+import (
+	"time"
+)
+
 type Config struct {
 	PhoneNumber               string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
 	SiakadLoginURL            string `json:"siakadloginurl,omitempty" bson:"siakadloginurl,omitempty"`
@@ -13,4 +17,10 @@ type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
+}
+
+type LoginInfo struct {
+	NoHp      string    `json:"nohp" bson:"nohp"`
+	Email     string    `json:"email" bson:"email"`
+	LoginTime time.Time `json:"login_time" bson:"login_time"`
 }
