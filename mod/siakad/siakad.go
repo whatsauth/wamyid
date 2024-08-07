@@ -18,7 +18,10 @@ import (
 )
 
 func PanduanDosen(message itmodel.IteungMessage) string {
-	content, err := ioutil.ReadFile("panduan_dosen.txt")
+	// Path file panduan_dosen.txt
+	const filePath = "./siakad/panduan_dosen.txt"
+
+	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Printf("Error reading file: %v", err)
 		return "Maaf, terjadi kesalahan saat mengambil panduan dosen."
