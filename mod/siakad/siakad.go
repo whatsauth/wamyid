@@ -20,7 +20,7 @@ import (
 
 func PanduanDosen(message itmodel.IteungMessage) string {
 	// Path file panduan_dosen.txt
-	const filePath = "../mod/siakad/panduan_dosen.txt"
+	const filePath = "./mod/siakad/panduan_dosen.txt"
 
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -195,7 +195,6 @@ func extractPeriod(message string) string {
 }
 
 // MintaBAP processes the request for BAP
-// MintaBAP processes the request for BAP
 func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	periode := extractPeriod(message.Message)
@@ -243,13 +242,13 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	var loginInfo LoginInfo
 	err = db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan dalam database siakad: " + err.Error()
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
 	}
 	email := loginInfo.Email
 
 	if resp.StatusCode == http.StatusForbidden {
 		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", email)
-		return fmt.Sprintf("Gagal mendapatkan BAP, kamu bukan dosen. Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
+		return fmt.Sprintf("Gagal BAP belum diapprove!. Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
 	}
 
 	if resp.StatusCode != http.StatusOK {
