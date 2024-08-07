@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -14,6 +16,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+func PanduanDosen(message itmodel.IteungMessage) string {
+	content, err := ioutil.ReadFile("panduan_dosen.txt")
+	if err != nil {
+		log.Printf("Error reading file: %v", err)
+		return "Maaf, terjadi kesalahan saat mengambil panduan dosen."
+	}
+	return string(content)
+}
 
 func extractEmail(message string) string {
 	re := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
@@ -142,6 +153,10 @@ func ApproveBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	defer resp.Body.Close()
 
+	// Check the response status code
+	if resp.StatusCode == http.StatusForbidden {
+		return "Kamu bukan Kaprodi ya! Silahkan hubungi kaprodi untuk approve BAP"
+	}
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Sprintf("Gagal approve bap, status code: %d", resp.StatusCode)
 	}

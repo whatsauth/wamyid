@@ -49,6 +49,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = tasklist.TaskListSave(Pesan, db)
 	case "domyikado-user":
 		reply = daftar.DaftarDomyikado(Pesan, db)
+	case "panduan-siakad":
+		reply = siakad.PanduanDosen(Pesan)
 	case "login-siakad":
 		reply = siakad.LoginSiakad(Pesan, db)
 	case "approve-bap":
