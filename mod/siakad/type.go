@@ -4,6 +4,7 @@ type Config struct {
 	PhoneNumber               string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
 	SiakadLoginURL            string `json:"siakadloginurl,omitempty" bson:"siakadloginurl,omitempty"`
 	BapURL                    string `json:"bapurl,omitempty" bson:"bapurl,omitempty"`
+	ApproveBapURL             string `json:"approvebapurl,omitempty" bson:"approvebapurl,omitempty"`
 	ApproveBimbinganURL       string `json:"approvebimbinganurl,omitempty" bson:"approvebimbinganurl,omitempty"`
 	ApproveBimbinganByPoinURL string `json:"approvebimbinganbypoinurl,omitempty" bson:"approvebimbinganbypoinurl,omitempty"`
 }

@@ -51,6 +51,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = daftar.DaftarDomyikado(Pesan, db)
 	case "login-siakad":
 		reply = siakad.LoginSiakad(Pesan, db)
+	case "approve-bap":
+		reply = siakad.ApproveBAP(Pesan, db)
 	case "minta-bap":
 		reply = siakad.MintaBAP(Pesan, db)
 	case "approve-bimbingan":

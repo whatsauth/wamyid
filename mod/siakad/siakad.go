@@ -101,6 +101,54 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 	return "Hai kak, " + message.Alias_name + "\nBerhasil login dengan email:" + email
 }
 
+func ApproveBAP(message itmodel.IteungMessage, db *mongo.Database) string {
+	email := extractEmail(message.Message)
+	if email == "user@email.com" {
+		return "Emailnya di ubah dulu dong kak, jadi emailnya dosen yang ingin diapprove BAP "
+	} else if email == "" {
+		return "Emailnya di sertakan dulu dong kak " + message.Alias_name + " di akhir pesan nya"
+	}
+
+	// Get the phone number from the message
+	noHp := message.Phone_number
+	if noHp == "" {
+		return "Nomor telepon tidak ditemukan dalam pesan."
+	}
+
+	// Get the API URL from the database
+	var conf Config
+	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+	}
+
+	// Prepare the request body
+	requestBody, err := json.Marshal(map[string]string{
+		"email_dosen": email,
+	})
+	if err != nil {
+		return "Gagal membuat request body: " + err.Error()
+	}
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("POST", conf.ApproveBapURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "Gagal membuat request: " + err.Error()
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "Gagal mengirim request: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Sprintf("Gagal approve bap, status code: %d", resp.StatusCode)
+	}
+
+	return "Terima kasih pak, BAP Dosen dengan email " + email + " berhasil di approve, hubungi dosen terkait untuk cetak BAP nya"
+}
+
 func extractPeriod(message string) string {
 	// Function to extract class and period from the message
 	var periode string
