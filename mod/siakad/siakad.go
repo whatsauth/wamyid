@@ -248,7 +248,7 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 
 	if resp.StatusCode == http.StatusForbidden {
 		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", email)
-		return fmt.Sprintf("Gagal BAP belum diapprove!. Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
+		return fmt.Sprintf("Gagal, BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
 	}
 
 	if resp.StatusCode != http.StatusOK {
