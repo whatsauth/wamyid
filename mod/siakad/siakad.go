@@ -176,6 +176,7 @@ func ApproveBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Gagal membuat request: " + err.Error()
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("nohp", noHp)
 
 	resp, err := client.Do(req)
 	if err != nil {
