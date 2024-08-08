@@ -259,6 +259,10 @@ func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return fmt.Sprintf("Gagal, BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return "Gagal mendapatkan BAP, kamu bukan dosen."
 	}
