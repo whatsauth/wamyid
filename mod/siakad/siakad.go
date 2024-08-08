@@ -5,10 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -19,22 +17,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func PanduanDosen(message itmodel.IteungMessage) string {
-	// Path absolut file panduan_dosen.txt
-	absPath, err := filepath.Abs("./mod/siakad/panduan_dosen.txt")
+func PanduanDosen(message itmodel.IteungMessage, db *mongo.Database) string {
+	// Mencari dokumen dalam koleksi panduansiakad dengan filter prompt yang sesuai
+	var prompt Prompt
+	filter := bson.M{"prompt": message.Message}
+	err := db.Collection("panduansiakad").FindOne(context.TODO(), filter).Decode(&prompt)
 	if err != nil {
-		log.Printf("Error getting absolute path: %v", err)
-		return "Maaf, terjadi kesalahan saat mengambil panduan dosen."
-	}
-
-	log.Printf("Path absolut dari file panduan_dosen.txt: %s", absPath)
-
-	content, err := ioutil.ReadFile(absPath)
-	if err != nil {
-		log.Printf("Error reading file %s: %v", absPath, err)
+		log.Printf("Error finding document in MongoDB: %v", err)
 		return fmt.Sprintf("Maaf, terjadi kesalahan saat mengambil panduan dosen: %v", err)
 	}
-	return string(content)
+
+	return prompt.Answer
 }
 
 func extractEmail(message string) string {

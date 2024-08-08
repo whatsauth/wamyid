@@ -50,7 +50,7 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "domyikado-user":
 		reply = daftar.DaftarDomyikado(Pesan, db)
 	case "panduan-siakad":
-		reply = siakad.PanduanDosen(Pesan)
+		reply = siakad.PanduanDosen(Pesan, db)
 	case "login-siakad":
 		reply = siakad.LoginSiakad(Pesan, db)
 	case "approve-bap":

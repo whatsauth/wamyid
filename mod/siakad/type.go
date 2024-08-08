@@ -24,3 +24,8 @@ type LoginInfo struct {
 	Email     string    `json:"email" bson:"email"`
 	LoginTime time.Time `json:"login_time" bson:"login_time"`
 }
+
+type Prompt struct {
+	Prompt string `bson:"prompt"`
+	Answer string `bson:"answer"`
+}
