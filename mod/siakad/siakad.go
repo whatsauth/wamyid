@@ -18,15 +18,20 @@ import (
 )
 
 func PanduanDosen(message itmodel.IteungMessage, db *mongo.Database) string {
-	// Mencari dokumen dalam koleksi panduansiakad dengan filter prompt yang sesuai
+	// Ekstraksi pesan yang diterima dari message
+	pesan := message.Message
+
+	// Buat filter regex untuk mencari dokumen dengan prompt yang mengandung kata kunci
+	filter := bson.M{"prompt": bson.M{"$regex": pesan, "$options": "i"}}
+
 	var prompt Prompt
-	filter := bson.M{"prompt": message.Message}
 	err := db.Collection("panduansiakad").FindOne(context.TODO(), filter).Decode(&prompt)
 	if err != nil {
 		log.Printf("Error finding document in MongoDB: %v", err)
 		return fmt.Sprintf("Maaf, terjadi kesalahan saat mengambil panduan dosen: %v", err)
 	}
 
+	// Mengembalikan jawaban yang sesuai dengan prompt
 	return prompt.Answer
 }
 
