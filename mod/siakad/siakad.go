@@ -27,6 +27,11 @@ func PanduanDosen(message itmodel.IteungMessage, db *mongo.Database) string {
 	var prompt Prompt
 	err := db.Collection("panduansiakad").FindOne(context.TODO(), filter).Decode(&prompt)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// Jika tidak ditemukan dokumen yang cocok, berikan respon berikut
+			return "Keyword salah. Berikut keyword yang benar: myika panduan dosen"
+		}
+		// Jika ada kesalahan lain, tampilkan pesan kesalahan
 		log.Printf("Error finding document in MongoDB: %v", err)
 		return fmt.Sprintf("Maaf, terjadi kesalahan saat mengambil panduan dosen: %v", err)
 	}
