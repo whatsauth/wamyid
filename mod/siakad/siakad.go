@@ -121,7 +121,7 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 
 	// Cek jika status code adalah 500
 	if resp.StatusCode == http.StatusInternalServerError {
-		return "Gagal login, email atau password salah. \n_Jika kamu mengakses Siakad dengan SSO Google, harap cek/ganti password terlebih dahulu dan coba lagi login di domyikado._"
+		return "Gagal login, email atau password salah. \n_Notes : jika kamu mengakses Siakad dengan SSO Google, harap cek/ganti password terlebih dahulu dan coba lagi login di domyikado._"
 	}
 
 	// Respon default untuk status code selain 200 dan 500
