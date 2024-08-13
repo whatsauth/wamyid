@@ -204,19 +204,85 @@ func ApproveBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	return "Terima kasih pak, BAP Dosen dengan email " + email + " berhasil di approve, hubungi dosen terkait untuk cetak BAP nya"
 }
 
+func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
+	// Get the phone number from the message
+	noHp := message.Phone_number
+	if noHp == "" {
+		return "Nomor telepon tidak ditemukan dalam pesan."
+	}
+
+	// Get the API URL from the database
+	var conf Config
+	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+	}
+
+	// Create a new HTTP client with a timeout
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	// Create a new POST request without a body, only setting headers
+	req, err := http.NewRequest("POST", conf.CekApprovalBapURL, nil)
+	if err != nil {
+		return "Gagal membuat request: " + err.Error()
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("nohp", noHp)
+
+	// Send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return "Gagal mengirim request: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Sprintf("Gagal cek approval bap, status code: %d", resp.StatusCode)
+	}
+
+	// Parse the response body to determine the approval status
+	var approvalResponse struct {
+		Status bool `json:"status"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&approvalResponse)
+	if err != nil {
+		return "Gagal memproses respon dari server: " + err.Error()
+	}
+
+	// Check the approval status and return the appropriate message
+	if approvalResponse.Status {
+		return "BAP sudah di Approve! Gunakan format pesan berikut: \n*myika cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
+
+	} else {
+		// Get the email based on noHp from the siakad collection
+		var loginInfo struct {
+			Email string `bson:"email"`
+		}
+		err = db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
+		if err != nil {
+			return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		}
+
+		// Construct the WhatsApp URL with the email
+		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", loginInfo.Email)
+		return fmt.Sprintf("BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
+	}
+}
+
 func extractPeriod(message string) string {
 	// Function to extract class and period from the message
 	var periode string
-	fmt.Sscanf(message, "minta bap periode %s", &periode)
+	fmt.Sscanf(message, "cetak bap periode %s", &periode)
 	return periode
 }
 
-// MintaBAP processes the request for BAP
-func MintaBAP(message itmodel.IteungMessage, db *mongo.Database) string {
+// CetakBAP processes the request for BAP
+func CetakBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	// Extract information from the message
 	periode := extractPeriod(message.Message)
 	if periode == "" {
-		return "Pesan tidak sesuai format. Gunakan format 'minta bap periode [periode]'"
+		return "Pesan tidak sesuai format. Gunakan format 'cetak bap periode [periode]'"
 	}
 
 	// Get the phone number from the message
