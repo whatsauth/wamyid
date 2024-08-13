@@ -236,6 +236,10 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+	}
+
 	// Check the response status code
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Sprintf("Gagal cek approval bap, status code: %d", resp.StatusCode)
