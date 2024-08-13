@@ -205,23 +205,23 @@ func ApproveBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 }
 
 func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
-	// Get the phone number from the message
+	// Ambil nomor telepon dari pesan
 	noHp := message.Phone_number
 	if noHp == "" {
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
-	// Get the API URL from the database
+	// Ambil URL API dari database
 	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
-		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+		return "Wah Bapak/Ibu " + message.Alias_name + ", mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
-	// Create a new HTTP client with a timeout
+	// Buat HTTP client baru dengan timeout
 	client := &http.Client{Timeout: 10 * time.Second}
 
-	// Create a new POST request without a body, only setting headers
+	// Buat POST request tanpa body, hanya header
 	req, err := http.NewRequest("POST", conf.CekApprovalBapURL, nil)
 	if err != nil {
 		return "Gagal membuat request: " + err.Error()
@@ -229,7 +229,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("nohp", noHp)
 
-	// Send the request
+	// Kirim request
 	resp, err := client.Do(req)
 	if err != nil {
 		return "Gagal mengirim request: " + err.Error()
@@ -240,26 +240,25 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
 	}
 
-	// Check the response status code
+	// Periksa status kode dari respon
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Sprintf("Gagal cek approval bap, status code: %d", resp.StatusCode)
+		return fmt.Sprintf("Gagal cek approval BAP, status code: %d", resp.StatusCode)
 	}
 
-	// Parse the response body to determine the approval status
+	// Parse body respon untuk status approval
 	var approvalResponse struct {
-		Status bool `json:"status"`
+		Message string `json:"message"`
 	}
 	err = json.NewDecoder(resp.Body).Decode(&approvalResponse)
 	if err != nil {
 		return "Gagal memproses respon dari server: " + err.Error()
 	}
 
-	// Check the approval status and return the appropriate message
-	if approvalResponse.Status {
+	// Periksa isi pesan approval dan kembalikan pesan yang sesuai
+	if approvalResponse.Message == "BAP sudah di Approve!" {
 		return "BAP sudah di Approve! Gunakan format pesan berikut: \n*cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
-
 	} else {
-		// Get the email based on noHp from the siakad collection
+		// Ambil email berdasarkan noHp dari koleksi siakad
 		var loginInfo struct {
 			Email string `bson:"email"`
 		}
@@ -268,7 +267,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 			return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
 		}
 
-		// Construct the WhatsApp URL with the email
+		// Buat URL WhatsApp dengan email
 		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", loginInfo.Email)
 		return fmt.Sprintf("BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
 	}
