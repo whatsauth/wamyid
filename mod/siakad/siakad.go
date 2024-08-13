@@ -201,7 +201,7 @@ func ApproveBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return fmt.Sprintf("Gagal approve bap, status code: %d", resp.StatusCode)
 	}
 
-	return "Terima kasih pak, BAP Dosen dengan email " + email + " berhasil di approve, hubungi dosen terkait untuk cetak BAP nya"
+	return "Terima kasih pak, BAP Dosen dengan email " + email + " berhasil di approve, hubungi dosen terkait untuk cetak BAP nya di domykado dengan format pesan berikut: \n*cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
 }
 
 func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
@@ -252,7 +252,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 
 	// Check the approval status and return the appropriate message
 	if approvalResponse.Status {
-		return "BAP sudah di Approve! Gunakan format pesan berikut: \n*myika cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
+		return "BAP sudah di Approve! Gunakan format pesan berikut: \n*cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
 
 	} else {
 		// Get the email based on noHp from the siakad collection
