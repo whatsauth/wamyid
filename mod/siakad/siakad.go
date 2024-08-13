@@ -261,17 +261,15 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return fmt.Sprintf("Gagal cek approval BAP, status code: %d", resp.StatusCode)
 	}
 
-	// Parse body respon untuk status approval
-	var approvalResponse struct {
-		Approved bool `json:"approved"`
-	}
-	err = json.NewDecoder(resp.Body).Decode(&approvalResponse)
+	// Parse body respon sebagai string
+	var approvalStatus string
+	err = json.NewDecoder(resp.Body).Decode(&approvalStatus)
 	if err != nil {
 		return "Gagal memproses respon dari server: " + err.Error()
 	}
 
 	// Periksa status approval dan kembalikan pesan yang sesuai
-	if approvalResponse.Approved {
+	if approvalStatus == "true" {
 		return "BAP sudah di Approve! Gunakan format pesan berikut: \n*cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
 	} else {
 		// Buat URL WhatsApp dengan email
