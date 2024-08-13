@@ -23,6 +23,7 @@ type LoginRequest struct {
 type LoginInfo struct {
 	NoHp      string    `json:"nohp" bson:"nohp"`
 	Email     string    `json:"email" bson:"email"`
+	Role      string    `json:"role" bson:"role"`
 	LoginTime time.Time `json:"login_time" bson:"login_time"`
 }
 

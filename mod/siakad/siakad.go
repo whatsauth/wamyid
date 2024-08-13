@@ -139,6 +139,7 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 		"$set": bson.M{
 			"nohp":       noHp,
 			"email":      email,
+			"role":       role,
 			"login_time": time.Now(),
 		},
 	}
@@ -211,9 +212,24 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
+	// Ambil informasi login berdasarkan nomor telepon dari koleksi siakad
+	var loginInfo struct {
+		Email string `bson:"email"`
+		Role  string `bson:"role"`
+	}
+	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
+	if err != nil {
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+	}
+
+	// Cek apakah role pengguna adalah dosen
+	if loginInfo.Role != "dosen" {
+		return "Akses ini hanya tersedia untuk dosen. Mohon maaf jika Anda bukan dosen."
+	}
+
 	// Ambil URL API dari database
 	var conf Config
-	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	err = db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
 		return "Wah Bapak/Ibu " + message.Alias_name + ", mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
@@ -237,7 +253,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		return "Akun tidak ditemukan! Silakan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
 	}
 
 	// Periksa status kode dari respon
@@ -247,26 +263,17 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 
 	// Parse body respon untuk status approval
 	var approvalResponse struct {
-		Message string `json:"message"`
+		Approved bool `json:"approved"`
 	}
 	err = json.NewDecoder(resp.Body).Decode(&approvalResponse)
 	if err != nil {
 		return "Gagal memproses respon dari server: " + err.Error()
 	}
 
-	// Periksa isi pesan approval dan kembalikan pesan yang sesuai
-	if approvalResponse.Message == "BAP sudah di Approve!" {
+	// Periksa status approval dan kembalikan pesan yang sesuai
+	if approvalResponse.Approved {
 		return "BAP sudah di Approve! Gunakan format pesan berikut: \n*cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
 	} else {
-		// Ambil email berdasarkan noHp dari koleksi siakad
-		var loginInfo struct {
-			Email string `bson:"email"`
-		}
-		err = db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
-		if err != nil {
-			return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
-		}
-
 		// Buat URL WhatsApp dengan email
 		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", loginInfo.Email)
 		return fmt.Sprintf("BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
