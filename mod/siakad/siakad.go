@@ -299,11 +299,26 @@ func CetakBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
-	// Get the API URL from the database
-	var conf Config
-	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	// Ambil informasi login berdasarkan nomor telepon dari koleksi siakad
+	var loginInfo struct {
+		Email string `bson:"email"`
+		Role  string `bson:"role"`
+	}
+	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+	}
+
+	// Cek apakah role pengguna adalah dosen
+	if loginInfo.Role != "dosen" {
+		return "Akses ini hanya tersedia untuk dosen. Mohon maaf jika Anda bukan dosen."
+	}
+
+	// Ambil URL API dari database
+	var conf Config
+	err = db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah Bapak/Ibu " + message.Alias_name + ", mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
 	// Prepare the request body
@@ -329,14 +344,7 @@ func CetakBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	defer resp.Body.Close()
 
-	// Get the email based on noHp from the siakad collection
-	var loginInfo LoginInfo
-	err = db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
-	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
-	}
 	email := loginInfo.Email
-
 	if resp.StatusCode == http.StatusForbidden {
 		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", email)
 		return fmt.Sprintf("Gagal, BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
@@ -412,12 +420,26 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
-	// Get the API URL from the database
-	var conf Config
-	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	// Ambil informasi login berdasarkan nomor telepon dari koleksi siakad
+	var loginInfo struct {
+		Email string `bson:"email"`
+		Role  string `bson:"role"`
+	}
+	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		fmt.Printf("Error fetching config: %s\n", err.Error())
-		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+	}
+
+	// Cek apakah role pengguna adalah dosen
+	if loginInfo.Role != "dosen" {
+		return "Akses ini hanya tersedia untuk dosen. Mohon maaf jika Anda bukan dosen."
+	}
+
+	// Ambil URL API dari database
+	var conf Config
+	err = db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah Bapak/Ibu " + message.Alias_name + ", mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
 	// Prepare the request body
@@ -483,12 +505,26 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
-	// Get the API URL from the database
-	var conf Config
-	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	// Ambil informasi login berdasarkan nomor telepon dari koleksi siakad
+	var loginInfo struct {
+		Email string `bson:"email"`
+		Role  string `bson:"role"`
+	}
+	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		fmt.Printf("Error fetching config: %s\n", err.Error())
-		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+	}
+
+	// Cek apakah role pengguna adalah dosen
+	if loginInfo.Role != "dosen" {
+		return "Akses ini hanya tersedia untuk dosen. Mohon maaf jika Anda bukan dosen."
+	}
+
+	// Ambil URL API dari database
+	var conf Config
+	err = db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
+	if err != nil {
+		return "Wah Bapak/Ibu " + message.Alias_name + ", mohon maaf ada kesalahan dalam pengambilan config di database: " + err.Error()
 	}
 
 	// Prepare the request body
