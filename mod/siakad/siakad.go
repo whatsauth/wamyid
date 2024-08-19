@@ -231,7 +231,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4%20TI"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4%20TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -265,7 +265,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return "Akun tidak ditemukan! Silakan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
+		return "Akun tidak ditemukan! Silakan klik link ini: https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Periksa status kode dari respon
@@ -285,7 +285,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "BAP sudah di Approve! Gunakan format pesan berikut: \n*cetak bap periode [periode]*\n\n*_Contoh Pesan:_*\n\n*_cetak bap periode 20232_*"
 	} else {
 		// Buat URL WhatsApp dengan email
-		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", loginInfo.Email)
+		whatsappURL := fmt.Sprintf("https://wa.me/628999710040?text=approve%%20bap%%20email:%%20%s", loginInfo.Email)
 		return fmt.Sprintf("BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
 	}
 }
@@ -318,7 +318,7 @@ func CetakBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -358,12 +358,12 @@ func CetakBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 
 	email := loginInfo.Email
 	if resp.StatusCode == http.StatusForbidden {
-		whatsappURL := fmt.Sprintf("https://wa.me/62895601060000?text=approve%%20bap%%20email:%%20%s", email)
+		whatsappURL := fmt.Sprintf("https://wa.me/628999710040?text=approve%%20bap%%20email:%%20%s", email)
 		return fmt.Sprintf("Gagal, BAP belum diapprove! Silakan hubungi kaprodi untuk approve BAP dengan kirimkan url ini: %s", whatsappURL)
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
+		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -439,7 +439,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -486,7 +486,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
 		switch resp.StatusCode {
 		case http.StatusNotFound:
-			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa%20prodi%3A%20D4TI"
+			return "Token tidak ditemukan! klik link ini https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa%20prodi%3A%20D4TI"
 		case http.StatusForbidden:
 			return "Gagal, Bimbingan telah disetujui!"
 		default:
@@ -524,7 +524,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -571,7 +571,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
 		switch resp.StatusCode {
 		case http.StatusNotFound:
-			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa%20prodi%3A%20D4TI"
+			return "Token tidak ditemukan! klik link ini https://wa.me/628999710040?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa%20prodi%3A%20D4TI"
 		case http.StatusForbidden:
 			return "Gagal, Bimbingan telah disetujui!"
 		default:
