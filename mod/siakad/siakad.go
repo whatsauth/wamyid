@@ -64,6 +64,15 @@ func extractRole(message string) string {
 	return ""
 }
 
+func extractProdi(message string) string {
+	re := regexp.MustCompile(`"prodi":\s*"([^"]+)"`)
+	matches := re.FindStringSubmatch(message)
+	if len(matches) > 1 {
+		return matches[1]
+	}
+	return ""
+}
+
 func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 	email := extractEmail(message.Message)
 	if email == "user@email.com" {
@@ -82,13 +91,17 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Rolenya di sertakan dulu dong kak " + message.Alias_name + " di akhir pesan nya dengan format 'role: [dosen/mhs]'"
 	}
 
+	prodi := extractProdi(message.Message)
+	if prodi == "" {
+		return "Prodinya di sertakan dulu dong kak " + message.Alias_name + " di akhir pesan nya dengan format 'prodi: [prodi]'"
+	}
+
 	var conf Config
 	err := db.Collection("config").FindOne(context.TODO(), bson.M{"phonenumber": "62895601060000"}).Decode(&conf)
 	if err != nil {
 		return "Wah kak " + message.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
 
-	// Logging the SiakadLoginURL
 	fmt.Println("SiakadLoginURL:", conf.SiakadLoginURL)
 
 	if conf.SiakadLoginURL == "" {
@@ -99,6 +112,7 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 		Email:    email,
 		Password: password,
 		Role:     role,
+		Prodi:    prodi,
 	}
 
 	loginRequestBody, err := json.Marshal(loginRequest)
@@ -119,12 +133,10 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	defer resp.Body.Close()
 
-	// Cek jika status code adalah 500
 	if resp.StatusCode == http.StatusInternalServerError {
 		return "Gagal login, email atau password salah. \n_Notes : jika kamu mengakses Siakad dengan SSO Google, harap cek/ganti password terlebih dahulu dan coba lagi login di domyikado._"
 	}
 
-	// Respon default untuk status code selain 200 dan 500
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Sprintf("Gagal login, status code: %d", resp.StatusCode)
 	}
@@ -134,12 +146,12 @@ func LoginSiakad(message itmodel.IteungMessage, db *mongo.Database) string {
 		return "Nomor telepon tidak ditemukan dalam pesan."
 	}
 
-	// Save or update login information to the database
 	loginInfo := bson.M{
 		"$set": bson.M{
 			"nohp":       noHp,
 			"email":      email,
 			"role":       role,
+			"prodi":      prodi,
 			"login_time": time.Now(),
 		},
 	}
@@ -219,7 +231,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4%20TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -253,7 +265,7 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return "Akun tidak ditemukan! Silakan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		return "Akun tidak ditemukan! Silakan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Periksa status kode dari respon
@@ -306,7 +318,7 @@ func CetakBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -351,7 +363,7 @@ func CetakBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		return "Akun tidak ditemukan! silahkan klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -427,7 +439,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -474,7 +486,7 @@ func ApproveBimbingan(message itmodel.IteungMessage, db *mongo.Database) string 
 		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
 		switch resp.StatusCode {
 		case http.StatusNotFound:
-			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa"
+			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa%20prodi%3A%20D4TI"
 		case http.StatusForbidden:
 			return "Gagal, Bimbingan telah disetujui!"
 		default:
@@ -512,7 +524,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 	}
 	err := db.Collection("siakad").FindOne(context.TODO(), bson.M{"nohp": noHp}).Decode(&loginInfo)
 	if err != nil {
-		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen"
+		return "Nomor telepon tidak ditemukan, silahkan login dengan klik link ini: https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20dosen%20prodi%3A%20D4TI"
 	}
 
 	// Cek apakah role pengguna adalah dosen
@@ -559,7 +571,7 @@ func ApproveBimbinganbyPoin(message itmodel.IteungMessage, db *mongo.Database) s
 		_ = json.NewDecoder(resp.Body).Decode(&errorResponse)
 		switch resp.StatusCode {
 		case http.StatusNotFound:
-			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa"
+			return "Token tidak ditemukan! klik link ini https://wa.me/62895601060000?text=login%20siakad%20email%3A%20email%20password%3A%20password%20role%3A%20mahasiswa%20prodi%3A%20D4TI"
 		case http.StatusForbidden:
 			return "Gagal, Bimbingan telah disetujui!"
 		default:
