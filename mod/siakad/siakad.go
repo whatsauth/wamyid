@@ -65,10 +65,10 @@ func extractRole(message string) string {
 }
 
 func extractProdi(message string) string {
-	re := regexp.MustCompile(`"prodi":\s*"([^"]+)"`)
+	re := regexp.MustCompile(`(?i)prodi:\s*([a-zA-Z0-9\s]+)`)
 	matches := re.FindStringSubmatch(message)
 	if len(matches) > 1 {
-		return matches[1]
+		return strings.TrimSpace(matches[1])
 	}
 	return ""
 }
