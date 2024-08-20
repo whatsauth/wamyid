@@ -291,10 +291,12 @@ func CekApprovalBAP(message itmodel.IteungMessage, db *mongo.Database) string {
 }
 
 func extractPeriod(message string) string {
-	// Function to extract class and period from the message
-	var periode string
-	fmt.Sscanf(message, "cetak bap periode %s", &periode)
-	return periode
+	re := regexp.MustCompile(`periode\s+(\d{5})`)
+	matches := re.FindStringSubmatch(message)
+	if len(matches) > 1 {
+		return matches[1]
+	}
+	return ""
 }
 
 // CetakBAP processes the request for BAP
