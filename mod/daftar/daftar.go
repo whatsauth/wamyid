@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func DaftarDomyikado(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
+func DaftarDomyikado(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	// Define a regex pattern for email addresses
 	re := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 
@@ -22,8 +22,8 @@ func DaftarDomyikado(Pesan itmodel.IteungMessage, db *mongo.Database) (reply str
 	} else if email == "" {
 		return "Emailnya di sertakan dulu dong kak " + Pesan.Alias_name + " di akhir pesan nya"
 	}
-
-	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
+	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
+	//conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
 	if err != nil {
 		return "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
