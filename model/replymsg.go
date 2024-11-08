@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/whatsauth/itmodel"
+)
 
 type Chats struct {
 	IdChats   string  `json:"id_chats" bson:"idChats"`
@@ -14,8 +18,9 @@ type Requests struct {
 }
 
 type LogInbox struct {
-	ID        string    `bson:"_id,omitempty"`
-	From      string    `bson:"from,omitempty"`
-	Message   string    `bson:"messsage,omitempty"`
-	CreatedAt time.Time `bson:"createdAt"`
+	ID            string                `bson:"_id,omitempty"`
+	From          string                `bson:"from,omitempty"`
+	Message       string                `bson:"messsage,omitempty"`
+	IteungMessage itmodel.IteungMessage `bson:"iteungmessage,omitempty"`
+	CreatedAt     time.Time             `bson:"createdAt"`
 }

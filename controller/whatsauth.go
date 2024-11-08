@@ -36,8 +36,7 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 		} else if msg.Message != "" {
 			//log ke inbox
 			var loginbox model.LogInbox
-			loginbox.From = msg.Phone_number
-			loginbox.Message = msg.Message
+			loginbox.IteungMessage = msg
 			loginbox.CreatedAt = time.Now()
 			_, err = helper.InsertOneDoc(config.Mongoconn, "inbox", loginbox)
 			if err != nil {
