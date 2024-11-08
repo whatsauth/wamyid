@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Chats struct {
 	IdChats   string  `json:"id_chats" bson:"idChats"`
 	Message   string  `json:"message" bson:"message"`
@@ -9,4 +11,11 @@ type Chats struct {
 
 type Requests struct {
 	Messages string `json:"messages" bson:"messages"`
+}
+
+type LogInbox struct {
+	ID        string    `bson:"_id,omitempty"`
+	From      string    `bson:"from,omitempty"`
+	Message   string    `bson:"messsage,omitempty"`
+	CreatedAt time.Time `bson:"createdAt"`
 }

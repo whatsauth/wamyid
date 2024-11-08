@@ -3,9 +3,11 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gocroot/config"
 	"github.com/gocroot/helper"
+	"github.com/gocroot/model"
 	"github.com/whatsauth/itmodel"
 )
 
@@ -32,10 +34,16 @@ func PostInboxNomor(respw http.ResponseWriter, req *http.Request) {
 			helper.WriteResponse(respw, http.StatusBadRequest, resp)
 			return
 		} else if msg.Message != "" {
-			/* _, err = helper.InsertOneDoc(config.Mongoconn, "inbox", msg)
+			//log ke inbox
+			var loginbox model.LogInbox
+			loginbox.From = msg.Phone_number
+			loginbox.Message = msg.Message
+			loginbox.CreatedAt = time.Now()
+			_, err = helper.InsertOneDoc(config.Mongoconn, "inbox", loginbox)
 			if err != nil {
 				resp.Response = err.Error()
-			} */
+			}
+			//end log inbox
 			resp, err = helper.WebHook(prof.QRKeyword, waphonenumber, config.WAAPIQRLogin, config.WAAPIMessageText, msg, config.Mongoconn)
 			if err != nil {
 				resp.Response = err.Error()
