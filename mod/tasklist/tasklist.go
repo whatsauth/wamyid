@@ -24,7 +24,7 @@ func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string
 	if err != nil {
 		return "Data task tidak ditemukan kak"
 	}
-	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "62895601060000"})
+	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": "628999710040"})
 	if err != nil {
 		return "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 	}
@@ -49,7 +49,7 @@ func TaskListSave(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string
 	return msg
 }
 
-// input := "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++task list pertama ini"
+// input := "https://wa.me/628999710040?text=-.-T@$kl1$t-.-98suf8usdf0s98dfoi0sid9f|||++task list pertama ini"
 func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply string) {
 	id, task := GetIDandTask(Pesan.Message)
 	idp, err := primitive.ObjectIDFromHex(id)
@@ -75,7 +75,7 @@ func TaskListAppend(Pesan itmodel.IteungMessage, db *mongo.Database) (reply stri
 	for i, taskone := range taskall {
 		msg += strconv.Itoa(i+1) + ". " + taskone.Task + "\n"
 	}
-	msg += "\n======================\nUntuk menambah task klik:\n✅" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n❌" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n💾" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
+	msg += "\n======================\nUntuk menambah task klik:\n✅" + "https://wa.me/628999710040?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n❌" + "https://wa.me/628999710040?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n💾" + "https://wa.me/628999710040?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
 	return msg
 }
 
@@ -90,7 +90,7 @@ func TaskListReset(Pesan itmodel.IteungMessage, db *mongo.Database) (reply strin
 		return "gagal hapus db kak"
 	}
 	msg := "Pertemuan https://www.do.my.id/resume/#" + id + "\n*Task List Anda Sudah di Reset*\n"
-	msg += "\n======================\nUntuk menambah task klik:\n✅" + "https://wa.me/62895601060000?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n❌" + "https://wa.me/62895601060000?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n💾" + "https://wa.me/62895601060000?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
+	msg += "\n======================\nUntuk menambah task klik:\n✅" + "https://wa.me/628999710040?text=-.-T@$kl1$t-.-" + id + "|||++" + "\nUntuk Reset Isi Task klik:\n❌" + "https://wa.me/628999710040?text=-.-T@$kl1$tR35t-.-" + id + "|||++" + "\nUntuk simpan permanen klik:\n💾" + "https://wa.me/628999710040?text=-.-T@$kl1$tS@v3-.-" + id + "|||++"
 	return msg
 }
 
