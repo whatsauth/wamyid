@@ -1,8 +1,9 @@
 package pomodoro
 
 import (
-    "time"
-    "go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Pomodoro struct {
@@ -23,4 +24,8 @@ type PomodoroReport struct {
     Aktivitas     []string           `bson:"aktivitas"`
     Signature     string             `bson:"signature"`
     CreatedAt     time.Time          `bson:"createdAt"`
+}
+
+type Config struct {
+    PublicKey    string `json:"public_key" bson:"public_key"`
 }
