@@ -90,12 +90,6 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		}
 	})
 
-	if int(stravaActivity.Distance[0]) < 5 {
-		reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏" +
-			"\nSatu hari minimal 5 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi" +
-			"\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
-	}
-
 	c.OnScraped(func(r *colly.Response) {
 		distanceFloat := parseDistance(stravaActivity.Distance)
 		if distanceFloat < 5 {
