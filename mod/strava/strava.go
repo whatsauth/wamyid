@@ -80,21 +80,21 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
 		stravaActivity.TypeSport = e.ChildText("span.styles_typeText__6DEXK")
 
-		c.OnHTML("div.Stat_stat__hhbSV", func(e *colly.HTMLElement) {
-			label := e.ChildText("span.Stat_statLabel__9Qe6h")
-			value := e.ChildText("div.Stat_statValue__jbFOA")
-
-			switch strings.ToLower(label) {
-			case "distance":
-				stravaActivity.Distance = value
-			case "time":
-				stravaActivity.TimePeriod = value
-			case "elevation":
-				stravaActivity.Elevation = value
-			}
-		})
-
 		activities = append(activities, stravaActivity)
+	})
+
+	c.OnHTML("div.Stat_stat__hhbSV", func(e *colly.HTMLElement) {
+		label := e.ChildText("span.Stat_statLabel__9Qe6h")
+		value := e.ChildText("div.Stat_statValue__jbFOA")
+
+		switch strings.ToLower(label) {
+		case "distance":
+			stravaActivity.Distance = value
+		case "time":
+			stravaActivity.TimePeriod = value
+		case "elevation":
+			stravaActivity.Elevation = value
+		}
 	})
 
 	c.OnScraped(func(r *colly.Response) {
