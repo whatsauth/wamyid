@@ -6,14 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Pomodoro struct {
-    ID          primitive.ObjectID `bson:"_id,omitempty"`
-    PhoneNumber string             `bson:"phonenumber"`
-    Cycle       int                `bson:"cycle"`
-    StartTime   time.Time          `bson:"start_time"`
-    Milestone   string             `bson:"milestone,omitempty"`
-}
-
 type PomodoroReport struct {
     ID            primitive.ObjectID `bson:"_id,omitempty"`
     PhoneNumber   string             `bson:"phonenumber,omitempty"`
@@ -27,5 +19,5 @@ type PomodoroReport struct {
 }
 
 type Config struct {
-    PublicKey    string `json:"public_key" bson:"public_key"`
+    PublicKey    string `json:"public_key" bson:"publickeypomokit"`
 }
