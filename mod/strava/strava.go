@@ -11,9 +11,10 @@ import (
 )
 
 var activityId string
+var reply string
 
 func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-	reply := "Strava activity has been scraped"
+	reply = "Strava activity has been scraped"
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("strava.app.link"),
@@ -52,8 +53,6 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) string {
-	reply := ""
-
 	c := colly.NewCollector(
 		colly.AllowedDomains("www.strava.com"),
 	)
@@ -92,7 +91,17 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		if err != nil {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
-			reply += responseStravaData(stravaActivity)
+			reply += "\n\nHaiiiiii kak, " + stravaActivity.Name + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
+				"\n\nActivity_id: " + stravaActivity.ActivityId +
+				"\nName: " + stravaActivity.Name +
+				"\nTitle: " + stravaActivity.Title +
+				"\nDate Time: " + stravaActivity.DateTime +
+				"\nType Sport: " + stravaActivity.TypeSport +
+				"\nDistance: " + stravaActivity.Distance +
+				"\nTime Period: " + stravaActivity.TimePeriod +
+				"\nElevation: " + stravaActivity.Elevation +
+				"\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻" +
+				"\n\n"
 		}
 	})
 
@@ -102,20 +111,6 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 	}
 
 	return reply
-}
-
-func responseStravaData(stravaActivity StravaActivity) string {
-	return "\n\nHaiiiiii kak, " + stravaActivity.Name + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
-		"\n\nActivity_id: " + stravaActivity.ActivityId +
-		"\nName: " + stravaActivity.Name +
-		"\nTitle: " + stravaActivity.Title +
-		"\nDate Time: " + stravaActivity.DateTime +
-		"\nType Sport: " + stravaActivity.TypeSport +
-		"\nDistance: " + stravaActivity.Distance +
-		"\nTime Period: " + stravaActivity.TimePeriod +
-		"\nElevation: " + stravaActivity.Elevation +
-		"\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻" +
-		"\n\n"
 }
 
 func extractStravaLink(text string) string {
