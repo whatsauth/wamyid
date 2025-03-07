@@ -1,6 +1,7 @@
 package strava
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -10,7 +11,6 @@ import (
 )
 
 var activityId string
-var rawUrl = "https://strava.app.link/NlALiL9oxRb"
 
 func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Strava "
@@ -38,12 +38,17 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 		}
 	})
 
+	rawUrl := extractStravaLink(Pesan.Message)
+	if rawUrl == "" {
+		return reply + " activity link not found"
+	}
+
 	err := c.Visit(rawUrl)
 	if err != nil {
 		return "\nError visiting URL1" + err.Error()
 	}
 
-	return reply + "activity has been scraped" + Pesan.Message
+	return reply + "activity has been scraped\n" + rawUrl
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) string {
@@ -98,4 +103,11 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 	}
 
 	return reply
+}
+
+func extractStravaLink(text string) string {
+	re := regexp.MustCompile(`https?://strava\.app\.link/\S+`)
+	match := re.FindString(text)
+
+	return match
 }
