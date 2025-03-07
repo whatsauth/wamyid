@@ -7,6 +7,7 @@ import (
 	"github.com/gocroot/mod/kyc"
 	"github.com/gocroot/mod/lms"
 	"github.com/gocroot/mod/lmsdesa"
+	"github.com/gocroot/mod/pomodoro"
 	"github.com/gocroot/mod/posint"
 	"github.com/gocroot/mod/presensi"
 	"github.com/gocroot/mod/siakad"
@@ -65,6 +66,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = siakad.ApproveBimbinganbyPoin(Pesan, db)
 	case "prohibited-items":
 		reply = posint.GetProhibitedItems(Pesan, db)
+	case "pomodoro-cycle":
+		reply = pomodoro.HandlePomodoroStart(Pesan, db)
 	}
 
 	return
