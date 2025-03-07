@@ -36,10 +36,14 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
+		reply += "\nLink: " + link
 
 		if strings.Contains(link, "/activities/") {
 			parts := strings.Split(link, "/activities/")
+			reply += "\nParts: " + strings.Join(parts, ", ")
+
 			if len(parts) > 1 {
+				reply += "\nActivity ID: " + strings.Split(parts[1], "/")[0]
 				activityId = strings.Split(parts[1], "/")[0]
 				fullActivityURL := "https://www.strava.com/activities/" + activityId
 
