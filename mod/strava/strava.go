@@ -19,31 +19,17 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 		colly.AllowedDomains("strava.app.link"),
 	)
 
-	c.OnRequest(func(r *colly.Request) {
-		// fmt.Println("Visiting: ", r.URL)
-		reply += "\nVisiting: " + r.URL.String()
-	})
-
 	c.OnError(func(_ *colly.Response, err error) {
-		// fmt.Println("Something went wrong: ", err)
 		reply += "\nSomething went wrong: " + err.Error()
-	})
-
-	c.OnResponse(func(r *colly.Response) {
-		// fmt.Println("Page visited: ", r.Request.URL)
-		reply += "\nPage visited: " + r.Request.URL.String()
 	})
 
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
-		reply += "\nLink: " + link
 
 		if strings.Contains(link, "/activities/") {
 			parts := strings.Split(link, "/activities/")
-			reply += "\nParts: " + strings.Join(parts, ", ")
 
 			if len(parts) > 1 {
-				reply += "\nActivity ID: " + strings.Split(parts[1], "/")[0]
 				activityId = strings.Split(parts[1], "/")[0]
 				fullActivityURL := "https://www.strava.com/activities/" + activityId
 
@@ -54,11 +40,10 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 
 	err := c.Visit(rawUrl)
 	if err != nil {
-		// fmt.Println("Error visiting URL1", err)
 		return "\nError visiting URL1" + err.Error()
 	}
 
-	return reply + "activity has been scraped"
+	return reply + "activity has been scraped" + Pesan.Message
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) string {
@@ -100,7 +85,7 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 	c.OnScraped(func(r *colly.Response) {
 		_, err := atdb.InsertOneDoc(db, "strava", stravaActivity)
 		if err != nil {
-			reply += "\nError inserting document: " + err.Error()
+			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
 			reply += "\n\nData berhasil disimpan ke MongoDB."
 			reply += "\n\nName: " + stravaActivity.Name + "\nTitle: " + stravaActivity.Title + "\nDate Time: " + stravaActivity.DateTime + "\nType Sport: " + stravaActivity.TypeSport + "\nDistance: " + stravaActivity.Distance + "\nTime Period: " + stravaActivity.TimePeriod + "\nElevation: " + stravaActivity.Elevation
@@ -109,8 +94,7 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 
 	err := c.Visit(url)
 	if err != nil {
-		// fmt.Println("Error visiting URL", err)
-		reply += "\n\nError visiting URL" + err.Error()
+		return "\nError visiting URL2" + err.Error()
 	}
 
 	return reply
