@@ -39,10 +39,10 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	}
 
 	// 4. Decode token
-	payload, err := watoken.Decode(publicKey, token)
+	decode, err := watoken.Decode(publicKey, token)
 	if err != nil {
 		errorMsg := "Token tidak valid"
-		
+
 		// Deteksi jenis error
 		if strings.Contains(err.Error(), "expired") {
 			errorMsg = "Token sudah kedaluwarsa"
@@ -51,50 +51,23 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		} else if strings.Contains(err.Error(), "hex") {
 			errorMsg = "Format public key tidak valid"
 		}
-		
-		return fmt.Sprintf("Wah kak %s, %s: %v", 
-			Pesan.Alias_name, 
-			errorMsg, 
+
+		return fmt.Sprintf("Wah kak %s, %s: %v",
+			Pesan.Alias_name,
+			errorMsg,
 			strings.Split(err.Error(), ":")[0], // Ambil pesan error utama
 		)
 	}
 
 	// 5. Validasi payload dan ekstrak URL
 	var url string
-	// Di bagian validasi payload
-	if payloadData, ok := payload.Data.(map[string]interface{}); ok {
-		if u, exists := payloadData["id"].(string); exists {
-			url = u
-		}
+	payloadStr := fmt.Sprintf("%v", decode)
+	// Ekstrak URL dari string
+	urlRegex := regexp.MustCompile(`\{(https://[^\s]+)`)
+	urlMatch := urlRegex.FindStringSubmatch(payloadStr)
+	if len(urlMatch) > 1 {
+		url = urlMatch[1]
 	}
-
-	expectedPayload := fmt.Sprintf(
-		"cycle:%d|hostname:%s|ip:%s|screenshots:%d|activities:%v",
-		cycle,
-		hostname,
-		ip,
-		screenshots,
-		pekerjaan,
-	)
-
-	// Create a comparable payload string
-	payloadStr := fmt.Sprintf(
-		"cycle:%d|hostname:%s|ip:%s|screenshots:%d|activities:%v",
-		cycle,
-		hostname,
-		ip,
-		screenshots,
-		pekerjaan,
-	)
-
-	// Compare the expected payload with what we constructed
-	if payloadStr != expectedPayload {
-		return "Wah kak " + Pesan.Alias_name + ", data laporan tidak sesuai dengan token"
-	}
-
-	// if hostname == "" || ip == "" || len(pekerjaan) == 0 {
-	// 	return "Wah kak " + Pesan.Alias_name + ", Format laporan tidak valid!"
-	// }
 
 	// 6. Simpan ke database
 	loc, _ := time.LoadLocation("Asia/Jakarta")
@@ -105,7 +78,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		IP:          ip,
 		Screenshots: screenshots,
 		Pekerjaan:   pekerjaan,
-		Token:   token,
+		Token:       token,
 		CreatedAt:   time.Now().In(loc),
 	}
 
@@ -135,67 +108,119 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 
 // Helper functions
 func extractCycleNumber(msg string) int {
-    re := regexp.MustCompile(`Report\s+(\d+)\s+cycle`)
-    matches := re.FindStringSubmatch(msg)
-    if len(matches) > 1 {
-        cycle, _ := strconv.Atoi(matches[1])
-        return cycle
-    }
-    return 0
+	re := regexp.MustCompile(`Report\s+(\d+)\s+cycle`)
+	matches := re.FindStringSubmatch(msg)
+	if len(matches) > 1 {
+		cycle, _ := strconv.Atoi(matches[1])
+		return cycle
+	}
+	return 0
 }
 
 func extractValue(msg, prefix string) string {
-    re := regexp.MustCompile(regexp.QuoteMeta(prefix) + `(\S+)(?:\s|$)`)
-    match := re.FindStringSubmatch(msg)
-    if len(match) > 1 {
-        return strings.TrimSpace(match[1])
-    }
-    return ""
+	re := regexp.MustCompile(regexp.QuoteMeta(prefix) + `(\S+)(?:\s|$)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+	return ""
 }
 
 func extractIP(msg string) string {
-    re := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-    match := re.FindStringSubmatch(msg)
-    if len(match) > 1 {
-        return match[1]
-    }
-    return ""
+	// Coba pola IP langsung
+	re := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	// Jika tidak ditemukan, coba ekstrak dari URL
+	reURL := regexp.MustCompile(`IP\s*:\s*https://whatismyipaddress\.com/ip/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+	matchURL := reURL.FindStringSubmatch(msg)
+	if len(matchURL) > 1 {
+		return matchURL[1]
+	}
+
+	return ""
 }
 
 func extractNumber(msg, prefix string) int {
-    re := regexp.MustCompile(regexp.QuoteMeta(prefix) + `(\d+)`)
-    match := re.FindStringSubmatch(msg)
-    if len(match) > 1 {
-        num, _ := strconv.Atoi(match[1])
-        return num
-    }
-    return 0
+	re := regexp.MustCompile(regexp.QuoteMeta(prefix) + `(\d+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		num, _ := strconv.Atoi(match[1])
+		return num
+	}
+	return 0
 }
 
 func extractActivities(msg string) []string {
-    re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n((?:- .+\n)+)`)
-    match := re.FindStringSubmatch(msg)
-    if len(match) > 1 {
-        activities := strings.Split(match[1], "\n- ")
-        activities[0] = strings.TrimPrefix(activities[0], "- ")
-        return activities
-    }
-    return []string{}
+	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n([\s\S]+?)(?:\n\#|$)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		// Bersihkan teks dan pisahkan berdasarkan baris baru jika perlu
+		text := strings.TrimSpace(match[1])
+		if strings.Contains(text, "\n") {
+			lines := strings.Split(text, "\n")
+			var activities []string
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line != "" {
+					if strings.HasPrefix(line, "- ") {
+						activities = append(activities, strings.TrimPrefix(line, "- "))
+					} else {
+						activities = append(activities, line)
+					}
+				}
+			}
+			return activities
+		}
+		return []string{text}
+	}
+	return []string{}
 }
 
 func extractToken(msg string) string {
-    re := regexp.MustCompile(`#(v4\..+)`)
-    match := re.FindStringSubmatch(msg)
-    if len(match) > 1 {
-        return match[1]
-    }
-    return ""
+	re := regexp.MustCompile(`#(v4\..+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return match[1]
+	}
+	return ""
+}
+
+func extractURLFromPayload(payload any) string {
+	// Cek jika payload adalah string
+	if urlStr, ok := payload.(string); ok && strings.HasPrefix(urlStr, "http") {
+		return urlStr
+	}
+
+	// Jika payload adalah map
+	if payloadMap, ok := payload.(map[string]interface{}); ok {
+		// Coba cari key yang berisi URL
+		for _, v := range payloadMap { // Hapus variabel k yang tidak digunakan
+			if urlStr, ok := v.(string); ok && strings.HasPrefix(urlStr, "http") {
+				return urlStr
+			}
+		}
+	}
+
+	// Cek jika payload adalah struct
+	payloadStr := fmt.Sprintf("%v", payload)
+	// Ekstrak URL dari string representasi payload
+	re := regexp.MustCompile(`\{(https://[^\s]+)`)
+	match := re.FindStringSubmatch(payloadStr)
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	return ""
 }
 
 func getPublicKey(db *mongo.Database) (string, error) {
-    conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": bson.M{"$exists": true}})
-    if err != nil {
-        return "", fmt.Errorf("konfigurasi tidak ditemukan")
-    }
-    return conf.PublicKeyPomokit, nil
+	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": bson.M{"$exists": true}})
+	if err != nil {
+		return "", fmt.Errorf("konfigurasi tidak ditemukan")
+	}
+	return conf.PublicKeyPomokit, nil
 }
