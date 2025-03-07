@@ -11,6 +11,7 @@ import (
 	"github.com/gocroot/mod/posint"
 	"github.com/gocroot/mod/presensi"
 	"github.com/gocroot/mod/siakad"
+	"github.com/gocroot/mod/strava"
 	"github.com/gocroot/mod/tasklist"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -68,6 +69,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = posint.GetProhibitedItems(Pesan, db)
 	case "pomodoro-cycle":
 		reply = pomodoro.HandlePomodoroReport(Pesan, db)
+	case "strava-activity":
+		reply = strava.StravaHandler(Pesan, db)
 	}
 
 	return
