@@ -7,6 +7,7 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -48,11 +49,12 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 		return "\nError visiting URL1" + err.Error()
 	}
 
-	return reply + "link strava activity: " + rawUrl + "\n#mental_health"
+	return reply + "link strava activity kamu: " + rawUrl + "\n\n#mental_health"
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) string {
-	reply := "Hehe 😅 "
+	reply := ""
+
 	c := colly.NewCollector(
 		colly.AllowedDomains("www.strava.com"),
 	)
@@ -87,19 +89,38 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		_, err := atdb.InsertOneDoc(db, "strava", stravaActivity)
+		if int(stravaActivity.Distance[0]) < 5 {
+			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏" +
+				"\nSatu hari minimal 5 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi" +
+				"\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+		}
+
+		col := "strava"
+		data, err := atdb.GetOneDoc[StravaActivity](db, col, bson.M{"activity_id": stravaActivity.ActivityId})
+		if err != nil {
+			reply += "\n\nError fetching data from MongoDB: " + err.Error()
+			return
+		}
+		if data.ActivityId == stravaActivity.ActivityId {
+			reply += "\n\nHayoolooooo ngapain, Jangan Curang donggg! 😏 Kamu sudah pernah share aktivitas ini sebelumnya." +
+				"\n*AOKWOKOKOWKOWKOWKKWOKOK* 🤣🤣" +
+				"\nSana Lari lagi jangan malas! \n\n#tetap_semangat💪🏻"
+			return
+		}
+
+		_, err = atdb.InsertOneDoc(db, col, stravaActivity)
 		if err != nil {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
-			reply += "\n\nHaiiiiii kak, " + stravaActivity.Name + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
-				"\n\nActivity_id: " + stravaActivity.ActivityId +
-				"\nName: " + stravaActivity.Name +
-				"\nTitle: " + stravaActivity.Title +
-				"\nDate Time: " + stravaActivity.DateTime +
-				"\nType Sport: " + stravaActivity.TypeSport +
-				"\nDistance: " + stravaActivity.Distance +
-				"\nTime Period: " + stravaActivity.TimePeriod +
-				"\nElevation: " + stravaActivity.Elevation +
+			reply += "Haiiiii kak, " + stravaActivity.Name + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
+				"\n\n- Activity_id: " + stravaActivity.ActivityId +
+				"\n- Name: " + stravaActivity.Name +
+				"\n- Title: " + stravaActivity.Title +
+				"\n- Date Time: " + stravaActivity.DateTime +
+				"\n- Type Sport: " + stravaActivity.TypeSport +
+				"\n- Distance: " + stravaActivity.Distance +
+				"\n- Time Period: " + stravaActivity.TimePeriod +
+				"\n- Elevation: " + stravaActivity.Elevation +
 				"\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻" +
 				"\n\n"
 		}
