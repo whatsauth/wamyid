@@ -1,8 +1,6 @@
 package pomodoro
 
 import (
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -14,7 +12,6 @@ import (
 	"github.com/whatsauth/watoken"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/crypto/ed25519"
 )
 
 func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
@@ -42,16 +39,32 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	}
 
 	// 4. Verifikasi token dan payload
-	publicKeyHex := hex.EncodeToString(publicKey) // Mengonversi ed25519.PublicKey ke string
-	payload, err := watoken.Decode(publicKeyHex, signature)
+	payload, err := watoken.Decode(publicKey, signature)
 	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + ", signature tidak valid: " + err.Error()
+		errorMsg := "Signature tidak valid"
+		
+		// Deteksi jenis error
+		if strings.Contains(err.Error(), "expired") {
+			errorMsg = "Token sudah kedaluwarsa"
+		} else if strings.Contains(err.Error(), "invalid") {
+			errorMsg = "Format token tidak valid"
+		} else if strings.Contains(err.Error(), "hex") {
+			errorMsg = "Format public key tidak valid"
+		}
+		
+		return fmt.Sprintf("Wah kak %s, %s: %v", 
+			Pesan.Alias_name, 
+			errorMsg, 
+			strings.Split(err.Error(), ":")[0], // Ambil pesan error utama
+		)
 	}
 
-	// 5. Validasi payload
-	payloadJSON, err := json.Marshal(payload)
-	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + ", gagal mengonversi payload ke JSON: " + err.Error()
+	// 5. Validasi payload dan ekstrak URL
+	var url string
+	if payloadData, ok := payload.Data.(map[string]interface{}); ok {
+		if u, exists := payloadData["url"].(string); exists {
+			url = u
+		}
 	}
 
 	expectedPayload := fmt.Sprintf(
@@ -63,7 +76,18 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		activities,
 	)
 
-	if string(payloadJSON) != expectedPayload {
+	// Create a comparable payload string
+	payloadStr := fmt.Sprintf(
+		"cycle:%d|hostname:%s|ip:%s|screenshots:%d|activities:%v",
+		cycle,
+		hostname,
+		ip,
+		screenshots,
+		activities,
+	)
+
+	// Compare the expected payload with what we constructed
+	if payloadStr != expectedPayload {
 		return "Wah kak " + Pesan.Alias_name + ", data laporan tidak sesuai dengan signature"
 	}
 
@@ -91,12 +115,14 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			"Hostname: %s\n"+
 			"IP: %s\n"+
 			"Aktivitas:\n- %s\n"+
+			"🔗 Alamat URL %s\n"+
 			"🕒 %s",
 		cycle,
 		Pesan.Alias_name,
 		hostname,
 		ip,
 		strings.Join(activities, "\n- "),
+		url, // Tampilkan URL dari payload
 		time.Now().Format("2006-01-02 15:04"),
 	)
 }
@@ -145,17 +171,10 @@ func extractSignature(msg string) string {
 	return ""
 }
 
-func getPublicKey(db *mongo.Database) (ed25519.PublicKey, error) {
-    conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": "nilai-publik-key-anda"})
+func getPublicKey(db *mongo.Database) (string, error) {
+    conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": bson.M{"$exists": true}})
     if err != nil {
-        return nil, fmt.Errorf("konfigurasi tidak ditemukan")
+        return "", fmt.Errorf("konfigurasi tidak ditemukan")
     }
-    keyBytes, err := hex.DecodeString(conf.PublicKey)
-    if err != nil {
-        return nil, fmt.Errorf("format public key invalid")
-    }
-    if len(keyBytes) != ed25519.PublicKeySize {
-        return nil, fmt.Errorf("ukuran public key tidak valid")
-    }
-    return ed25519.PublicKey(keyBytes), nil
+    return conf.PublicKeyPomokit, nil
 }

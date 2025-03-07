@@ -19,5 +19,5 @@ type PomodoroReport struct {
 }
 
 type Config struct {
-    PublicKey    string `json:"public_key" bson:"publickeypomokit"`
+    PublicKeyPomokit    string `json:"publickeypomokit,omitempty" bson:"publickeypomokit,omitempty"`
 }
