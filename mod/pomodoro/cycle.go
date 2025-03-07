@@ -36,9 +36,9 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	signature := extractSignature(Pesan.Message)
 
 	// 3. Verifikasi signature
-	publicKey, err := getPublicKey(db, Pesan.Phone_number)
+	publicKey, err := getPublicKey(db)
 	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + ", gagal memuat public key: " + err.Error()
+		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memuat public key: " + err.Error()
 	}
 
 	// 4. Verifikasi token dan payload
@@ -145,20 +145,17 @@ func extractSignature(msg string) string {
 	return ""
 }
 
-func getPublicKey(db *mongo.Database, publickey string) (ed25519.PublicKey, error) {
-	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": publickey})
-	if err != nil {
-		return nil, fmt.Errorf("konfigurasi tidak ditemukan")
-	}
-
-	keyBytes, err := hex.DecodeString(conf.PublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("format public key invalid")
-	}
-
-	if len(keyBytes) != ed25519.PublicKeySize {
-		return nil, fmt.Errorf("ukuran public key tidak valid")
-	}
-
-	return ed25519.PublicKey(keyBytes), nil
+func getPublicKey(db *mongo.Database) (ed25519.PublicKey, error) {
+    conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": "nilai-publik-key-anda"})
+    if err != nil {
+        return nil, fmt.Errorf("konfigurasi tidak ditemukan")
+    }
+    keyBytes, err := hex.DecodeString(conf.PublicKey)
+    if err != nil {
+        return nil, fmt.Errorf("format public key invalid")
+    }
+    if len(keyBytes) != ed25519.PublicKeySize {
+        return nil, fmt.Errorf("ukuran public key tidak valid")
+    }
+    return ed25519.PublicKey(keyBytes), nil
 }
