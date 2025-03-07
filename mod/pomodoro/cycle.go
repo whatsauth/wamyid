@@ -79,7 +79,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		CreatedAt:   time.Now(),
 	}
 
-	_, err = atdb.InsertOneDoc(db, "pomodoro-cyclez", report)
+	_, err = atdb.InsertOneDoc(db, "pomokit", report)
 	if err != nil {
 		return "Wah kak " + Pesan.Alias_name + ", gagal menyimpan laporan: " + err.Error()
 	}
