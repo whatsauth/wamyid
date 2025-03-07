@@ -11,10 +11,9 @@ import (
 )
 
 var activityId string
-var reply string
 
 func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-	reply = "Strava activity has been scraped"
+	reply := "Strava activity has been scraped"
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("strava.app.link"),
@@ -49,10 +48,11 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 		return "\nError visiting URL1" + err.Error()
 	}
 
-	return "link strava activity: " + rawUrl + "\n#mental_health"
+	return reply + "link strava activity: " + rawUrl + "\n#mental_health"
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) string {
+	reply := "Hehe 😅 "
 	c := colly.NewCollector(
 		colly.AllowedDomains("www.strava.com"),
 	)
