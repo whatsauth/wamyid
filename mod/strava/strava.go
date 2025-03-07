@@ -1,7 +1,6 @@
 package strava
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -14,20 +13,26 @@ var activityId string
 var rawUrl = "https://strava.app.link/NlALiL9oxRb"
 
 func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+
+	reply := "Strava activity has been scraped"
+
 	c := colly.NewCollector(
 		colly.AllowedDomains("strava.app.link"),
 	)
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting: ", r.URL)
+		// fmt.Println("Visiting: ", r.URL)
+		reply += "Visiting: " + r.URL.String()
 	})
 
 	c.OnError(func(_ *colly.Response, err error) {
-		fmt.Println("Something went wrong: ", err)
+		// fmt.Println("Something went wrong: ", err)
+		reply += "Something went wrong: " + err.Error()
 	})
 
 	c.OnResponse(func(r *colly.Response) {
-		fmt.Println("Page visited: ", r.Request.URL)
+		// fmt.Println("Page visited: ", r.Request.URL)
+		reply += "Page visited: " + r.Request.URL.String()
 	})
 
 	c.OnHTML("a", func(e *colly.HTMLElement) {
@@ -46,13 +51,16 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 
 	err := c.Visit(rawUrl)
 	if err != nil {
-		fmt.Println("Error visiting URL1", err)
+		// fmt.Println("Error visiting URL1", err)
+		return "Error visiting URL1" + err.Error()
 	}
 
-	return "Strava activity has been scraped"
+	return reply
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) {
+	reply := "Scraping Strava activity"
+
 	c := colly.NewCollector(
 		colly.AllowedDomains("www.strava.com"),
 	)
@@ -87,11 +95,16 @@ func scrapeStravaActivity(db *mongo.Database, url string) {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		atdb.InsertOneDoc(db, "stravas", activities)
+		_, err := atdb.InsertOneDoc(db, "stravas", activities)
+		if err != nil {
+			// fmt.Println("Error inserting document", err)
+			reply += "Error inserting document" + err.Error()
+		}
 	})
 
 	err := c.Visit(url)
 	if err != nil {
-		fmt.Println("Error visiting URL", err)
+		// fmt.Println("Error visiting URL", err)
+		reply += "Error visiting URL" + err.Error()
 	}
 }
