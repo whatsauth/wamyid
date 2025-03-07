@@ -47,7 +47,7 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 				activityId = strings.Split(parts[1], "/")[0]
 				fullActivityURL := "https://www.strava.com/activities/" + activityId
 
-				scrapeStravaActivity(db, fullActivityURL)
+				reply += scrapeStravaActivity(db, fullActivityURL)
 			}
 		}
 	})
@@ -61,7 +61,7 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	return reply + "activity has been scraped"
 }
 
-func scrapeStravaActivity(db *mongo.Database, url string) {
+func scrapeStravaActivity(db *mongo.Database, url string) string {
 	reply := "Strava "
 
 	c := colly.NewCollector(
@@ -102,14 +102,16 @@ func scrapeStravaActivity(db *mongo.Database, url string) {
 		if err != nil {
 			reply += "\nError inserting document: " + err.Error()
 		} else {
-			reply += "\nData berhasil disimpan ke MongoDB."
-			reply += "\nName: " + stravaActivity.Name + "\nTitle: " + stravaActivity.Title + "\nDate Time: " + stravaActivity.DateTime + "\nType Sport: " + stravaActivity.TypeSport + "\nDistance: " + stravaActivity.Distance + "\nTime Period: " + stravaActivity.TimePeriod + "\nElevation: " + stravaActivity.Elevation
+			reply += "\n\nData berhasil disimpan ke MongoDB."
+			reply += "\n\nName: " + stravaActivity.Name + "\nTitle: " + stravaActivity.Title + "\nDate Time: " + stravaActivity.DateTime + "\nType Sport: " + stravaActivity.TypeSport + "\nDistance: " + stravaActivity.Distance + "\nTime Period: " + stravaActivity.TimePeriod + "\nElevation: " + stravaActivity.Elevation
 		}
 	})
 
 	err := c.Visit(url)
 	if err != nil {
 		// fmt.Println("Error visiting URL", err)
-		reply += "\nError visiting URL" + err.Error()
+		reply += "\n\nError visiting URL" + err.Error()
 	}
+
+	return reply
 }
