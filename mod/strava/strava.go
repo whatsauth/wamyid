@@ -51,7 +51,7 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 		return "\nError visiting URL1" + err.Error()
 	}
 
-	return reply + "\n\nlink strava activity kamu: " + rawUrl + "\n\n#mental_health"
+	return reply + "\n\nlink strava activity kamu: " + rawUrl
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) string {
@@ -108,7 +108,7 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		if data.ActivityId == stravaActivity.ActivityId {
 			reply += "\n\nHayoolooooo ngapain, Jangan Curang donggg! 😏 Kamu sudah pernah share aktivitas ini sebelumnya." +
 				"\n*AOKWOKOKOWKOWKOWKKWOKOK* 🤣🤣" +
-				"\nSana Lari lagi jangan malas! \n\n#tetap_semangat💪🏻"
+				"\nSana Lari lagi jangan malas!"
 			return
 		}
 
@@ -116,7 +116,7 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		if err != nil {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
-			reply += "Haiiiii kak, " + stravaActivity.Name + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
+			reply += "\n\nHaiiiii kak, " + stravaActivity.Name + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
 				"\n\n- Activity_id: " + stravaActivity.ActivityId +
 				"\n- Name: " + stravaActivity.Name +
 				"\n- Title: " + stravaActivity.Title +
@@ -125,8 +125,7 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 				"\n- Distance: " + stravaActivity.Distance +
 				"\n- Time Period: " + stravaActivity.TimePeriod +
 				"\n- Elevation: " + stravaActivity.Elevation +
-				"\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻" +
-				"\n\n"
+				"\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 		}
 	})
 
