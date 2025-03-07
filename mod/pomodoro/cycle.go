@@ -27,21 +27,21 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	}
 
 	hostname := extractValue(Pesan.Message, "Hostname : ")
-	ip := extractValue(Pesan.Message, "IP : ")
+	ip := extractIP(Pesan.Message) // Gunakan fungsi khusus IP
 	screenshots := extractNumber(Pesan.Message, "Jumlah ScreenShoot : ")
-	activities := extractActivities(strings.Split(Pesan.Message, "\n"))
-	signature := extractSignature(Pesan.Message)
+	pekerjaan := extractActivities(Pesan.Message) // Update parameter
+	token := extractToken(Pesan.Message)
 
-	// 3. Verifikasi signature
+	// 3. Verifikasi public key
 	publicKey, err := getPublicKey(db)
 	if err != nil {
 		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memuat public key: " + err.Error()
 	}
 
-	// 4. Verifikasi token dan payload
-	payload, err := watoken.Decode(publicKey, signature)
+	// 4. Decode token
+	payload, err := watoken.Decode(publicKey, token)
 	if err != nil {
-		errorMsg := "Signature tidak valid"
+		errorMsg := "Token tidak valid"
 		
 		// Deteksi jenis error
 		if strings.Contains(err.Error(), "expired") {
@@ -73,7 +73,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		hostname,
 		ip,
 		screenshots,
-		activities,
+		pekerjaan,
 	)
 
 	// Create a comparable payload string
@@ -83,12 +83,16 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		hostname,
 		ip,
 		screenshots,
-		activities,
+		pekerjaan,
 	)
 
 	// Compare the expected payload with what we constructed
 	if payloadStr != expectedPayload {
-		return "Wah kak " + Pesan.Alias_name + ", data laporan tidak sesuai dengan signature"
+		return "Wah kak " + Pesan.Alias_name + ", data laporan tidak sesuai dengan token"
+	}
+
+	if hostname == "" || ip == "" || len(pekerjaan) == 0 {
+		return "Wah kak " + Pesan.Alias_name + ", Format laporan tidak valid!"
 	}
 
 	// 6. Simpan ke database
@@ -98,8 +102,8 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Hostname:    hostname,
 		IP:          ip,
 		Screenshots: screenshots,
-		Aktivitas:   activities,
-		Signature:   signature,
+		Pekerjaan:   pekerjaan,
+		Token:   token,
 		CreatedAt:   time.Now(),
 	}
 
@@ -121,7 +125,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Pesan.Alias_name,
 		hostname,
 		ip,
-		strings.Join(activities, "\n- "),
+		strings.Join(pekerjaan, "\n- "),
 		url, // Tampilkan URL dari payload
 		time.Now().Format("2006-01-02 15:04"),
 	)
@@ -129,22 +133,31 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 
 // Helper functions
 func extractCycleNumber(msg string) int {
-	re := regexp.MustCompile(`Report (\d+) cycle`)
-	matches := re.FindStringSubmatch(msg)
-	if len(matches) > 1 {
-		cycle, _ := strconv.Atoi(matches[1])
-		return cycle
-	}
-	return 0
+    re := regexp.MustCompile(`Report\s+(\d+)\s+cycle`)
+    matches := re.FindStringSubmatch(msg)
+    if len(matches) > 1 {
+        cycle, _ := strconv.Atoi(matches[1])
+        return cycle
+    }
+    return 0
 }
 
 func extractValue(msg, prefix string) string {
-	for _, line := range strings.Split(msg, "\n") {
-		if strings.Contains(line, prefix) {
-			return strings.TrimSpace(strings.TrimPrefix(line, prefix))
-		}
-	}
-	return ""
+    re := regexp.MustCompile(regexp.QuoteMeta(prefix) + `(\S+)(?:\s|$)`)
+    match := re.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        return strings.TrimSpace(match[1])
+    }
+    return ""
+}
+
+func extractIP(msg string) string {
+    re := regexp.MustCompile(`IP\s*:\s*(\S+)`)
+    match := re.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        return match[1]
+    }
+    return ""
 }
 
 func extractNumber(msg, prefix string) int {
@@ -153,22 +166,22 @@ func extractNumber(msg, prefix string) int {
 	return num
 }
 
-func extractActivities(lines []string) []string {
-	var activities []string
-	for _, line := range lines {
-		if strings.HasPrefix(line, "|") {
-			activities = append(activities, strings.TrimPrefix(line, "| "))
-		}
-	}
-	return activities
+func extractActivities(msg string) []string {
+    re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\|([^#]+)`)
+    match := re.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        return strings.Split(match[1], "|")
+    }
+    return []string{}
 }
 
-func extractSignature(msg string) string {
-	parts := strings.Split(msg, "#")
-	if len(parts) > 1 {
-		return strings.TrimSpace(parts[len(parts)-1])
-	}
-	return ""
+func extractToken(msg string) string {
+    re := regexp.MustCompile(`#(v4\..+)`)
+    match := re.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        return match[1]
+    }
+    return ""
 }
 
 func getPublicKey(db *mongo.Database) (string, error) {
