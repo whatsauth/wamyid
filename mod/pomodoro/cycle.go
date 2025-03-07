@@ -1,91 +1,95 @@
 package pomodoro
 
 import (
-    "fmt"
-    "strings"
-    "time"
-    
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/gocroot/helper/atdb"
-    "github.com/whatsauth/itmodel"
-    "go.mongodb.org/mongo-driver/bson"
-    "go.mongodb.org/mongo-driver/mongo"
+	"github.com/whatsauth/itmodel"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func PomodoroHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-    switch {
-    case strings.HasPrefix(Pesan.Message, "Pomodoro Start"):
-        handleStart(Pesan, db)
-        return "" // Tidak ada respons saat mulai
-    case strings.HasPrefix(Pesan.Message, "Pomodoro Report"):
-        return handleReport(Pesan, db)
-    default:
-        return "Command tidak valid. Gunakan:\n- Pomodoro Start\n- Pomodoro Report"
+func HandlePomodoroReport(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+    // Validasi format pesan
+    if !strings.HasPrefix(Pesan.Message, "Iteung Pomodoro Report") {
+        return "Format laporan tidak valid"
     }
-}
 
-func handleStart(Pesan itmodel.IteungMessage, db *mongo.Database) {
-    milestone := extractMilestone(Pesan.Message)
+    // Parse data dari pesan
+    lines := strings.Split(Pesan.Message, "\n")
     
-    // Auto-increment cycle
-    lastCycle := getLastCycle(db, Pesan.Phone_number)
-    newCycle := lastCycle + 1
-
-    // Simpan ke database tanpa memberikan respons
-    pomodoro := Pomodoro{
+    report := PomodoroReport{
         PhoneNumber: Pesan.Phone_number,
-        Cycle:       newCycle,
-        StartTime:   time.Now(),
-        Milestone:   milestone,
+        Cycle:       extractCycle(lines[0]),
+        Hostname:    extractValue(lines[1], "Hostname : "),
+        IP:          extractValue(lines[2], "IP : "),
+        Screenshots: extractNumber(lines[3], "Jumlah ScreenShoot : "),
+        Aktivitas:   extractActivities(lines[4:]),
+        Signature:   extractSignature(Pesan.Message),
+        CreatedAt:   time.Now(),
     }
-    
-    atdb.InsertOneDoc(db, "pomodoros", pomodoro)
-}
 
-func handleReport(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-    lastEntry, err := getLastEntry(db, Pesan.Phone_number)
+    // Simpan ke database
+    _, err := atdb.InsertOneDoc(db, "pomodoro", report)
     if err != nil {
-        return "Wah kak " + Pesan.Alias_name + ", belum ada cycle yang dimulai"
+        return "Gagal menyimpan laporan: " + err.Error()
     }
 
-    duration := time.Since(lastEntry.StartTime).Round(time.Minute)
-    
-    return fmt.Sprintf(
-        "✅ *Laporan Cycle %d*\n"+
-        "Nama: %s\n"+
-        "Milestone: %s\n"+
-        "Durasi: %s\n"+
-        "Mulai: %s\n"+
-        "Selesai: %s",
-        lastEntry.Cycle,
-        Pesan.Alias_name,
-        lastEntry.Milestone,
-        duration,
-        lastEntry.StartTime.Format("15:04"),
-        time.Now().Format("15:04"),
-    )
+    return generateResponse(report, Pesan.Alias_name)
 }
 
-// Helper functions
-func extractMilestone(msg string) string {
-    parts := strings.SplitN(msg, "Milestone : ", 2)
+func extractCycle(line string) int {
+    parts := strings.Split(line, " ")
+    if len(parts) < 4 {
+        return 0
+    }
+    cycle, _ := strconv.Atoi(parts[3])
+    return cycle
+}
+
+func extractValue(line, prefix string) string {
+    return strings.TrimSpace(strings.TrimPrefix(line, prefix))
+}
+
+func extractNumber(line, prefix string) int {
+    valStr := extractValue(line, prefix)
+    num, _ := strconv.Atoi(valStr)
+    return num
+}
+
+func extractActivities(lines []string) []string {
+    var activities []string
+    for _, line := range lines {
+        if strings.HasPrefix(line, "|") {
+            activities = append(activities, strings.TrimPrefix(line, "|"))
+        }
+    }
+    return activities
+}
+
+func extractSignature(msg string) string {
+    parts := strings.Split(msg, "#")
     if len(parts) > 1 {
-        return strings.TrimSpace(parts[1])
+        return parts[1]
     }
-    return "Tidak ada milestone"
+    return ""
 }
 
-func getLastEntry(db *mongo.Database, phone string) (Pomodoro, error) {
-    filter := bson.M{"phonenumber": phone}
-    // Tambahkan type parameter Pomodoro dalam kurung siku
-    result, err := atdb.GetOneLatestDoc[Pomodoro](db, "pomodoro", filter)
-    if err != nil {
-        return Pomodoro{}, err
-    }
-    return result, nil
-}
-
-func getLastCycle(db *mongo.Database, phone string) int {
-    // Tambahkan type parameter Pomodoro
-    result, _ := atdb.GetOneLatestDoc[Pomodoro](db, "pomodoro", bson.M{"phonenumber": phone})
-    return result.Cycle
+func generateResponse(report PomodoroReport, name string) string {
+    return fmt.Sprintf(
+        "✅ *Laporan Pomodoro Cycle %d*\n"+
+        "Nama: %s\n"+
+        "Hostname: %s\n"+
+        "Durasi: %s\n"+
+        "Screenshots: %d\n"+
+        "Aktivitas:\n- %s",
+        report.Cycle,
+        name,
+        report.Hostname,
+        time.Since(report.CreatedAt).Round(time.Minute).String(),
+        report.Screenshots,
+        strings.Join(report.Aktivitas, "\n- "),
+    )
 }
