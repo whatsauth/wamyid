@@ -1,7 +1,9 @@
 package strava
 
 import (
+	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -14,7 +16,7 @@ import (
 var activityId string
 
 func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-	reply := "Strava activity has been scraped"
+	reply := "Informasi Stava kamu hari ini: "
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("strava.app.link"),
@@ -49,7 +51,7 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 		return "\nError visiting URL1" + err.Error()
 	}
 
-	return reply + "link strava activity kamu: " + rawUrl + "\n\n#mental_health"
+	return reply + "\n\nlink strava activity kamu: " + rawUrl + "\n\n#mental_health"
 }
 
 func scrapeStravaActivity(db *mongo.Database, url string) string {
@@ -88,16 +90,24 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		}
 	})
 
+	if int(stravaActivity.Distance[0]) < 5 {
+		reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏" +
+			"\nSatu hari minimal 5 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi" +
+			"\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+	}
+
 	c.OnScraped(func(r *colly.Response) {
-		if int(stravaActivity.Distance[0]) < 5 {
+		distanceFloat := parseDistance(stravaActivity.Distance)
+		if distanceFloat < 5 {
 			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏" +
 				"\nSatu hari minimal 5 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi" +
 				"\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+			return
 		}
 
 		col := "strava"
 		data, err := atdb.GetOneDoc[StravaActivity](db, col, bson.M{"activity_id": stravaActivity.ActivityId})
-		if err != nil {
+		if err != nil && err != mongo.ErrNoDocuments {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
 			return
 		}
@@ -139,4 +149,26 @@ func extractStravaLink(text string) string {
 	match := re.FindString(text)
 
 	return match
+}
+
+func parseDistance(distance string) float64 {
+	distance = strings.TrimSpace(distance)
+	if len(distance) == 0 {
+		return 0
+	}
+
+	re := regexp.MustCompile(`[0-9]+(\.[0-9]+)?`)
+	number := re.FindString(distance)
+
+	if number == "" {
+		return 0
+	}
+
+	distanceFloat, err := strconv.ParseFloat(number, 64)
+	if err != nil {
+		fmt.Println("Gagal konversi jarak ke float64:", err)
+		return 0
+	}
+
+	return distanceFloat
 }
