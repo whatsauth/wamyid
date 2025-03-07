@@ -5,76 +5,87 @@ import (
     "strings"
     "time"
     
-    "github.com/gocroot/helper/atdb"
+	"github.com/gocroot/helper/atdb"
     "github.com/whatsauth/itmodel"
     "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
 )
 
-func HandlePomodoroStart(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-    // Ambil cycle terakhir
+func PomodoroHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+    switch {
+    case strings.HasPrefix(Pesan.Message, "Pomodoro Start"):
+        handleStart(Pesan, db)
+        return "" // Tidak ada respons saat mulai
+    case strings.HasPrefix(Pesan.Message, "Pomodoro Report"):
+        return handleReport(Pesan, db)
+    default:
+        return "Command tidak valid. Gunakan:\n- Pomodoro Start\n- Pomodoro Report"
+    }
+}
+
+func handleStart(Pesan itmodel.IteungMessage, db *mongo.Database) {
+    milestone := extractMilestone(Pesan.Message)
+    
+    // Auto-increment cycle
     lastCycle := getLastCycle(db, Pesan.Phone_number)
-    
-    // Buat cycle baru
     newCycle := lastCycle + 1
-    
-    // Simpan ke database
+
+    // Simpan ke database tanpa memberikan respons
     pomodoro := Pomodoro{
         PhoneNumber: Pesan.Phone_number,
         Cycle:       newCycle,
         StartTime:   time.Now(),
-        Milestone:   extractMilestone(Pesan.Message),
+        Milestone:   milestone,
     }
     
-    _, err := atdb.InsertOneDoc(db, "pomodoros", pomodoro)
-    if err != nil {
-        return "Gagal memulai cycle 😥"
-    }
-    
-    return fmt.Sprintf(
-        "🎯 *Mulai Cycle %d*\n"+
-        "Hai %s\n"+
-        "Waktu: %s\n"+
-        "Milestone: %s",
-        newCycle,
-        Pesan.Alias_name,
-        time.Now().Format("15:04"),
-        pomodoro.Milestone,
-    )
+    atdb.InsertOneDoc(db, "pomodoros", pomodoro)
 }
 
-func HandlePomodoroReport(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-    // Ambil cycle terakhir
-    lastCycle := getLastCycle(db, Pesan.Phone_number)
+func handleReport(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+    lastEntry, err := getLastEntry(db, Pesan.Phone_number)
+    if err != nil {
+        return "Wah kak " + Pesan.Alias_name + ", belum ada cycle yang dimulai"
+    }
+
+    duration := time.Since(lastEntry.StartTime).Round(time.Minute)
     
     return fmt.Sprintf(
-        "✅ *Cycle %d Selesai*\n"+
+        "✅ *Laporan Cycle %d*\n"+
         "Nama: %s\n"+
-        "Durasi: 25 menit\n"+
-        "Milestone: %s",
-        lastCycle,
+        "Milestone: %s\n"+
+        "Durasi: %s\n"+
+        "Mulai: %s\n"+
+        "Selesai: %s",
+        lastEntry.Cycle,
         Pesan.Alias_name,
-        getLastMilestone(db, Pesan.Phone_number),
+        lastEntry.Milestone,
+        duration,
+        lastEntry.StartTime.Format("15:04"),
+        time.Now().Format("15:04"),
     )
 }
 
 // Helper functions
-func getLastCycle(db *mongo.Database, phone string) int {
-    filter := bson.M{"phonenumber": phone}
-    result, _ := atdb.GetOneLatestDoc[Pomodoro](db, "pomodoro", filter)
-    return result.Cycle
-}
-
 func extractMilestone(msg string) string {
-    parts := strings.Split(msg, "Milestone : ")
+    parts := strings.SplitN(msg, "Milestone : ", 2)
     if len(parts) > 1 {
         return strings.TrimSpace(parts[1])
     }
     return "Tidak ada milestone"
 }
 
-func getLastMilestone(db *mongo.Database, phone string) string {
+func getLastEntry(db *mongo.Database, phone string) (Pomodoro, error) {
     filter := bson.M{"phonenumber": phone}
-    result, _ := atdb.GetOneLatestDoc[Pomodoro](db, "pomodoro", filter)
-    return result.Milestone
+    // Tambahkan type parameter Pomodoro dalam kurung siku
+    result, err := atdb.GetOneLatestDoc[Pomodoro](db, "pomodoro", filter)
+    if err != nil {
+        return Pomodoro{}, err
+    }
+    return result, nil
+}
+
+func getLastCycle(db *mongo.Database, phone string) int {
+    // Tambahkan type parameter Pomodoro
+    result, _ := atdb.GetOneLatestDoc[Pomodoro](db, "pomodoro", bson.M{"phonenumber": phone})
+    return result.Cycle
 }

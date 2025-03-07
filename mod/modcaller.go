@@ -67,7 +67,7 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "prohibited-items":
 		reply = posint.GetProhibitedItems(Pesan, db)
 	case "pomodoro-cycle":
-		reply = pomodoro.HandlePomodoroStart(Pesan, db)
+		reply = pomodoro.PomodoroHandler(Pesan, db)
 	}
 
 	return
