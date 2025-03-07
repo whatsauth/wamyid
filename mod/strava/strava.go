@@ -98,10 +98,12 @@ func scrapeStravaActivity(db *mongo.Database, url string) {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		_, err := atdb.InsertOneDoc(db, "strava", activities)
+		_, err := atdb.InsertOneDoc(db, "strava", stravaActivity)
 		if err != nil {
-			// fmt.Println("Error inserting document", err)
-			reply += "\nError inserting document " + err.Error()
+			reply += "\nError inserting document: " + err.Error()
+		} else {
+			reply += "\nData berhasil disimpan ke MongoDB."
+			reply += "\nName: " + stravaActivity.Name + "\nTitle: " + stravaActivity.Title + "\nDate Time: " + stravaActivity.DateTime + "\nType Sport: " + stravaActivity.TypeSport + "\nDistance: " + stravaActivity.Distance + "\nTime Period: " + stravaActivity.TimePeriod + "\nElevation: " + stravaActivity.Elevation
 		}
 	})
 
