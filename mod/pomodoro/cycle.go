@@ -61,8 +61,9 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 
 	// 5. Validasi payload dan ekstrak URL
 	var url string
+	// Di bagian validasi payload
 	if payloadData, ok := payload.Data.(map[string]interface{}); ok {
-		if u, exists := payloadData["url"].(string); exists {
+		if u, exists := payloadData["id"].(string); exists {
 			url = u
 		}
 	}
@@ -96,6 +97,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	}
 
 	// 6. Simpan ke database
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	report := PomodoroReport{
 		PhoneNumber: Pesan.Phone_number,
 		Cycle:       cycle,
@@ -104,7 +106,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Screenshots: screenshots,
 		Pekerjaan:   pekerjaan,
 		Token:   token,
-		CreatedAt:   time.Now(),
+		CreatedAt:   time.Now().In(loc),
 	}
 
 	_, err = atdb.InsertOneDoc(db, "pomokit", report)
@@ -152,7 +154,7 @@ func extractValue(msg, prefix string) string {
 }
 
 func extractIP(msg string) string {
-    re := regexp.MustCompile(`IP\s*:\s*(\S+)`)
+    re := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
     match := re.FindStringSubmatch(msg)
     if len(match) > 1 {
         return match[1]
@@ -161,16 +163,22 @@ func extractIP(msg string) string {
 }
 
 func extractNumber(msg, prefix string) int {
-	valStr := extractValue(msg, prefix)
-	num, _ := strconv.Atoi(valStr)
-	return num
+    re := regexp.MustCompile(regexp.QuoteMeta(prefix) + `(\d+)`)
+    match := re.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        num, _ := strconv.Atoi(match[1])
+        return num
+    }
+    return 0
 }
 
 func extractActivities(msg string) []string {
-    re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\|([^#]+)`)
+    re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n((?:- .+\n)+)`)
     match := re.FindStringSubmatch(msg)
     if len(match) > 1 {
-        return strings.Split(match[1], "|")
+        activities := strings.Split(match[1], "\n- ")
+        activities[0] = strings.TrimPrefix(activities[0], "- ")
+        return activities
     }
     return []string{}
 }
