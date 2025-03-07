@@ -92,9 +92,9 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		return "Wah kak " + Pesan.Alias_name + ", data laporan tidak sesuai dengan token"
 	}
 
-	if hostname == "" || ip == "" || len(pekerjaan) == 0 {
-		return "Wah kak " + Pesan.Alias_name + ", Format laporan tidak valid!"
-	}
+	// if hostname == "" || ip == "" || len(pekerjaan) == 0 {
+	// 	return "Wah kak " + Pesan.Alias_name + ", Format laporan tidak valid!"
+	// }
 
 	// 6. Simpan ke database
 	loc, _ := time.LoadLocation("Asia/Jakarta")
