@@ -34,6 +34,7 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 
 			if len(parts) > 1 {
 				activityId = strings.Split(parts[1], "/")[0]
+				activityId = strings.Split(activityId, "?")[0]
 				fullActivityURL := "https://www.strava.com" + path + activityId
 
 				reply += scrapeStravaActivity(db, fullActivityURL, Pesan.Alias_name)
@@ -43,17 +44,17 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 
 	rawUrl := extractStravaLink(Pesan.Message)
 	if rawUrl == "" {
-		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. " +
-			"Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
+		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
 	}
 
 	err := c.Visit(rawUrl)
 	if err != nil {
-		return "Link Strava Activity yang anda kirimkan tidak valid. " +
-			"Silakan kirim ulang dengan link yang valid.(1)"
+		return "Link Strava Activity yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(1)"
 	}
 
-	return reply + "\n\nlink strava activity kamu: " + rawUrl
+	reply += "\n\nlink strava activity kamu: " + rawUrl
+
+	return reply
 }
 
 func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
@@ -102,9 +103,9 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 	c.OnScraped(func(r *colly.Response) {
 		distanceFloat := parseDistance(stravaActivity.Distance)
 		if distanceFloat < 5 {
-			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏" +
-				"\nSatu hari minimal 5 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi" +
-				"\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
+			reply += "\nSatu hari minimal 5 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi"
+			reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 			return
 		}
 
@@ -115,9 +116,9 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 			return
 		}
 		if data.ActivityId == stravaActivity.ActivityId {
-			reply += "\n\nHayoolooooo ngapain, Jangan Curang donggg! 😏 Kamu sudah pernah share aktivitas ini sebelumnya." +
-				"\n*AOKWOKOKOWKOWKOWKKWOKOK* 🤣🤣" +
-				"\nSana Lari lagi jangan malas!"
+			reply += "\n\n*AOKWOKOKOWKOWKOWKKWOKOK* 🤣🤣"
+			reply += "\nHayoolooooo ngapain, Jangan Curang donggg! 😏 Kamu sudah pernah share aktivitas ini sebelumnya."
+			reply += "\nSana Lari lagi jangan malas!"
 			return
 		}
 
@@ -125,22 +126,21 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 		if err != nil {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
-			reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
-				"\n\n- Name: " + stravaActivity.Name +
-				"\n- Title: " + stravaActivity.Title +
-				"\n- Date Time: " + stravaActivity.DateTime +
-				"\n- Type Sport: " + stravaActivity.TypeSport +
-				"\n- Distance: " + stravaActivity.Distance +
-				"\n- Moving TIme: " + stravaActivity.MovingTime +
-				"\n- Elevation: " + stravaActivity.Elevation +
-				"\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+			reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀"
+			reply += "\n\n- Name		: " + stravaActivity.Name
+			reply += "\n- Title			: " + stravaActivity.Title
+			reply += "\n- Date Time		: " + stravaActivity.DateTime
+			reply += "\n- Type Sport	: " + stravaActivity.TypeSport
+			reply += "\n- Distance	 	: " + stravaActivity.Distance
+			reply += "\n- Moving Time	: " + stravaActivity.MovingTime
+			reply += "\n- Elevation	 	: " + stravaActivity.Elevation
+			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 		}
 	})
 
 	err := c.Visit(url)
 	if err != nil {
-		return "Link Strava Activity yang anda kirimkan tidak valid. " +
-			"Silakan kirim ulang dengan link yang valid.(2)"
+		return "Link Strava Activity yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(2)"
 	}
 
 	return reply
