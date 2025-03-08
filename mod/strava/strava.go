@@ -75,6 +75,13 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
 		stravaActivity.TypeSport = e.ChildText("span.styles_typeText__6DEXK")
 
+		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
+			imgTitle := imgEl.Attr("title")
+			if imgTitle == stravaActivity.Name {
+				stravaActivity.Picture = imgEl.Attr("src")
+			}
+		})
+
 		activities = append(activities, stravaActivity)
 	})
 
@@ -86,7 +93,7 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		case "distance":
 			stravaActivity.Distance = value
 		case "time":
-			stravaActivity.TimePeriod = value
+			stravaActivity.MovingTime = value
 		case "elevation":
 			stravaActivity.Elevation = value
 		}
@@ -118,14 +125,17 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 		if err != nil {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
-			reply += "\n\nHaiiiii kak, " + stravaActivity.Name + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
+			var pesan itmodel.IteungMessage
+
+			reply += "\n\nHaiiiii kak, " + stravaActivity.Name + " (" + pesan.Alias_name + ")" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀" +
 				"\n\n- Activity_id: " + stravaActivity.ActivityId +
+				"\n- Picture: " + stravaActivity.Picture +
 				"\n- Name: " + stravaActivity.Name +
 				"\n- Title: " + stravaActivity.Title +
 				"\n- Date Time: " + stravaActivity.DateTime +
 				"\n- Type Sport: " + stravaActivity.TypeSport +
 				"\n- Distance: " + stravaActivity.Distance +
-				"\n- Time Period: " + stravaActivity.TimePeriod +
+				"\n- Time Period: " + stravaActivity.MovingTime +
 				"\n- Elevation: " + stravaActivity.Elevation +
 				"\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 		}
