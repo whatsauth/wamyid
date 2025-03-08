@@ -99,7 +99,12 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 		}
 	})
 
-	// found := false
+	found := false
+
+	c.OnHTML("canvas.mapboxgl-canvas", func(e *colly.HTMLElement) {
+		found = true
+		reply += "\n\nAktivitas Strava kamu ditemukan! 🎉"
+	})
 
 	// c.OnHTML("div.shared_col-md-6__dcrcA styles_mapData__cTtcD", func(e *colly.HTMLElement) {
 	// 	hasMap := e.DOM.Find("div.MapAndElevationChart_mapContainer__VIs6u").Length() > 0
@@ -114,11 +119,11 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 	// })
 
 	c.OnScraped(func(r *colly.Response) {
-		// if !found {
-		// 	reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-		// 	reply += "\nYang semangat dong... yang semangat dong..."
-		// 	return
-		// }
+		if !found {
+			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+			reply += "\nYang semangat dong... yang semangat dong..."
+			return
+		}
 
 		distanceFloat := parseDistance(stravaActivity.Distance)
 		if distanceFloat < 5 {
