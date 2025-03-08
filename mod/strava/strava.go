@@ -101,22 +101,9 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 
 	found := false
 
-	c.OnHTML("canvas.mapboxgl-canvas", func(e *colly.HTMLElement) {
+	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
 		found = true
-		reply += "\n\nAktivitas Strava kamu ditemukan! 🎉"
 	})
-
-	// c.OnHTML("div.shared_col-md-6__dcrcA styles_mapData__cTtcD", func(e *colly.HTMLElement) {
-	// 	hasMap := e.DOM.Find("div.MapAndElevationChart_mapContainer__VIs6u").Length() > 0
-	// 	hasChart := e.DOM.Find("div.MapAndElevationChart_chartContainer__S95YD").Length() > 0
-	// 	if hasMap || hasChart {
-	// 		found = true
-	// 		reply += "\n\nAktivitas Strava kamu ditemukan! 🎉"
-	// 	}
-
-	// 	reply += "\n\nHas Map: " + strconv.FormatBool(hasMap)
-	// 	reply += "\nHas Chart: " + strconv.FormatBool(hasChart)
-	// })
 
 	c.OnScraped(func(r *colly.Response) {
 		if !found {
