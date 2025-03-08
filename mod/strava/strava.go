@@ -1,7 +1,6 @@
 package strava
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,18 +22,19 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	)
 
 	c.OnError(func(_ *colly.Response, err error) {
-		reply += "\nSomething went wrong: " + err.Error()
+		reply += "Something went wrong:\n\n" + err.Error()
 	})
 
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 
-		if strings.Contains(link, "/activities/") {
-			parts := strings.Split(link, "/activities/")
+		path := "/activities/"
+		if strings.Contains(link, path) {
+			parts := strings.Split(link, path)
 
 			if len(parts) > 1 {
 				activityId = strings.Split(parts[1], "/")[0]
-				fullActivityURL := "https://www.strava.com/activities/" + activityId
+				fullActivityURL := "https://www.strava.com" + path + activityId
 
 				reply += scrapeStravaActivity(db, fullActivityURL)
 			}
@@ -43,7 +43,8 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 
 	rawUrl := extractStravaLink(Pesan.Message)
 	if rawUrl == "" {
-		return reply + " activity link not found"
+		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. " +
+			"Silakan kirim link aktivitas Strava untuk mendapatkan informasinya. 😊"
 	}
 
 	err := c.Visit(rawUrl)
@@ -145,6 +146,7 @@ func extractStravaLink(text string) string {
 }
 
 func parseDistance(distance string) float64 {
+	reply := ""
 	distance = strings.TrimSpace(distance)
 	if len(distance) == 0 {
 		return 0
@@ -159,7 +161,7 @@ func parseDistance(distance string) float64 {
 
 	distanceFloat, err := strconv.ParseFloat(number, 64)
 	if err != nil {
-		fmt.Println("Gagal konversi jarak ke float64:", err)
+		reply += "\nError parsing distance: " + err.Error()
 		return 0
 	}
 
