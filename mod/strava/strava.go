@@ -66,9 +66,18 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 
 	var activities []StravaActivity
 
-	stravaActivity := StravaActivity{
-		ActivityId: activityId,
-	}
+	stravaActivity := StravaActivity{}
+	stravaActivity.ActivityId = activityId
+
+	found := false
+
+	c.OnHTML("div.shared_col-md-6__dcrcA styles_mapData__cTtcD", func(e *colly.HTMLElement) {
+		hasMap := e.DOM.Find("canvas.mapboxgl-canvas").Length() > 0
+		hasChart := e.DOM.Find("div.MapAndElevationChart_chartContainer__S95YD").Length() > 0
+		if hasMap || hasChart {
+			found = true
+		}
+	})
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
@@ -101,6 +110,12 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
+		if !found {
+			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+			reply += "\nYang semangat dong... yang semangat dong..."
+			return
+		}
+
 		distanceFloat := parseDistance(stravaActivity.Distance)
 		if distanceFloat < 5 {
 			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
@@ -127,13 +142,13 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
 			reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀"
-			reply += "\n\n- Name		: " + stravaActivity.Name
-			reply += "\n- Title			: " + stravaActivity.Title
-			reply += "\n- Date Time		: " + stravaActivity.DateTime
-			reply += "\n- Type Sport	: " + stravaActivity.TypeSport
-			reply += "\n- Distance	 	: " + stravaActivity.Distance
-			reply += "\n- Moving Time	: " + stravaActivity.MovingTime
-			reply += "\n- Elevation	 	: " + stravaActivity.Elevation
+			reply += "\n\n- Name: " + stravaActivity.Name
+			reply += "\n- Title: " + stravaActivity.Title
+			reply += "\n- Date Time: " + stravaActivity.DateTime
+			reply += "\n- Type Sport: " + stravaActivity.TypeSport
+			reply += "\n- Distance: " + stravaActivity.Distance
+			reply += "\n- Moving Time: " + stravaActivity.MovingTime
+			reply += "\n- Elevation: " + stravaActivity.Elevation
 			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 		}
 	})
