@@ -44,12 +44,13 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	rawUrl := extractStravaLink(Pesan.Message)
 	if rawUrl == "" {
 		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. " +
-			"Silakan kirim link aktivitas Strava untuk mendapatkan informasinya. 😊"
+			"Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
 	}
 
 	err := c.Visit(rawUrl)
 	if err != nil {
-		return "\nError visiting URL1" + err.Error()
+		return "Link Strava Activity yang anda kirimkan tidak valid. " +
+			"Silakan kirim ulang dengan link yang valid.(1)"
 	}
 
 	return reply + "\n\nlink strava activity kamu: " + rawUrl
@@ -132,7 +133,8 @@ func scrapeStravaActivity(db *mongo.Database, url string) string {
 
 	err := c.Visit(url)
 	if err != nil {
-		return "\nError visiting URL2" + err.Error()
+		return "Link Strava Activity yang anda kirimkan tidak valid. " +
+			"Silakan kirim ulang dengan link yang valid.(2)"
 	}
 
 	return reply
