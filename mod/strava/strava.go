@@ -69,17 +69,6 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 	stravaActivity := StravaActivity{}
 	stravaActivity.ActivityId = activityId
 
-	found := false
-
-	c.OnHTML("div.shared_col-md-6__dcrcA styles_mapData__cTtcD", func(e *colly.HTMLElement) {
-		hasMap := e.DOM.Find("div.MapAndElevationChart_mapContainer__VIs6u").Length() > 0
-		hasChart := e.DOM.Find("div.MapAndElevationChart_chartContainer__S95YD").Length() > 0
-		if hasMap || hasChart {
-			found = true
-			reply += "\n\nAktivitas Strava kamu ditemukan! 🎉"
-		}
-	})
-
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
 		stravaActivity.Title = e.ChildText("h1.styles_name__irvsZ")
@@ -108,6 +97,20 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 		case "elevation":
 			stravaActivity.Elevation = value
 		}
+	})
+
+	found := false
+
+	c.OnHTML("div.shared_col-md-6__dcrcA styles_mapData__cTtcD", func(e *colly.HTMLElement) {
+		hasMap := e.DOM.Find("div.MapAndElevationChart_mapContainer__VIs6u").Length() > 0
+		hasChart := e.DOM.Find("div.MapAndElevationChart_chartContainer__S95YD").Length() > 0
+		if hasMap || hasChart {
+			found = true
+			reply += "\n\nAktivitas Strava kamu ditemukan! 🎉"
+		}
+
+		reply += "\n\nHas Map: " + strconv.FormatBool(hasMap)
+		reply += "\nHas Chart: " + strconv.FormatBool(hasChart)
 	})
 
 	c.OnScraped(func(r *colly.Response) {
