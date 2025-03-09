@@ -38,11 +38,11 @@ func parseDistance(distance string) float64 {
 }
 
 func formatDateTimeToIndo(dateTime string) string {
-	loc, _ := time.LoadLocation("Asia/Jakarta")
-	t, err := time.ParseInLocation(time.RFC3339, dateTime, loc)
+	layout := "2006-01-02T15:04:05"
+	t, err := time.ParseInLocation(layout, dateTime, time.Local)
 	if err != nil {
-		return ""
+		return "Error parsing date time: " + err.Error()
 	}
 
-	return t.Format("02 Jan 2006 15:04")
+	return t.Format("02 Jan 2006 15:04 WIB")
 }

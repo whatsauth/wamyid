@@ -73,12 +73,14 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
 		stravaActivity.Title = e.ChildText("h1.styles_name__irvsZ")
-		// stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
 		stravaActivity.TypeSport = e.ChildText("span.styles_typeText__6DEXK")
-
+		// stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
+		
 		e.ForEach("time.styles_date__Bx7mx", func(_ int, timeEl *colly.HTMLElement) {
 			if timeEl.Attr("datetime") != "" {
 				stravaActivity.DateTime = formatDateTimeToIndo(timeEl.Attr("datetime"))
+			} else {
+				stravaActivity.DateTime = timeEl.Attr("datetime")
 			}
 		})
 
