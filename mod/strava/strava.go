@@ -145,6 +145,8 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 			reply += "\n- Distance: " + stravaActivity.Distance
 			reply += "\n- Moving Time: " + stravaActivity.MovingTime
 			reply += "\n- Elevation: " + stravaActivity.Elevation
+			reply += "\nIni adalah link Strava Profile Picture kakak: " + stravaActivity.Picture
+			reply += "\nJangan lupa di masukkan ke form profile akun di do.my.id kakak yaaa"
 			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 		}
 	})
