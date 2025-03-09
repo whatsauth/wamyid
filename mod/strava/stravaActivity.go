@@ -75,12 +75,13 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		stravaActivity.Title = e.ChildText("h1.styles_name__irvsZ")
 		stravaActivity.TypeSport = e.ChildText("span.styles_typeText__6DEXK")
 		// stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
-		
+
 		e.ForEach("time.styles_date__Bx7mx", func(_ int, timeEl *colly.HTMLElement) {
-			if timeEl.Attr("datetime") != "" {
-				stravaActivity.DateTime = formatDateTimeToIndo(timeEl.Attr("datetime"))
+			dt := timeEl.Attr("datetime")
+			if dt != "" {
+				stravaActivity.DateTime = formatDateTimeToIndo(dt)
 			} else {
-				stravaActivity.DateTime = timeEl.Attr("datetime")
+				stravaActivity.DateTime = dt
 			}
 		})
 
@@ -108,19 +109,19 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		}
 	})
 
-	// found := false
+	found := false
 
-	// c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
-	// 	found = true
-	// })
+	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
+		found = true
+	})
 
 	c.OnScraped(func(r *colly.Response) {
 		// cek apakah ada map atau tidak di halaman strava
-		// if !found {
-		// 	reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-		// 	reply += "\nYang semangat dong... yang semangat dong..."
-		// 	return
-		// }
+		if !found {
+			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+			reply += "\nYang semangat dong... yang semangat dong..."
+			return
+		}
 
 		// cek apakah jarak lari kurang dari 5 km
 		distanceFloat := parseDistance(stravaActivity.Distance)
@@ -137,6 +138,7 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
 			return
 		}
+		// cek apakah data sudah up to date
 		if Idata.Picture != stravaActivity.Picture {
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
