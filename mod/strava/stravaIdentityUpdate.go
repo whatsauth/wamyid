@@ -11,7 +11,7 @@ import (
 )
 
 func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
-	reply := "Informasi Profile Stava kamu1: "
+	reply := "Informasi Profile Stava kakak: "
 
 	col := "strava_identity"
 	data, err := atdb.GetOneDoc[StravaIdentity](db, col, bson.M{"phone_number": Pesan.Phone_number})
@@ -45,35 +45,39 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 		})
 	})
 
+	c.OnScraped(func(r *colly.Response) {
+		if data.AthleteId == stravaIdentity.AthleteId {
+			if data.PhoneNumber != Pesan.Phone_number {
+				reply += "\n\nBukan akun kamu ini mah kak."
+				return
+			}
+
+			if data.Picture == stravaIdentity.Picture {
+				reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
+				return
+			}
+
+			stravaIdentity.UpdatedAt = time.Now()
+
+			updateData := bson.M{
+				"picture":    stravaIdentity.Picture,
+				"updated_at": stravaIdentity.UpdatedAt,
+			}
+
+			_, err := atdb.UpdateDoc(db, col, bson.M{"athlete_id": stravaIdentity.AthleteId}, bson.M{"$set": updateData})
+			if err != nil {
+				reply += "\n\nError updating data to MongoDB: " + err.Error()
+				return
+			}
+
+			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
+			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + data.Picture
+		}
+	})
+
 	err = c.Visit(data.LinkIndentity)
 	if err != nil {
 		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(3)"
-	}
-
-	if data.AthleteId == stravaIdentity.AthleteId {
-		if data.PhoneNumber != Pesan.Phone_number {
-			return "\n\nBukan akun kamu ini mah kak."
-		}
-
-		if data.Picture == stravaIdentity.Picture {
-			return "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date." + stravaIdentity.AthleteId
-		}
-
-		stravaIdentity.UpdatedAt = time.Now()
-
-		updateData := bson.M{
-			"picture":    stravaIdentity.Picture,
-			"updated_at": stravaIdentity.UpdatedAt,
-		}
-
-		_, err := atdb.UpdateDoc(db, col, bson.M{"athlete_id": stravaIdentity.AthleteId}, bson.M{"$set": updateData})
-		if err != nil {
-			return "\n\nError updating data to MongoDB: " + err.Error()
-
-		}
-
-		reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
-
 	}
 
 	return reply
