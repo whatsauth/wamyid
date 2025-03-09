@@ -1,8 +1,6 @@
 package strava
 
 import (
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,7 +13,7 @@ import (
 
 var activityId string
 
-func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Stava kamu hari ini: "
 
 	c := colly.NewCollector(
@@ -38,7 +36,7 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 				activityId = strings.Split(activityId, "?")[0]
 				fullActivityURL := "https://www.strava.com" + path + activityId
 
-				reply += scrapeStravaActivity(db, fullActivityURL, Pesan.Alias_name)
+				reply += scrapeStravaActivity(db, fullActivityURL, Pesan.Phone_number, Pesan.Alias_name)
 			}
 		}
 	})
@@ -58,7 +56,7 @@ func StravaHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	return reply
 }
 
-func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
+func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	reply := ""
 
 	c := colly.NewCollector(
@@ -68,7 +66,8 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 	var activities []StravaActivity
 
 	stravaActivity := StravaActivity{}
-	stravaActivity.ActivityId = int64(parseDistance(activityId))
+	stravaActivity.ActivityId = activityId
+	stravaActivity.LinkActivity = url
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
@@ -100,18 +99,18 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 		}
 	})
 
-	found := false
+	// found := false
 
-	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
-		found = true
-	})
+	// c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
+	// 	found = true
+	// })
 
 	c.OnScraped(func(r *colly.Response) {
-		if !found {
-			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-			reply += "\nYang semangat dong... yang semangat dong..."
-			return
-		}
+		// if !found {
+		// 	reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+		// 	reply += "\nYang semangat dong... yang semangat dong..."
+		// 	return
+		// }
 
 		distanceFloat := parseDistance(stravaActivity.Distance)
 		if distanceFloat < 5 {
@@ -121,7 +120,18 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 			return
 		}
 
-		col := "strava"
+		Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
+		if err != nil && err != mongo.ErrNoDocuments {
+			reply += "\n\nError fetching data from MongoDB: " + err.Error()
+			return
+		}
+		if Idata.Picture != stravaActivity.Picture {
+			reply += "\n\nAda yang salah nih dengan akun strava kamu, selahkan lakukan update dengan perintah dibawah yaaa"
+			reply += "\n\n *strava update in*"
+			return
+		}
+
+		col := "strava_activity"
 		data, err := atdb.GetOneDoc[StravaActivity](db, col, bson.M{"activity_id": stravaActivity.ActivityId})
 		if err != nil && err != mongo.ErrNoDocuments {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
@@ -148,8 +158,6 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 			reply += "\n- Distance: " + stravaActivity.Distance
 			reply += "\n- Moving Time: " + stravaActivity.MovingTime
 			reply += "\n- Elevation: " + stravaActivity.Elevation
-			reply += "\nIni adalah link Strava Profile Picture kakak: " + stravaActivity.Picture
-			reply += "\nJangan lupa di masukkan ke form profile akun di do.my.id kakak yaaa"
 			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 		}
 	})
@@ -160,34 +168,4 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 	}
 
 	return reply
-}
-
-func extractStravaLink(text string) string {
-	re := regexp.MustCompile(`https?://strava\.app\.link/\S+`)
-	match := re.FindString(text)
-
-	return match
-}
-
-func parseDistance(distance string) float64 {
-	reply := ""
-	distance = strings.TrimSpace(distance)
-	if len(distance) == 0 {
-		return 0
-	}
-
-	re := regexp.MustCompile(`[0-9]+(\.[0-9]+)?`)
-	number := re.FindString(distance)
-
-	if number == "" {
-		return 0
-	}
-
-	distanceFloat, err := strconv.ParseFloat(number, 64)
-	if err != nil {
-		reply += "\nError parsing distance: " + err.Error()
-		return 0
-	}
-
-	return distanceFloat
 }

@@ -69,8 +69,12 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = posint.GetProhibitedItems(Pesan, db)
 	case "pomodoro-cycle":
 		reply = pomodoro.HandlePomodoroReport(Profile, Pesan, db)
+	case "strava-identity":
+		reply = strava.StravaIdentityHandler(Pesan, db)
 	case "strava-activity":
-		reply = strava.StravaHandler(Pesan, db)
+		reply = strava.StravaActivityHandler(Pesan, db)
+	case "strava-update-identity":
+		reply = strava.StravaIdentityUpdateHandler(Pesan, db)
 	}
 
 	return
