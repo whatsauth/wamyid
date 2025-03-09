@@ -73,8 +73,14 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
 		stravaActivity.Title = e.ChildText("h1.styles_name__irvsZ")
-		stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
+		// stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
 		stravaActivity.TypeSport = e.ChildText("span.styles_typeText__6DEXK")
+
+		e.ForEach("time.styles_date__Bx7mx", func(_ int, timeEl *colly.HTMLElement) {
+			if timeEl.Attr("datetime") != "" {
+				stravaActivity.DateTime = formatDateTimeToIndo(timeEl.Attr("datetime"))
+			}
+		})
 
 		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
 			imgTitle := imgEl.Attr("title")
@@ -100,19 +106,19 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		}
 	})
 
-	found := false
+	// found := false
 
-	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
-		found = true
-	})
+	// c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
+	// 	found = true
+	// })
 
 	c.OnScraped(func(r *colly.Response) {
 		// cek apakah ada map atau tidak di halaman strava
-		if !found {
-			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-			reply += "\nYang semangat dong... yang semangat dong..."
-			return
-		}
+		// if !found {
+		// 	reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+		// 	reply += "\nYang semangat dong... yang semangat dong..."
+		// 	return
+		// }
 
 		// cek apakah jarak lari kurang dari 5 km
 		distanceFloat := parseDistance(stravaActivity.Distance)

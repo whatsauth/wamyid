@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func extractStravaLink(text string) string {
@@ -34,4 +35,14 @@ func parseDistance(distance string) float64 {
 	}
 
 	return distanceFloat
+}
+
+func formatDateTimeToIndo(dateTime string) string {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	t, err := time.ParseInLocation(time.RFC3339, dateTime, loc)
+	if err != nil {
+		return ""
+	}
+
+	return t.Format("02 Jan 2006 15:04")
 }
