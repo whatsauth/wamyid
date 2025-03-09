@@ -125,8 +125,13 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
 			return
 		}
+		if Idata.PhoneNumber != phone {
+			reply += "\n\nBukan punya kamu ini mah kak. Jangan curang yaaa! Share aktivitas sendiri dong!"
+			return
+		}
+
 		if Idata.Picture != stravaActivity.Picture {
-			reply += "\n\nAda yang salah nih dengan akun strava kamu, selahkan lakukan update dengan perintah dibawah yaaa"
+			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
 			return
 		}

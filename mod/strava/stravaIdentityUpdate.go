@@ -23,7 +23,7 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 	}
 
 	if data.LinkIndentity == "" {
-		return "Kak, link Strava kamu belum tersimpan di database. Silakan tambahkan dulu!"
+		return "link Strava kamu belum tersimpan di database!"
 	}
 
 	c := colly.NewCollector(
@@ -32,7 +32,6 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 
 	stravaIdentity := StravaIdentity{}
 	stravaIdentity.AthleteId = data.AthleteId
-	stravaIdentity.PhoneNumber = data.PhoneNumber
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		name := e.ChildText("h2.Details_name__Wz5bH")
@@ -47,11 +46,6 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 
 	c.OnScraped(func(r *colly.Response) {
 		if data.AthleteId == stravaIdentity.AthleteId {
-			if data.PhoneNumber != Pesan.Phone_number {
-				reply += "\n\nBukan akun kamu ini mah kak."
-				return
-			}
-
 			if data.Picture == stravaIdentity.Picture {
 				reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
 				return
