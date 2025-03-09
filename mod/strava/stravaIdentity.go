@@ -85,6 +85,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 
 	c.OnScraped(func(r *colly.Response) {
 		col := "strava_identity"
+		// cek apakah data sudah ada di database
 		data, err := atdb.GetOneDoc[StravaIdentity](db, col, bson.M{"athlete_id": stravaIdentity.AthleteId})
 		if err != nil && err != mongo.ErrNoDocuments {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
@@ -97,6 +98,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 
 		stravaIdentity.CreatedAt = time.Now()
 
+		// simpan data ke database jika data belum ada
 		_, err = atdb.InsertOneDoc(db, col, stravaIdentity)
 		if err != nil {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()

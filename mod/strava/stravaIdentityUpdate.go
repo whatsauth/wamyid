@@ -14,6 +14,7 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 	reply := "Informasi Profile Stava kakak: "
 
 	col := "strava_identity"
+	// cek apakah akun strava sudah terdaftar di database
 	data, err := atdb.GetOneDoc[StravaIdentity](db, col, bson.M{"phone_number": Pesan.Phone_number})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -21,7 +22,6 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 		}
 		return "\n\nError fetching data dari MongoDB: " + err.Error()
 	}
-
 	if data.LinkIndentity == "" {
 		return "link Strava kamu belum tersimpan di database!"
 	}
@@ -46,6 +46,7 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 
 	c.OnScraped(func(r *colly.Response) {
 		if data.AthleteId == stravaIdentity.AthleteId {
+			// cek apakah data sudah up to date
 			if data.Picture == stravaIdentity.Picture {
 				reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
 				return
@@ -58,6 +59,7 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 				"updated_at": stravaIdentity.UpdatedAt,
 			}
 
+			// update data ke database jika ada perubahan
 			_, err := atdb.UpdateDoc(db, col, bson.M{"athlete_id": stravaIdentity.AthleteId}, bson.M{"$set": updateData})
 			if err != nil {
 				reply += "\n\nError updating data to MongoDB: " + err.Error()

@@ -41,6 +41,7 @@ func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 		}
 	})
 
+	// ambil link strava activity dari pesan
 	rawUrl := extractStravaLink(Pesan.Message)
 	if rawUrl == "" {
 		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
@@ -99,19 +100,21 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		}
 	})
 
-	// found := false
+	found := false
 
-	// c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
-	// 	found = true
-	// })
+	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
+		found = true
+	})
 
 	c.OnScraped(func(r *colly.Response) {
-		// if !found {
-		// 	reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-		// 	reply += "\nYang semangat dong... yang semangat dong..."
-		// 	return
-		// }
+		// cek apakah ada map atau tidak di halaman strava
+		if !found {
+			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+			reply += "\nYang semangat dong... yang semangat dong..."
+			return
+		}
 
+		// cek apakah jarak lari kurang dari 5 km
 		distanceFloat := parseDistance(stravaActivity.Distance)
 		if distanceFloat < 5 {
 			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
@@ -120,12 +123,12 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			return
 		}
 
+		// cek apakah yang share link strava activity adalah pemilik akun strava
 		Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
 		if err != nil && err != mongo.ErrNoDocuments {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
 			return
 		}
-
 		if Idata.Picture != stravaActivity.Picture {
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
@@ -134,6 +137,7 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		}
 
 		col := "strava_activity"
+		// cek apakah data sudah ada di database
 		data, err := atdb.GetOneDoc[StravaActivity](db, col, bson.M{"activity_id": stravaActivity.ActivityId})
 		if err != nil && err != mongo.ErrNoDocuments {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
@@ -148,6 +152,7 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 
 		stravaActivity.CreatedAt = time.Now()
 
+		// simpan data ke database jika data belum ada
 		_, err = atdb.InsertOneDoc(db, col, stravaActivity)
 		if err != nil {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
