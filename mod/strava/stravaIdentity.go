@@ -102,7 +102,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
 			reply += "\n\nData Strava Kak " + alias + " sudah berhasil di simpan."
-			reply += "\n\nTambahkan Strava Profile Picture kamu ke profile akun do.my.id yaa \n" + data.Picture
+			reply += "\n\nTambahin Strava Profile Picture kamu ke profile akun do.my.id kamu yaa \n" + data.Picture
 		}
 	})
 
