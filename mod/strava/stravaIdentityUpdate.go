@@ -36,7 +36,7 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 	})
 
 	col := "strava_identity"
-	data, err := atdb.GetOneDoc[StravaIdentity](db, col, bson.M{"athlete_id": stravaIdentity.AthleteId})
+	data, err := atdb.GetOneDoc[StravaIdentity](db, col, bson.M{"phone_number": Pesan.Phone_number})
 	if err != nil && err != mongo.ErrNoDocuments {
 		return "\n\nError fetching data from MongoDB: " + err.Error()
 	}
@@ -48,22 +48,26 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 				return
 			}
 
-			if data.Picture != stravaIdentity.Picture {
-				stravaIdentity.UpdatedAt = time.Now()
-
-				updateData := bson.M{
-					"picture":    stravaIdentity.Picture,
-					"updated_at": stravaIdentity.UpdatedAt,
-				}
-
-				_, err := atdb.UpdateDoc(db, col, bson.M{"athlete_id": stravaIdentity.AthleteId}, bson.M{"$set": updateData})
-				if err != nil {
-					reply += "\n\nError updating data to MongoDB: " + err.Error()
-					return
-				}
-
-				reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
+			if data.Picture == stravaIdentity.Picture {
+				reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date." + stravaIdentity.AthleteId
+				return
 			}
+
+			stravaIdentity.UpdatedAt = time.Now()
+
+			updateData := bson.M{
+				"picture":    stravaIdentity.Picture,
+				"updated_at": stravaIdentity.UpdatedAt,
+			}
+
+			_, err := atdb.UpdateDoc(db, col, bson.M{"athlete_id": stravaIdentity.AthleteId}, bson.M{"$set": updateData})
+			if err != nil {
+				reply += "\n\nError updating data to MongoDB: " + err.Error()
+				return
+			}
+
+			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
+
 		}
 	})
 
