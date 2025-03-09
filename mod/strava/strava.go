@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/gocroot/helper/atdb"
@@ -67,7 +68,7 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 	var activities []StravaActivity
 
 	stravaActivity := StravaActivity{}
-	stravaActivity.ActivityId = activityId
+	stravaActivity.ActivityId = int64(parseDistance(activityId))
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
@@ -132,6 +133,8 @@ func scrapeStravaActivity(db *mongo.Database, url, alias string) string {
 			reply += "\nSana Lari lagi jangan malas!"
 			return
 		}
+
+		stravaActivity.CreatedAt = time.Now()
 
 		_, err = atdb.InsertOneDoc(db, col, stravaActivity)
 		if err != nil {
