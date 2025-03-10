@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Profile Stava kakak: "
 
 	col := "strava_identity"
@@ -76,9 +76,9 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
 			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + stravaIdentity.Picture
 
-			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Pesan.Phone_number})
+			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
 			if err != nil {
-				reply += "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error() + Pesan.Phone_number
+				reply += "\n\nWah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 				return
 			}
 
@@ -92,11 +92,11 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 
 			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
 			if err != nil {
-				reply += "Akses ke endpoint domyikado gagal: " + err.Error()
+				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
 			}
 			if statuscode != http.StatusOK {
-				reply += "Salah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+				reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
 				return
 			}
 

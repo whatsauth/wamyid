@@ -76,7 +76,7 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "strava-activity":
 		reply = strava.StravaActivityHandler(Pesan, db)
 	case "strava-update-identity":
-		reply = strava.StravaIdentityUpdateHandler(Pesan, db)
+		reply = strava.StravaIdentityUpdateHandler(Profile, Pesan, db)
 	}
 
 	return
