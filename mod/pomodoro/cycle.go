@@ -108,15 +108,15 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			"Nama: %s\n"+
 			"Hostname: %s\n"+
 			"IP: %s\n"+
-			"Aktivitas:\n- %s\n"+
+			"Aktivitas: %s\n"+
 			"🔗 Alamat URL %s\n"+
 			"🕒 %s",
 		cycle,
 		Pesan.Alias_name,
 		hostname,
 		ip,
-		pekerjaan, // pekerjaan is already a string
-		url, // Tampilkan URL dari payload
+		pekerjaan,
+		url,
 		time.Now().Format("2006-01-02 15:04"),
 	)
 }
@@ -183,7 +183,10 @@ func extractNumber(msg, prefix string) int {
 }
 
 func extractActivities(msg string) string {
-    // Contoh: Gabungkan aktivitas dengan pemisah (misal koma)
+	// hapus tanda |
+	msg = strings.TrimPrefix(msg, "|")
+
+	// penggabung pemisah
     re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([^#]+)`)
     match := re.FindStringSubmatch(msg)
     if len(match) > 1 {
