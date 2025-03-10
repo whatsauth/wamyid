@@ -55,7 +55,7 @@ func pushToBackend(phone, picture, token string) string {
 // }
 
 func getTokenFromCookie(req *colly.Request, cookieName string) string {
-	cookie := req.Headers.Get("Cookie")
+	cookie := req.Headers.Get("cookies")
 	cookies := strings.Split(cookie, "; ")
 	for _, c := range cookies {
 		parts := strings.SplitN(c, "=", 2)
