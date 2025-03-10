@@ -108,14 +108,14 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			"IP: %s\n"+
 			"Aktivitas: %s\n"+
 			"🔗 Alamat URL %s\n"+
-			"🕒 %s",
+			"📅 %s",
 		cycle,
 		Pesan.Alias_name,
 		hostname,
 		ip,
 		pekerjaan,
 		url,
-		time.Now().Format("2006-01-02 15:04"),
+		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"), // ini dikonversi
 	)
 }
 
