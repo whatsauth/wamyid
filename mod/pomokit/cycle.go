@@ -219,58 +219,39 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	// Pisahkan pesan menjadi baris-baris
 	lines := strings.Split(Pesan.Message, "\n")
 	
-	// Variabel untuk menyimpan data yang diekstrak
-	var cycle int
-	var milestone, version, hostname, ip string
+	// Bersihkan setiap baris dari spasi berlebih
+	for i := range lines {
+		lines[i] = strings.TrimSpace(lines[i])
+	}
 	
-	// Ekstrak nilai dari setiap baris
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		
-		// Ekstrak cycle dari baris pertama
-		if strings.Contains(line, "Start") && strings.Contains(line, "cycle") {
-			re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
-			matches := re.FindStringSubmatch(line)
-			if len(matches) > 1 {
-				cycle, _ = strconv.Atoi(matches[1])
-			}
-		}
-		
-		// Ekstrak milestone
-		if strings.Contains(line, "Milestone :") {
-			milestone = strings.TrimSpace(strings.Split(line, "Milestone :")[1])
-		}
-		
-		// Ekstrak version
-		if strings.Contains(line, "Version :") {
-			version = strings.TrimSpace(strings.Split(line, "Version :")[1])
-		}
-		
-		// Ekstrak hostname
-		if strings.Contains(line, "Hostname :") {
-			hostname = strings.TrimSpace(strings.Split(line, "Hostname :")[1])
-		}
-		
-		// Ekstrak IP
-		if strings.Contains(line, "IP :") {
-			ipValue := strings.TrimSpace(strings.Split(line, "IP :")[1])
-			// Periksa apakah IP sudah dalam format URL
-			if strings.HasPrefix(ipValue, "https://whatismyipaddress.com") {
-				ip = ipValue
-			} else {
-				// Jika hanya IP biasa, buat URL
-				ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-				ipMatch := ipRegex.FindStringSubmatch(ipValue)
-				if len(ipMatch) > 1 {
-					ip = "https://whatismyipaddress.com/ip/" + ipMatch[1]
-				}
-			}
-		}
+	// Ekstrak cycle dari baris pertama atau dari seluruh pesan jika tidak ditemukan
+	cycle := 0
+	if strings.Contains(lines[0], "Start") && strings.Contains(lines[0], "cycle") {
+		cycle = extractStartCycleNumber(lines[0])
+	} else {
+		cycle = extractStartCycleNumber(Pesan.Message)
 	}
 	
 	// Validasi cycle
 	if cycle == 0 {
 		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
+	}
+
+	// Ekstrak nilai-nilai dari baris-baris terpisah
+	milestone := extractFromLine(lines, "Milestone :")
+	version := extractFromLine(lines, "Version :")
+	hostname := extractFromLine(lines, "Hostname :")
+	ipRaw := extractFromLine(lines, "IP :")
+	
+	// Format IP jika perlu
+	ip := ipRaw
+	if !strings.HasPrefix(ipRaw, "https://whatismyipaddress.com") && ipRaw != "" {
+		// Cek apakah ini adalah alamat IP
+		ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+		ipMatch := ipRegex.FindStringSubmatch(ipRaw)
+		if len(ipMatch) > 1 {
+			ip = "https://whatismyipaddress.com/ip/" + ipMatch[1]
+		}
 	}
 	
 	// Set nilai default jika kosong
@@ -304,4 +285,24 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 		ip,
 		currentTime.Format("2006-01-02 🕒15:04 WIB"),
 	)
+}
+
+func extractStartCycleNumber(msg string) int {
+	re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
+	matches := re.FindStringSubmatch(msg)
+	if len(matches) > 1 {
+		cycle, _ := strconv.Atoi(matches[1])
+		return cycle
+	}
+	return 0
+}
+
+// Fungsi untuk mengekstrak nilai dari baris berdasarkan prefiks label
+func extractFromLine(lines []string, prefix string) string {
+	for _, line := range lines {
+		if strings.HasPrefix(line, prefix) {
+			return strings.TrimSpace(line[len(prefix):])
+		}
+	}
+	return ""
 }
