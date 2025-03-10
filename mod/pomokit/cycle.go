@@ -237,11 +237,11 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
 	}
 
-	// Ekstrak nilai-nilai dari baris-baris terpisah
-	milestone := extractFromLine(lines, "Milestone :")
-	version := extractFromLine(lines, "Version :")
-	hostname := extractFromLine(lines, "Hostname :")
-	ipRaw := extractFromLine(lines, "IP :")
+	// Ekstrak nilai-nilai menggunakan regex yang lebih fleksibel
+	milestone := extractWithRegex(lines, `Milestone\s*:\s*(.+)`)
+	version := extractWithRegex(lines, `Version\s*:\s*(.+)`)
+	hostname := extractWithRegex(lines, `Hostname\s*:\s*(.+)`)
+	ipRaw := extractWithRegex(lines, `IP\s*:\s*(.+)`)
 	
 	// Format IP jika perlu
 	ip := ipRaw
@@ -287,6 +287,7 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	)
 }
 
+// Fungsi untuk ekstraksi cycle dari pesan Start
 func extractStartCycleNumber(msg string) int {
 	re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
 	matches := re.FindStringSubmatch(msg)
@@ -297,11 +298,13 @@ func extractStartCycleNumber(msg string) int {
 	return 0
 }
 
-// Fungsi untuk mengekstrak nilai dari baris berdasarkan prefiks label
-func extractFromLine(lines []string, prefix string) string {
+// Fungsi untuk mengekstrak nilai dengan regex yang lebih fleksibel
+func extractWithRegex(lines []string, pattern string) string {
+	re := regexp.MustCompile(pattern)
 	for _, line := range lines {
-		if strings.HasPrefix(line, prefix) {
-			return strings.TrimSpace(line[len(prefix):])
+		matches := re.FindStringSubmatch(line)
+		if len(matches) > 1 {
+			return strings.TrimSpace(matches[1])
 		}
 	}
 	return ""
