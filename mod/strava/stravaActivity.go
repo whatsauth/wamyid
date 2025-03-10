@@ -12,8 +12,6 @@ import (
 )
 
 var activityId string
-var domApp = "strava.app.link"
-var domWeb = "www.strava.com"
 
 func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Stava kamu hari ini: "

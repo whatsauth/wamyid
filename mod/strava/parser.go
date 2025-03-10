@@ -7,10 +7,17 @@ import (
 	"time"
 )
 
-func extractStravaLink(text string) string {
-	re := regexp.MustCompile(`https?://strava\.app\.link/\S+`)
-	match := re.FindString(text)
+// func extractStravaLink(text string) string {
+// 	re := regexp.MustCompile(`https?://strava\.app\.link/\S+`)
+// 	match := re.FindString(text)
 
+// 	return match
+// }
+
+func extractStravaLink(text string) string {
+	// Buat regex untuk menangkap baik strava.app.link maupun www.strava.com
+	re := regexp.MustCompile(`https?://(?:strava\.app\.link|www\.strava\.com)\S+`)
+	match := re.FindString(text)
 	return match
 }
 
