@@ -129,10 +129,6 @@ func isTokenUsed(db *mongo.Database, token string) (bool, error) {
 	return count > 0, nil
 }
 
-// Tidak perlu fungsi markTokenAsUsed lagi karena token sudah tersimpan
-// di dokumen pomokit
-
-// Helper functions
 func extractCycleNumber(msg string) int {
 	re := regexp.MustCompile(`Report\s+(\d+)\s+cycle`)
 	matches := re.FindStringSubmatch(msg)
@@ -205,38 +201,71 @@ func extractToken(msg string) string {
 	return ""
 }
 
-// func extractURLFromPayload(payload any) string {
-// 	// Cek jika payload adalah string
-// 	if urlStr, ok := payload.(string); ok && strings.HasPrefix(urlStr, "http") {
-// 		return urlStr
-// 	}
-
-// 	// Jika payload adalah map
-// 	if payloadMap, ok := payload.(map[string]interface{}); ok {
-// 		// Coba cari key yang berisi URL
-// 		for _, v := range payloadMap { // Hapus variabel k yang tidak digunakan
-// 			if urlStr, ok := v.(string); ok && strings.HasPrefix(urlStr, "http") {
-// 				return urlStr
-// 			}
-// 		}
-// 	}
-
-// 	// Cek jika payload adalah struct
-// 	payloadStr := fmt.Sprintf("%v", payload)
-// 	// Ekstrak URL dari string representasi payload
-// 	re := regexp.MustCompile(`\{(https://[^\s]+)`)
-// 	match := re.FindStringSubmatch(payloadStr)
-// 	if len(match) > 1 {
-// 		return match[1]
-// 	}
-
-// 	return ""
-// }
-
 func getPublicKey(db *mongo.Database) (string, error) {
 	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": bson.M{"$exists": true}})
 	if err != nil {
 		return "", fmt.Errorf("konfigurasi tidak ditemukan")
 	}
 	return conf.PublicKeyPomokit, nil
+}
+
+// HandlePomodoroStart menangani pesan permintaan untuk memulai siklus Pomodoro
+func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
+	// Validasi input dasar
+	if Pesan.Message == "" {
+		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
+	}
+
+	// Ekstrak informasi dari pesan
+	cycle := extractCycleNumber(Pesan.Message)
+	if cycle == 0 {
+		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
+	}
+
+	milestone := extractMilestone(Pesan.Message)
+	version := extractVersion(Pesan.Message)
+	hostname := extractValue(Pesan.Message, "Hostname : ")
+	ip := extractIP(Pesan.Message)
+
+	// Lokasi waktu Indonesia
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	currentTime := time.Now().In(loc)
+
+	// Format respons
+	return fmt.Sprintf(
+		"🍅 *Pomodoro Cycle %d Dimulai!*\n"+
+			"Nama: %s\n"+
+			"Milestone: %s\n"+
+			"Version: %s\n"+
+			"Hostname: %s\n"+
+			"IP: %s\n"+
+			"📅 %s\n\n"+
+			"Semangat kak! Waktu kerja nya dimulai 🚀",
+		cycle,
+		Pesan.Alias_name,
+		milestone,
+		version,
+		hostname,
+		ip,
+		currentTime.Format("2006-01-02 🕒15:04 WIB"),
+	)
+}
+
+// Fungsi tambahan untuk ekstraksi data dari pesan
+func extractMilestone(msg string) string {
+	re := regexp.MustCompile(`Milestone\s*:\s*([^$\n]+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+	return "Tidak ada milestone"
+}
+
+func extractVersion(msg string) string {
+	re := regexp.MustCompile(`Version\s*:\s*([^\s\n]+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+	return "1.0.0" // Default version
 }
