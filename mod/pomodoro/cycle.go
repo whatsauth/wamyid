@@ -183,11 +183,12 @@ func extractNumber(msg, prefix string) int {
 }
 
 func extractActivities(msg string) string {
-	// hapus tanda |
-	msg = strings.TrimPrefix(msg, "|")
 
 	// penggabung pemisah
     re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([^#]+)`)
+	
+	// hapus tanda |
+	msg = strings.TrimPrefix(msg, "|")
     match := re.FindStringSubmatch(msg)
     if len(match) > 1 {
         return strings.TrimSpace(match[1])
