@@ -86,7 +86,8 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 			} else {
 				resp := pushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture, token)
 				if resp != "" {
-					reply += "\n\nError sending data to Backend: " + resp
+					reply += "\n\nError sending data to Backend: " + resp + " " + token
+					return
 				} else {
 					reply += "\n\nStrava Profile Picture Kak " + Pesan.Alias_name + " sudah berhasil di update."
 					reply += "\n\nCek Ulang di do.my.id yaa kak."

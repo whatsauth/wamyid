@@ -129,7 +129,8 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 			} else {
 				resp := pushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture, token)
 				if resp != "" {
-					reply += "\n\nError sending data to Backend: " + resp
+					reply += "\n\nError sending data to Backend: " + resp + " " + token
+					return
 				} else {
 					reply += "\n\nStrava Profile Picture Kak " + alias + " sudah berhasil di update."
 					reply += "\n\nCek Ulang di do.my.id yaa kak."
