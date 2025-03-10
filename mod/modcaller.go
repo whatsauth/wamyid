@@ -67,7 +67,9 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = siakad.ApproveBimbinganbyPoin(Pesan, db)
 	case "prohibited-items":
 		reply = posint.GetProhibitedItems(Pesan, db)
-	case "pomodoro-cycle":
+	case "pomodoro-report":
+		reply = pomodoro.HandlePomodoroReport(Profile, Pesan, db)
+	case "pomodoro-start":
 		reply = pomodoro.HandlePomodoroReport(Profile, Pesan, db)
 	case "strava-identity":
 		reply = strava.StravaIdentityHandler(Pesan, db)
