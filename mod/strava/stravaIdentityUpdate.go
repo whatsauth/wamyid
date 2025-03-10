@@ -27,7 +27,7 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 	}
 
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.strava.com"),
+		colly.AllowedDomains(domWeb),
 	)
 
 	stravaIdentity := StravaIdentity{}

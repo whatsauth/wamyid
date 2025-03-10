@@ -12,33 +12,20 @@ import (
 )
 
 var activityId string
+var domApp = "strava.app.link"
+var domWeb = "www.strava.com"
 
 func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Stava kamu hari ini: "
 
+	var fullActivityURL string
+
 	c := colly.NewCollector(
-		colly.AllowedDomains("strava.app.link"),
+		colly.AllowedDomains(domApp, domWeb),
 	)
 
 	c.OnError(func(_ *colly.Response, err error) {
 		reply += "Something went wrong:\n\n" + err.Error()
-	})
-
-	c.OnHTML("a", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-
-		path := "/activities/"
-		if strings.Contains(link, path) {
-			parts := strings.Split(link, path)
-
-			if len(parts) > 1 {
-				activityId = strings.Split(parts[1], "/")[0]
-				activityId = strings.Split(activityId, "?")[0]
-				fullActivityURL := "https://www.strava.com" + path + activityId
-
-				reply += scrapeStravaActivity(db, fullActivityURL, Pesan.Phone_number, Pesan.Alias_name)
-			}
-		}
 	})
 
 	// ambil link strava activity dari pesan
@@ -47,12 +34,34 @@ func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
 	}
 
+	if strings.Contains(rawUrl, domWeb) {
+		reply += scrapeStravaActivity(db, rawUrl, Pesan.Phone_number, Pesan.Alias_name)
+
+	} else if strings.Contains(rawUrl, domApp) {
+		c.OnHTML("a", func(e *colly.HTMLElement) {
+			link := e.Attr("href")
+
+			path := "/activities/"
+			if strings.Contains(link, path) {
+				parts := strings.Split(link, path)
+
+				if len(parts) > 1 {
+					activityId = strings.Split(parts[1], "/")[0]
+					activityId = strings.Split(activityId, "?")[0]
+					fullActivityURL = "https://www.strava.com" + path + activityId
+
+					reply += scrapeStravaActivity(db, fullActivityURL, Pesan.Phone_number, Pesan.Alias_name)
+				}
+			}
+		})
+	}
+
 	err := c.Visit(rawUrl)
 	if err != nil {
 		return "Link Strava Activity yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(1)"
 	}
 
-	reply += "\n\nlink strava activity kamu: " + rawUrl
+	reply += "\n\nlink strava activity kamu: " + fullActivityURL
 
 	return reply
 }
@@ -61,7 +70,7 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	reply := ""
 
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.strava.com"),
+		colly.AllowedDomains(domWeb),
 	)
 
 	var activities []StravaActivity
