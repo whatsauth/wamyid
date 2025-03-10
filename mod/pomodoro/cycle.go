@@ -28,9 +28,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 
 	hostname := extractValue(Pesan.Message, "Hostname : ")
 	// Perbaikan: Pastikan hostname tidak menyertakan "IP" 
-	if strings.HasSuffix(hostname, "IP") {
-		hostname = strings.TrimSuffix(hostname, "IP")
-	}
+	// hostname = strings.TrimSuffix(hostname, "IP")
 	ip := extractIP(Pesan.Message) // Gunakan fungsi khusus IP
 	screenshots := extractNumber(Pesan.Message, "Jumlah ScreenShoot : ")
 	pekerjaan := extractActivities(Pesan.Message) // Update parameter
@@ -155,21 +153,22 @@ func extractValue(msg, prefix string) string {
 }
 
 func extractIP(msg string) string {
-	// Coba pola IP langsung
-	re := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-	match := re.FindStringSubmatch(msg)
-	if len(match) > 1 {
-		return match[1]
-	}
+    // 1. Cek apakah format URL whatismyipaddress sudah ada
+    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+    matchURL := reURL.FindStringSubmatch(msg)
+    if len(matchURL) > 1 {
+        return matchURL[1] // Langsung kembalikan URL lengkap
+    }
 
-	// Jika tidak ditemukan, coba ekstrak dari URL
-	reURL := regexp.MustCompile(`IP\s*:\s*https://whatismyipaddress\.com/ip/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-	matchURL := reURL.FindStringSubmatch(msg)
-	if len(matchURL) > 1 {
-		return matchURL[1]
-	}
+    // 2. Jika tidak ada URL, cari IP biasa dan konstruksi URL
+    reIP := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+    matchIP := reIP.FindStringSubmatch(msg)
+    if len(matchIP) > 1 {
+        // Bangun URL dari IP yang ditemukan
+        return "https://whatismyipaddress.com/ip/" + matchIP[1]
+    }
 
-	return ""
+    return "" // Jika tidak ada IP/URL yang valid
 }
 
 func extractNumber(msg, prefix string) int {
