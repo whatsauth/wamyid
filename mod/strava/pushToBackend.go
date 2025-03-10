@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gocolly/colly"
 )
@@ -54,13 +53,24 @@ func pushToBackend(phone, picture, token string) string {
 // 	return ""
 // }
 
-func getTokenFromCookie(req *colly.Request, cookieName string) string {
-	cookie := req.Headers.Get("cookies")
-	cookies := strings.Split(cookie, "; ")
-	for _, c := range cookies {
-		parts := strings.SplitN(c, "=", 2)
-		if len(parts) == 2 && parts[0] == cookieName {
-			return parts[1]
+// func getCookie(r *http.Request, cname string) string {
+// 	cookie, err := r.Cookie(cname)
+// 	if err != nil {
+// 		if err == http.ErrNoCookie {
+// 			return "Cookie not found"
+// 		}
+// 		return "Error getting cookie: " + err.Error()
+// 	}
+// 	return cookie.Value
+// }
+
+func getCookieFromColly(c *colly.Collector, cookieName string) string {
+	// Ambil semua cookies dari domain target
+	cookies := c.Cookies("https://www.do.my.id") // Ganti dengan domain target
+
+	for _, cookie := range cookies {
+		if cookie.Name == cookieName {
+			return cookie.Value
 		}
 	}
 	return ""
