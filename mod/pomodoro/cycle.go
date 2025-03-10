@@ -28,6 +28,10 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	}
 
 	hostname := extractValue(Pesan.Message, "Hostname : ")
+	// Perbaikan: Pastikan hostname tidak menyertakan "IP" 
+	if strings.HasSuffix(hostname, "IP") {
+		hostname = strings.TrimSuffix(hostname, "IP")
+	}
 	ip := extractIP(Pesan.Message) // Gunakan fungsi khusus IP
 	screenshots := extractNumber(Pesan.Message, "Jumlah ScreenShoot : ")
 	pekerjaan := extractActivities(Pesan.Message) // Update parameter
@@ -132,6 +136,7 @@ func isTokenUsed(db *mongo.Database, token string) (bool, error) {
 	return count > 0, nil
 }
 
+// Fungsi untuk menandai token sebagai telah digunakan
 func markTokenAsUsed(db *mongo.Database, token string, phoneNumber string) error {
 	tokenData := bson.M{
 		"token":        token,
@@ -192,19 +197,32 @@ func extractNumber(msg, prefix string) int {
 }
 
 func extractActivities(msg string) []string {
-	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n([\s\S]+?)(?:\n\#|$)`)
+	// Perbaikan regex untuk menangkap semua konten setelah "Yang Dikerjakan :"
+	// hingga tanda # atau akhir pesan, termasuk konten dengan format |text
+	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([\s\S]+?)(?:\n\s*\#|$)`)
 	match := re.FindStringSubmatch(msg)
 	if len(match) > 1 {
-		// Bersihkan teks dan pisahkan berdasarkan baris baru jika perlu
+		// Bersihkan teks
 		text := strings.TrimSpace(match[1])
+		
+		// Handle format dengan pipe (|)
+		if strings.HasPrefix(text, "|") {
+			text = strings.TrimPrefix(text, "|")
+			return []string{strings.TrimSpace(text)}
+		}
+		
+		// Handle format dengan baris baru
 		if strings.Contains(text, "\n") {
 			lines := strings.Split(text, "\n")
 			var activities []string
 			for _, line := range lines {
 				line = strings.TrimSpace(line)
 				if line != "" {
+					// Handle line dengan prefix - atau |
 					if strings.HasPrefix(line, "- ") {
 						activities = append(activities, strings.TrimPrefix(line, "- "))
+					} else if strings.HasPrefix(line, "|") {
+						activities = append(activities, strings.TrimPrefix(line, "|"))
 					} else {
 						activities = append(activities, line)
 					}
@@ -212,9 +230,21 @@ func extractActivities(msg string) []string {
 			}
 			return activities
 		}
+		
 		return []string{text}
 	}
-	return []string{}
+	
+	// Jika tidak match dengan pattern di atas, coba pattern alternatif
+	altRe := regexp.MustCompile(`Yang Dikerjakan\s*:(.+?)(?:\n\s*\#|$)`)
+	altMatch := altRe.FindStringSubmatch(msg)
+	if len(altMatch) > 1 {
+		text := strings.TrimSpace(altMatch[1])
+		if text != "" {
+			return []string{text}
+		}
+	}
+	
+	return []string{"Tidak ada detail aktivitas"}
 }
 
 func extractToken(msg string) string {
