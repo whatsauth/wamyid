@@ -184,38 +184,24 @@ func extractNumber(msg, prefix string) int {
 }
 
 func extractActivities(msg string) []string {
-	// Cari baris yang mengandung "Yang Dikerjakan :"
-	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?\|?(.+?)(?:\n|$)`)
-	match := re.FindStringSubmatch(msg)
-	
-	if len(match) > 1 {
-		// Bersihkan teks
-		text := strings.TrimSpace(match[1])
-		
-		// Jika teks dimulai dengan "|", hapus "|"
-		if strings.HasPrefix(text, "|") {
-			text = strings.TrimPrefix(text, "|")
-			text = strings.TrimSpace(text)
-		}
-		
-		// Jika teks tidak kosong, kembalikan sebagai aktivitas
-		if text != "" {
-			return []string{text}
-		}
+	// Cari bagian dengan format pipe (|)
+	pipeRegex := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?\|([^\n#]+)`)
+	pipeMatch := pipeRegex.FindStringSubmatch(msg)
+	if len(pipeMatch) > 1 {
+		return []string{strings.TrimSpace(pipeMatch[1])}
 	}
 	
-	// Jika tidak ada hasil yang cocok, coba pencocokan alternatif
-	altRe := regexp.MustCompile(`Yang Dikerjakan\s*:(.+?)(?:\n|$)`)
-	altMatch := altRe.FindStringSubmatch(msg)
-	if len(altMatch) > 1 {
-		text := strings.TrimSpace(altMatch[1])
-		if text != "" {
-			if strings.HasPrefix(text, "|") {
-				text = strings.TrimPrefix(text, "|")
-				text = strings.TrimSpace(text)
-			}
-			return []string{text}
+	// Format alternatif: Jika tidak ada pipe, coba ambil apa saja setelah "Yang Dikerjakan :"
+	// tetapi sebelum tanda # atau enter
+	plainRegex := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([^#\n]+)`)
+	plainMatch := plainRegex.FindStringSubmatch(msg)
+	if len(plainMatch) > 1 {
+		text := strings.TrimSpace(plainMatch[1])
+		// Jika masih ada pipe di dalam text, hapus
+		if strings.HasPrefix(text, "|") {
+			text = strings.TrimPrefix(text, "|")
 		}
+		return []string{strings.TrimSpace(text)}
 	}
 	
 	return []string{"Tidak ada detail aktivitas"}
@@ -257,7 +243,6 @@ func extractToken(msg string) string {
 
 // 	return ""
 // }
-
 
 func getPublicKey(db *mongo.Database) (string, error) {
 	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": bson.M{"$exists": true}})
