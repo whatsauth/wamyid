@@ -1,4 +1,4 @@
-package pomodoro
+package pomokit
 
 import (
 	"time"
