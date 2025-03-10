@@ -1,9 +1,11 @@
 package strava
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
@@ -73,6 +75,32 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 
 			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
 			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + stravaIdentity.Picture
+
+			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Pesan.Reply_phone_number})
+			if err != nil {
+				reply += "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error() + Pesan.Reply_phone_number
+				return
+			}
+
+			datastrava := struct {
+				StravaProfilePicture string `json:"stravaprofilepicture"`
+				PhoneNumber          string `json:"phonenumber"`
+			}{
+				StravaProfilePicture: stravaIdentity.Picture,
+				PhoneNumber:          Pesan.Phone_number,
+			}
+
+			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+			if err != nil {
+				reply += "Akses ke endpoint domyikado gagal: " + err.Error()
+				return
+			}
+			if statuscode != http.StatusOK {
+				reply += "Salah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+				return
+			}
+
+			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 
 		} else {
 			reply += "\n\nData Strava kak " + Pesan.Alias_name + " tidak ditemukan."

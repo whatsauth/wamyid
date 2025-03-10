@@ -26,3 +26,12 @@ type StravaActivity struct {
 	LinkActivity string    `bson:"link_activity" json:"link_activity"`
 	CreatedAt    time.Time `bson:"created_at" json:"created_at"`
 }
+
+type Config struct {
+	PhoneNumber      string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	LeaflyURL        string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
+	LeaflySecret     string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+	DomyikadoUserURL string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
+	DomyikadoSecret  string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
+	KimseokgisURL    string `json:"urlkimseokgis" bson:"urlkimseokgis"`
+}
