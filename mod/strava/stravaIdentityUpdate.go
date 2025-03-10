@@ -82,13 +82,23 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				return
 			}
 
-			datastrava := struct {
+			type DataStrava struct {
 				StravaProfilePicture string `json:"stravaprofilepicture"`
 				PhoneNumber          string `json:"phonenumber"`
-			}{
+			}
+
+			datastrava := DataStrava{
 				StravaProfilePicture: stravaIdentity.Picture,
 				PhoneNumber:          Pesan.Phone_number,
 			}
+
+			// datastrava := struct {
+			// 	StravaProfilePicture string `json:"stravaprofilepicture"`
+			// 	PhoneNumber          string `json:"phonenumber"`
+			// }{
+			// 	StravaProfilePicture: stravaIdentity.Picture,
+			// 	PhoneNumber:          Pesan.Phone_number,
+			// }
 
 			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
 			if err != nil {
@@ -100,7 +110,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				return
 			}
 
-			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
+			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak. " + httpresp.Response
 
 		} else {
 			reply += "\n\nData Strava kak " + Pesan.Alias_name + " tidak ditemukan."
