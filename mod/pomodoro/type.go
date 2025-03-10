@@ -15,6 +15,7 @@ type PomodoroReport struct {
     Screenshots   int                `bson:"screenshots"`
     Pekerjaan     []string           `bson:"pekerjaan"`
     Token         string             `bson:"token"`
+    URLPekerjaan  string             `bson:"urlpekerjaan"`
     CreatedAt     time.Time          `bson:"createdAt"`
 }
 

@@ -100,6 +100,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Screenshots: screenshots,
 		Pekerjaan:   pekerjaan,
 		Token:       token,
+		URLPekerjaan: url,
 		CreatedAt:   time.Now().In(loc),
 	}
 
@@ -283,6 +284,7 @@ func extractToken(msg string) string {
 
 // 	return ""
 // }
+
 
 func getPublicKey(db *mongo.Database) (string, error) {
 	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": bson.M{"$exists": true}})
