@@ -184,48 +184,36 @@ func extractNumber(msg, prefix string) int {
 }
 
 func extractActivities(msg string) []string {
-	// Perbaikan regex dengan batas yang jelas untuk tanda #
-	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([\s\S]+?)(?:\s*\n\s*\#|$)`)
+	// Cari baris yang mengandung "Yang Dikerjakan :"
+	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?\|?(.+?)(?:\n|$)`)
 	match := re.FindStringSubmatch(msg)
+	
 	if len(match) > 1 {
 		// Bersihkan teks
 		text := strings.TrimSpace(match[1])
 		
-		// Handle format dengan pipe (|)
+		// Jika teks dimulai dengan "|", hapus "|"
 		if strings.HasPrefix(text, "|") {
 			text = strings.TrimPrefix(text, "|")
-			return []string{strings.TrimSpace(text)}
+			text = strings.TrimSpace(text)
 		}
 		
-		// Handle format dengan baris baru
-		if strings.Contains(text, "\n") {
-			lines := strings.Split(text, "\n")
-			var activities []string
-			for _, line := range lines {
-				line = strings.TrimSpace(line)
-				if line != "" && !strings.HasPrefix(line, "#") {
-					// Handle line dengan prefix - atau |
-					if strings.HasPrefix(line, "- ") {
-						activities = append(activities, strings.TrimPrefix(line, "- "))
-					} else if strings.HasPrefix(line, "|") {
-						activities = append(activities, strings.TrimPrefix(line, "|"))
-					} else {
-						activities = append(activities, line)
-					}
-				}
-			}
-			return activities
+		// Jika teks tidak kosong, kembalikan sebagai aktivitas
+		if text != "" {
+			return []string{text}
 		}
-		
-		return []string{text}
 	}
 	
-	// Jika tidak match dengan pattern di atas, coba pattern alternatif
-	altRe := regexp.MustCompile(`Yang Dikerjakan\s*:(.+?)(?:\s*\n\s*\#|$)`)
+	// Jika tidak ada hasil yang cocok, coba pencocokan alternatif
+	altRe := regexp.MustCompile(`Yang Dikerjakan\s*:(.+?)(?:\n|$)`)
 	altMatch := altRe.FindStringSubmatch(msg)
 	if len(altMatch) > 1 {
 		text := strings.TrimSpace(altMatch[1])
 		if text != "" {
+			if strings.HasPrefix(text, "|") {
+				text = strings.TrimPrefix(text, "|")
+				text = strings.TrimSpace(text)
+			}
 			return []string{text}
 		}
 	}
