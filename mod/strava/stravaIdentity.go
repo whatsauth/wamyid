@@ -58,7 +58,11 @@ func StravaIdentityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(1)"
 	}
 
-	reply += "\n\nlink Profile Strava kamu: " + fullAthleteURL
+	if fullAthleteURL != "" {
+		reply += "\n\nLink Profile Strava kamu: " + fullAthleteURL
+	} else {
+		reply += "\n\nLink Profile Strava kamu: " + rawUrl
+	}
 
 	return reply
 }
