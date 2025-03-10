@@ -216,16 +216,17 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
 	}
 
-	// Ekstrak informasi dari pesan
+	// Ekstrak informasi dari pesan dengan fungsi yang tepat
 	cycle := extractStartCycleNumber(Pesan.Message)
 	if cycle == 0 {
 		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
 	}
 
-	milestone := extractMilestone(Pesan.Message)
-	version := extractVersion(Pesan.Message)
-	hostname := extractValue(Pesan.Message, "Hostname : ")
-	ip := extractIP(Pesan.Message)
+	// Gunakan fungsi ekstraksi yang telah diperbaiki
+	milestone := extractStartMilestone(Pesan.Message)
+	version := extractStartVersion(Pesan.Message)
+	hostname := extractStartHostname(Pesan.Message)
+	ip := extractStartIP(Pesan.Message)
 
 	// Lokasi waktu Indonesia
 	loc, _ := time.LoadLocation("Asia/Jakarta")
@@ -251,24 +252,6 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	)
 }
 
-func extractMilestone(msg string) string {
-	re := regexp.MustCompile(`Milestone\s*:\s*([^$\n]+)`)
-	match := re.FindStringSubmatch(msg)
-	if len(match) > 1 {
-		return strings.TrimSpace(match[1])
-	}
-	return "Tidak ada milestone"
-}
-
-func extractVersion(msg string) string {
-	re := regexp.MustCompile(`Version\s*:\s*([^\s\n]+)`)
-	match := re.FindStringSubmatch(msg)
-	if len(match) > 1 {
-		return strings.TrimSpace(match[1])
-	}
-	return "1.0.0"
-}
-
 func extractStartCycleNumber(msg string) int {
 	re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
 	matches := re.FindStringSubmatch(msg)
@@ -277,4 +260,50 @@ func extractStartCycleNumber(msg string) int {
 		return cycle
 	}
 	return 0
+}
+
+func extractStartMilestone(msg string) string {
+	re := regexp.MustCompile(`Milestone\s*:\s*([^\n\r]+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+	return "Tidak ada milestone"
+}
+
+func extractStartVersion(msg string) string {
+	re := regexp.MustCompile(`Version\s*:\s*([^\n\r]+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+	return "1.0.0" // Default version
+}
+
+func extractStartHostname(msg string) string {
+	re := regexp.MustCompile(`Hostname\s*:\s*([^\n\r]+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return strings.TrimSpace(match[1])
+	}
+	return ""
+}
+
+func extractStartIP(msg string) string {
+    // Cari URL IP lengkap
+    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+    matchURL := reURL.FindStringSubmatch(msg)
+    if len(matchURL) > 1 {
+        return matchURL[1] // Langsung kembalikan URL lengkap
+    }
+
+    // Jika tidak ada URL, cari IP biasa dan konstruksi URL
+    reIP := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+    matchIP := reIP.FindStringSubmatch(msg)
+    if len(matchIP) > 1 {
+        // Bangun URL dari IP yang ditemukan
+        return "https://whatismyipaddress.com/ip/" + matchIP[1]
+    }
+
+    return "" // Jika tidak ada IP/URL yang valid
 }
