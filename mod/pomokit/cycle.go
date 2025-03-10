@@ -164,7 +164,7 @@ func extractIP(msg string) string {
         return "https://whatismyipaddress.com/ip/" + matchIP[1]
     }
 
-    return "" // Jika tidak ada IP/URL yang valid
+    return ""
 }
 
 func extractNumber(msg, prefix string) int {
@@ -217,7 +217,7 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	}
 
 	// Ekstrak informasi dari pesan
-	cycle := extractCycleNumber(Pesan.Message)
+	cycle := extractStartCycleNumber(Pesan.Message)
 	if cycle == 0 {
 		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
 	}
@@ -251,7 +251,6 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	)
 }
 
-// Fungsi tambahan untuk ekstraksi data dari pesan
 func extractMilestone(msg string) string {
 	re := regexp.MustCompile(`Milestone\s*:\s*([^$\n]+)`)
 	match := re.FindStringSubmatch(msg)
@@ -267,5 +266,15 @@ func extractVersion(msg string) string {
 	if len(match) > 1 {
 		return strings.TrimSpace(match[1])
 	}
-	return "1.0.0" // Default version
+	return "1.0.0"
+}
+
+func extractStartCycleNumber(msg string) int {
+	re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
+	matches := re.FindStringSubmatch(msg)
+	if len(matches) > 1 {
+		cycle, _ := strconv.Atoi(matches[1])
+		return cycle
+	}
+	return 0
 }
