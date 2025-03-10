@@ -7,7 +7,7 @@ import (
 	"github.com/gocroot/mod/kyc"
 	"github.com/gocroot/mod/lms"
 	"github.com/gocroot/mod/lmsdesa"
-	"github.com/gocroot/mod/pomodoro"
+	"github.com/gocroot/mod/pomokit"
 	"github.com/gocroot/mod/posint"
 	"github.com/gocroot/mod/presensi"
 	"github.com/gocroot/mod/siakad"
@@ -68,9 +68,9 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "prohibited-items":
 		reply = posint.GetProhibitedItems(Pesan, db)
 	case "pomodoro-report":
-		reply = pomodoro.HandlePomodoroReport(Profile, Pesan, db)
+		reply = pomokit.HandlePomodoroReport(Profile, Pesan, db)
 	case "pomodoro-start":
-		reply = pomodoro.HandlePomodoroReport(Profile, Pesan, db)
+		reply = pomokit.HandlePomodoroStart(Profile, Pesan, db)
 	case "strava-identity":
 		reply = strava.StravaIdentityHandler(Pesan, db)
 	case "strava-activity":
