@@ -183,16 +183,17 @@ func extractNumber(msg, prefix string) int {
 }
 
 func extractActivities(msg string) string {
-
-	// penggabung pemisah
-    re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([^#]+)`)
-	
-	// hapus tanda |
-	msg = strings.TrimPrefix(msg, "|")
+    // Regex untuk menangkap konten setelah "Yang Dikerjakan :" dan menghiraukan "|" di awal
+    re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?\|?\s*([^#]+)`)
     match := re.FindStringSubmatch(msg)
+    
     if len(match) > 1 {
-        return strings.TrimSpace(match[1])
+        // Hilangkan karakter "|" di awal (jika ada) dan whitespace
+        cleaned := strings.TrimLeft(match[1], "| ") // Hapus "|" dan spasi di awal
+        cleaned = strings.TrimSpace(cleaned)        // Hilangkan spasi/newline di akhir
+        return cleaned
     }
+    
     return "Tidak ada detail aktivitas"
 }
 
