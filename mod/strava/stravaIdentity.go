@@ -117,12 +117,24 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 			reply += "\n\nData Strava Kak " + alias + " sudah berhasil di simpan."
 			reply += "\n\nTambahin Strava Profile Picture kamu ke profile akun do.my.id kamu yaa \n" + stravaIdentity.Picture
 
-			resp := PushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture)
-			if resp != "" {
-				reply += "\n\nError sending data to Backend: " + resp
+			var token string
+			if authHeader := r.Headers.Get("Authorization"); authHeader != "" {
+				token = strings.TrimPrefix(authHeader, "Bearer ")
+			} else if cookieHeader := r.Headers.Get("Cookie"); cookieHeader != "" {
+				// Jika token ada dalam cookie, kita perlu ekstrak nilai tokennya
+				token = ExtractTokenFromCookie(cookieHeader, "login")
+			}
+
+			if token == "" {
+				reply += "\n\nError: Token tidak ditemukan dalam header atau cookie."
 			} else {
-				reply += "\n\nStrava Profile Picture Kak " + alias + " sudah berhasil di update."
-				reply += "\n\nCek Ulang di do.my.id yaa kak."
+				// 🚀 Kirim data ke backend
+				result := pushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture, token)
+				if result == "" {
+					reply += "\n\nError sending data to Backend"
+				} else {
+					reply += "\n\n" + result
+				}
 			}
 		}
 	})

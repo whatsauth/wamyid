@@ -1,6 +1,7 @@
 package strava
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -74,12 +75,24 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
 			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + stravaIdentity.Picture
 
-			resp := PushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture)
-			if resp != "" {
-				reply += "\n\nError sending data to Backend: " + resp
+			var token string
+			if authHeader := r.Headers.Get("Authorization"); authHeader != "" {
+				token = strings.TrimPrefix(authHeader, "Bearer ")
+			} else if cookieHeader := r.Headers.Get("Cookie"); cookieHeader != "" {
+				// Jika token ada dalam cookie, kita perlu ekstrak nilai tokennya
+				token = ExtractTokenFromCookie(cookieHeader, "login")
+			}
+
+			if token == "" {
+				reply += "\n\nError: Token tidak ditemukan dalam header atau cookie."
 			} else {
-				reply += "\n\nStrava Profile Picture Kak " + Pesan.Alias_name + " sudah berhasil di update."
-				reply += "\n\nCek Ulang di do.my.id yaa kak."
+				// 🚀 Kirim data ke backend
+				result := pushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture, token)
+				if result == "" {
+					reply += "\n\nError sending data to Backend"
+				} else {
+					reply += "\n\n" + result
+				}
 			}
 
 		} else {
