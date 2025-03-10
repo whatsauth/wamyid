@@ -216,17 +216,71 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
 	}
 
-	// Ekstrak informasi dari pesan dengan fungsi yang tepat
-	cycle := extractStartCycleNumber(Pesan.Message)
+	// Pisahkan pesan menjadi baris-baris
+	lines := strings.Split(Pesan.Message, "\n")
+	
+	// Variabel untuk menyimpan data yang diekstrak
+	var cycle int
+	var milestone, version, hostname, ip string
+	
+	// Ekstrak nilai dari setiap baris
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		
+		// Ekstrak cycle dari baris pertama
+		if strings.Contains(line, "Start") && strings.Contains(line, "cycle") {
+			re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
+			matches := re.FindStringSubmatch(line)
+			if len(matches) > 1 {
+				cycle, _ = strconv.Atoi(matches[1])
+			}
+		}
+		
+		// Ekstrak milestone
+		if strings.Contains(line, "Milestone :") {
+			milestone = strings.TrimSpace(strings.Split(line, "Milestone :")[1])
+		}
+		
+		// Ekstrak version
+		if strings.Contains(line, "Version :") {
+			version = strings.TrimSpace(strings.Split(line, "Version :")[1])
+		}
+		
+		// Ekstrak hostname
+		if strings.Contains(line, "Hostname :") {
+			hostname = strings.TrimSpace(strings.Split(line, "Hostname :")[1])
+		}
+		
+		// Ekstrak IP
+		if strings.Contains(line, "IP :") {
+			ipValue := strings.TrimSpace(strings.Split(line, "IP :")[1])
+			// Periksa apakah IP sudah dalam format URL
+			if strings.HasPrefix(ipValue, "https://whatismyipaddress.com") {
+				ip = ipValue
+			} else {
+				// Jika hanya IP biasa, buat URL
+				ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+				ipMatch := ipRegex.FindStringSubmatch(ipValue)
+				if len(ipMatch) > 1 {
+					ip = "https://whatismyipaddress.com/ip/" + ipMatch[1]
+				}
+			}
+		}
+	}
+	
+	// Validasi cycle
 	if cycle == 0 {
 		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
 	}
-
-	// Gunakan fungsi ekstraksi yang telah diperbaiki
-	milestone := extractStartMilestone(Pesan.Message)
-	version := extractStartVersion(Pesan.Message)
-	hostname := extractStartHostname(Pesan.Message)
-	ip := extractStartIP(Pesan.Message)
+	
+	// Set nilai default jika kosong
+	if version == "" {
+		version = "1.0.0"
+	}
+	
+	if milestone == "" {
+		milestone = "Tidak ada milestone"
+	}
 
 	// Lokasi waktu Indonesia
 	loc, _ := time.LoadLocation("Asia/Jakarta")
@@ -250,60 +304,4 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 		ip,
 		currentTime.Format("2006-01-02 🕒15:04 WIB"),
 	)
-}
-
-func extractStartCycleNumber(msg string) int {
-	re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
-	matches := re.FindStringSubmatch(msg)
-	if len(matches) > 1 {
-		cycle, _ := strconv.Atoi(matches[1])
-		return cycle
-	}
-	return 0
-}
-
-func extractStartMilestone(msg string) string {
-	re := regexp.MustCompile(`Milestone\s*:\s*([^\n\r]+)`)
-	match := re.FindStringSubmatch(msg)
-	if len(match) > 1 {
-		return strings.TrimSpace(match[1])
-	}
-	return "Tidak ada milestone"
-}
-
-func extractStartVersion(msg string) string {
-	re := regexp.MustCompile(`Version\s*:\s*([^\n\r]+)`)
-	match := re.FindStringSubmatch(msg)
-	if len(match) > 1 {
-		return strings.TrimSpace(match[1])
-	}
-	return "1.0.0" // Default version
-}
-
-func extractStartHostname(msg string) string {
-	re := regexp.MustCompile(`Hostname\s*:\s*([^\n\r]+)`)
-	match := re.FindStringSubmatch(msg)
-	if len(match) > 1 {
-		return strings.TrimSpace(match[1])
-	}
-	return ""
-}
-
-func extractStartIP(msg string) string {
-    // Cari URL IP lengkap
-    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-    matchURL := reURL.FindStringSubmatch(msg)
-    if len(matchURL) > 1 {
-        return matchURL[1] // Langsung kembalikan URL lengkap
-    }
-
-    // Jika tidak ada URL, cari IP biasa dan konstruksi URL
-    reIP := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-    matchIP := reIP.FindStringSubmatch(msg)
-    if len(matchIP) > 1 {
-        // Bangun URL dari IP yang ditemukan
-        return "https://whatismyipaddress.com/ip/" + matchIP[1]
-    }
-
-    return "" // Jika tidak ada IP/URL yang valid
 }
