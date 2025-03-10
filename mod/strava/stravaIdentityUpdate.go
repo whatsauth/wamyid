@@ -82,7 +82,7 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 			token := getCookieFromColly(c, "login")
 			if token == "" {
 				reply += "\n\nError membaca token dari cookie. " + token
-
+				return
 			} else {
 				resp := pushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture, token)
 				if resp != "" {

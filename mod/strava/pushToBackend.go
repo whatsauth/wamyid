@@ -65,11 +65,13 @@ func pushToBackend(phone, picture, token string) string {
 // }
 
 func getCookieFromColly(c *colly.Collector, cookieName string) string {
+	reply := ""
 	// Ambil semua cookies dari domain target
 	cookies := c.Cookies("https://www.do.my.id") // Ganti dengan domain target
 
 	for _, cookie := range cookies {
 		if cookie.Name == cookieName {
+			reply += "Cookie: " + cookie.Name + " : " + cookie.Value + "\n"
 			return cookie.Value
 		}
 	}

@@ -125,7 +125,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 			token := getCookieFromColly(c, "login")
 			if token == "" {
 				reply += "\n\nError membaca token dari cookie."
-
+				return
 			} else {
 				resp := pushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture, token)
 				if resp != "" {
