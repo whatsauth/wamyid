@@ -43,7 +43,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memuat public key: " + err.Error()
 	}
 
-	// Cek apakah token sudah pernah digunakan
+	// Cek apakah token sudah pernah digunakan di koleksi pomokit
 	isUsed, err := isTokenUsed(db, token)
 	if err != nil {
 		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memeriksa token: " + err.Error()
@@ -72,12 +72,6 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			errorMsg,
 			strings.Split(err.Error(), ":")[0], // Ambil pesan error utama
 		)
-	}
-
-	// Tandai token sebagai telah digunakan
-	err = markTokenAsUsed(db, token, Pesan.Phone_number)
-	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + ", sistem gagal menandai token: " + err.Error()
 	}
 
 	// 5. Validasi payload dan ekstrak URL
@@ -128,26 +122,18 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	)
 }
 
-// Fungsi untuk memeriksa apakah token sudah digunakan
+// Fungsi untuk memeriksa apakah token sudah digunakan menggunakan koleksi pomokit
 func isTokenUsed(db *mongo.Database, token string) (bool, error) {
-	count, err := db.Collection("used_tokens").CountDocuments(context.Background(), bson.M{"token": token})
+	// Menggunakan koleksi pomokit yang sudah ada untuk mengecek token
+	count, err := db.Collection("pomokit").CountDocuments(context.Background(), bson.M{"token": token})
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
 }
 
-// Fungsi untuk menandai token sebagai telah digunakan
-func markTokenAsUsed(db *mongo.Database, token string, phoneNumber string) error {
-	tokenData := bson.M{
-		"token":        token,
-		"phone_number": phoneNumber,
-		"used_at":      time.Now(),
-	}
-
-	_, err := db.Collection("used_tokens").InsertOne(context.Background(), tokenData)
-	return err
-}
+// Tidak perlu fungsi markTokenAsUsed lagi karena token sudah tersimpan
+// di dokumen pomokit
 
 // Helper functions
 func extractCycleNumber(msg string) int {
@@ -198,9 +184,8 @@ func extractNumber(msg, prefix string) int {
 }
 
 func extractActivities(msg string) []string {
-	// Perbaikan regex untuk menangkap semua konten setelah "Yang Dikerjakan :"
-	// hingga tanda # atau akhir pesan, termasuk konten dengan format |text
-	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([\s\S]+?)(?:\n\s*\#|$)`)
+	// Perbaikan regex dengan batas yang jelas untuk tanda #
+	re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([\s\S]+?)(?:\s*\n\s*\#|$)`)
 	match := re.FindStringSubmatch(msg)
 	if len(match) > 1 {
 		// Bersihkan teks
@@ -218,7 +203,7 @@ func extractActivities(msg string) []string {
 			var activities []string
 			for _, line := range lines {
 				line = strings.TrimSpace(line)
-				if line != "" {
+				if line != "" && !strings.HasPrefix(line, "#") {
 					// Handle line dengan prefix - atau |
 					if strings.HasPrefix(line, "- ") {
 						activities = append(activities, strings.TrimPrefix(line, "- "))
@@ -236,7 +221,7 @@ func extractActivities(msg string) []string {
 	}
 	
 	// Jika tidak match dengan pattern di atas, coba pattern alternatif
-	altRe := regexp.MustCompile(`Yang Dikerjakan\s*:(.+?)(?:\n\s*\#|$)`)
+	altRe := regexp.MustCompile(`Yang Dikerjakan\s*:(.+?)(?:\s*\n\s*\#|$)`)
 	altMatch := altRe.FindStringSubmatch(msg)
 	if len(altMatch) > 1 {
 		text := strings.TrimSpace(altMatch[1])
