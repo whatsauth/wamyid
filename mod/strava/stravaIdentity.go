@@ -1,7 +1,6 @@
 package strava
 
 import (
-	"net/http/cookiejar"
 	"strings"
 	"time"
 
@@ -71,13 +70,9 @@ func StravaIdentityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 	reply := ""
 
-	jar, _ := cookiejar.New(nil)
-
 	c := colly.NewCollector(
 		colly.AllowedDomains(domWeb),
 	)
-
-	c.SetCookieJar(jar)
 
 	var identities []StravaIdentity
 
@@ -121,21 +116,6 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 		} else {
 			reply += "\n\nData Strava Kak " + alias + " sudah berhasil di simpan."
 			reply += "\n\nTambahin Strava Profile Picture kamu ke profile akun do.my.id kamu yaa \n" + stravaIdentity.Picture
-
-			token := getCookieFromColly(c, "login")
-			if token == "" {
-				reply += "\n\nError membaca token dari cookie."
-				return
-			} else {
-				resp := pushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture, token)
-				if resp != "" {
-					reply += "\n\nError sending data to Backend: " + resp + " " + token
-					return
-				} else {
-					reply += "\n\nStrava Profile Picture Kak " + alias + " sudah berhasil di update."
-					reply += "\n\nCek Ulang di do.my.id yaa kak."
-				}
-			}
 		}
 	})
 
