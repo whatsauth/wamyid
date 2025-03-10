@@ -21,7 +21,6 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
 	}
 
-	// 2. Ekstrak data dari pesan
 	cycle := extractCycleNumber(Pesan.Message)
 	if cycle == 0 {
 		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Iteung Pomodoro Report 1 cycle'"
@@ -116,7 +115,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Pesan.Alias_name,
 		hostname,
 		ip,
-		strings.Join(pekerjaan, "\n- "),
+		pekerjaan, // pekerjaan is already a string
 		url, // Tampilkan URL dari payload
 		time.Now().Format("2006-01-02 15:04"),
 	)
@@ -183,28 +182,14 @@ func extractNumber(msg, prefix string) int {
 	return 0
 }
 
-func extractActivities(msg string) []string {
-	// Cari bagian dengan format pipe (|)
-	pipeRegex := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?\|([^\n#]+)`)
-	pipeMatch := pipeRegex.FindStringSubmatch(msg)
-	if len(pipeMatch) > 1 {
-		return []string{strings.TrimSpace(pipeMatch[1])}
-	}
-	
-	// Format alternatif: Jika tidak ada pipe, coba ambil apa saja setelah "Yang Dikerjakan :"
-	// tetapi sebelum tanda # atau enter
-	plainRegex := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([^#\n]+)`)
-	plainMatch := plainRegex.FindStringSubmatch(msg)
-	if len(plainMatch) > 1 {
-		text := strings.TrimSpace(plainMatch[1])
-		// Jika masih ada pipe di dalam text, hapus
-		if strings.HasPrefix(text, "|") {
-			text = strings.TrimPrefix(text, "|")
-		}
-		return []string{strings.TrimSpace(text)}
-	}
-	
-	return []string{"Tidak ada detail aktivitas"}
+func extractActivities(msg string) string {
+    // Contoh: Gabungkan aktivitas dengan pemisah (misal koma)
+    re := regexp.MustCompile(`Yang Dikerjakan\s*:\s*\n?([^#]+)`)
+    match := re.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        return strings.TrimSpace(match[1])
+    }
+    return "Tidak ada detail aktivitas"
 }
 
 func extractToken(msg string) string {

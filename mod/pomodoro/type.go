@@ -13,7 +13,7 @@ type PomodoroReport struct {
     Hostname      string             `bson:"hostname"`
     IP            string             `bson:"ip"`
     Screenshots   int                `bson:"screenshots"`
-    Pekerjaan     []string           `bson:"pekerjaan"`
+    Pekerjaan     string             `bson:"pekerjaan"`
     Token         string             `bson:"token"`
     URLPekerjaan  string             `bson:"urlpekerjaan"`
     CreatedAt     time.Time          `bson:"createdAt"`
