@@ -76,9 +76,9 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
 			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + stravaIdentity.Picture
 
-			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Pesan.Reply_phone_number})
+			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Pesan.Phone_number})
 			if err != nil {
-				reply += "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error() + Pesan.Reply_phone_number
+				reply += "Wah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error() + Pesan.Phone_number
 				return
 			}
 
