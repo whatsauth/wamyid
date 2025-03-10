@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+
+	"github.com/gocolly/colly"
 )
 
 func pushToBackend(phone, picture, token string) string {
@@ -24,7 +26,8 @@ func pushToBackend(phone, picture, token string) string {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("login", token)
+	// req.Header.Set("Cookie", "login="+token)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -40,10 +43,22 @@ func pushToBackend(phone, picture, token string) string {
 	return "Data berhasil disimpan"
 }
 
-func ExtractTokenFromCookie(cookieHeader, cookieName string) string {
-	cookies := strings.Split(cookieHeader, "; ")
-	for _, cookie := range cookies {
-		parts := strings.SplitN(cookie, "=", 2)
+// func extractTokenFromCookie(cookieHeader, cookieName string) string {
+// 	cookies := strings.Split(cookieHeader, "; ")
+// 	for _, cookie := range cookies {
+// 		parts := strings.SplitN(cookie, "=", 2)
+// 		if len(parts) == 2 && parts[0] == cookieName {
+// 			return parts[1]
+// 		}
+// 	}
+// 	return ""
+// }
+
+func getTokenFromCookie(req *colly.Request, cookieName string) string {
+	cookie := req.Headers.Get("Cookie")
+	cookies := strings.Split(cookie, "; ")
+	for _, c := range cookies {
+		parts := strings.SplitN(c, "=", 2)
 		if len(parts) == 2 && parts[0] == cookieName {
 			return parts[1]
 		}
