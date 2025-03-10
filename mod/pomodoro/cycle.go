@@ -1,6 +1,7 @@
 package pomodoro
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -38,6 +39,16 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memuat public key: " + err.Error()
 	}
 
+	// Cek apakah token sudah pernah digunakan
+	isUsed, err := isTokenUsed(db, token)
+	if err != nil {
+		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memeriksa token: " + err.Error()
+	}
+
+	if isUsed {
+		return "Wah kak " + Pesan.Alias_name + ", token ini sudah pernah digunakan sebelumnya"
+	}
+
 	// 4. Decode token
 	decode, err := watoken.Decode(publicKey, token)
 	if err != nil {
@@ -57,6 +68,12 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			errorMsg,
 			strings.Split(err.Error(), ":")[0], // Ambil pesan error utama
 		)
+	}
+
+	// Tandai token sebagai telah digunakan
+	err = markTokenAsUsed(db, token, Pesan.Phone_number)
+	if err != nil {
+		return "Wah kak " + Pesan.Alias_name + ", sistem gagal menandai token: " + err.Error()
 	}
 
 	// 5. Validasi payload dan ekstrak URL
@@ -104,6 +121,26 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		url, // Tampilkan URL dari payload
 		time.Now().Format("2006-01-02 15:04"),
 	)
+}
+
+// Fungsi untuk memeriksa apakah token sudah digunakan
+func isTokenUsed(db *mongo.Database, token string) (bool, error) {
+	count, err := db.Collection("used_tokens").CountDocuments(context.Background(), bson.M{"token": token})
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func markTokenAsUsed(db *mongo.Database, token string, phoneNumber string) error {
+	tokenData := bson.M{
+		"token":        token,
+		"phone_number": phoneNumber,
+		"used_at":      time.Now(),
+	}
+
+	_, err := db.Collection("used_tokens").InsertOne(context.Background(), tokenData)
+	return err
 }
 
 // Helper functions
@@ -189,33 +226,33 @@ func extractToken(msg string) string {
 	return ""
 }
 
-func extractURLFromPayload(payload any) string {
-	// Cek jika payload adalah string
-	if urlStr, ok := payload.(string); ok && strings.HasPrefix(urlStr, "http") {
-		return urlStr
-	}
+// func extractURLFromPayload(payload any) string {
+// 	// Cek jika payload adalah string
+// 	if urlStr, ok := payload.(string); ok && strings.HasPrefix(urlStr, "http") {
+// 		return urlStr
+// 	}
 
-	// Jika payload adalah map
-	if payloadMap, ok := payload.(map[string]interface{}); ok {
-		// Coba cari key yang berisi URL
-		for _, v := range payloadMap { // Hapus variabel k yang tidak digunakan
-			if urlStr, ok := v.(string); ok && strings.HasPrefix(urlStr, "http") {
-				return urlStr
-			}
-		}
-	}
+// 	// Jika payload adalah map
+// 	if payloadMap, ok := payload.(map[string]interface{}); ok {
+// 		// Coba cari key yang berisi URL
+// 		for _, v := range payloadMap { // Hapus variabel k yang tidak digunakan
+// 			if urlStr, ok := v.(string); ok && strings.HasPrefix(urlStr, "http") {
+// 				return urlStr
+// 			}
+// 		}
+// 	}
 
-	// Cek jika payload adalah struct
-	payloadStr := fmt.Sprintf("%v", payload)
-	// Ekstrak URL dari string representasi payload
-	re := regexp.MustCompile(`\{(https://[^\s]+)`)
-	match := re.FindStringSubmatch(payloadStr)
-	if len(match) > 1 {
-		return match[1]
-	}
+// 	// Cek jika payload adalah struct
+// 	payloadStr := fmt.Sprintf("%v", payload)
+// 	// Ekstrak URL dari string representasi payload
+// 	re := regexp.MustCompile(`\{(https://[^\s]+)`)
+// 	match := re.FindStringSubmatch(payloadStr)
+// 	if len(match) > 1 {
+// 		return match[1]
+// 	}
 
-	return ""
-}
+// 	return ""
+// }
 
 func getPublicKey(db *mongo.Database) (string, error) {
 	conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"publickeypomokit": bson.M{"$exists": true}})
