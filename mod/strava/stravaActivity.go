@@ -70,6 +70,13 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	stravaActivity.ActivityId = activityId
 	stravaActivity.LinkActivity = url
 
+	pageErr := false
+	c.OnHTML("head div.description", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Text, "Sorry, this one stays red.") {
+			pageErr = true
+		}
+	})
+
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
 		stravaActivity.Title = e.ChildText("h1.styles_name__irvsZ")
@@ -110,12 +117,17 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	})
 
 	found := false
-
 	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
 		found = true
 	})
 
 	c.OnScraped(func(r *colly.Response) {
+		// cek apakah page error
+		if pageErr {
+			reply += "\n\nLink Strava Activity yang anda kirimkan tidak valid atau mungkin sudah di hapus. Silakan kirim ulang dengan link yang valid."
+			return
+		}
+
 		// cek apakah ada map atau tidak di halaman strava
 		if !found {
 			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"

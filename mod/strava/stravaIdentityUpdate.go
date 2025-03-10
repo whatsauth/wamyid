@@ -45,6 +45,11 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 	})
 
 	c.OnScraped(func(r *colly.Response) {
+		if data.AthleteId == "" {
+			reply += "\n\nAkun Strava kak " + Pesan.Alias_name + " belum terdaftar."
+			return
+		}
+
 		if data.AthleteId == stravaIdentity.AthleteId {
 			// cek apakah data sudah up to date
 			if data.Picture == stravaIdentity.Picture {
@@ -67,7 +72,10 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 			}
 
 			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
-			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + data.Picture
+			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + stravaIdentity.Picture
+		} else {
+			reply += "\n\nData Strava kak " + Pesan.Alias_name + " tidak ditemukan."
+			return
 		}
 	})
 
