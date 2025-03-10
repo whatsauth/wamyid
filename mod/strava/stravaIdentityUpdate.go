@@ -73,6 +73,15 @@ func StravaIdentityUpdateHandler(Pesan itmodel.IteungMessage, db *mongo.Database
 
 			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
 			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + stravaIdentity.Picture
+
+			resp := PushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture)
+			if resp != "" {
+				reply += "\n\nError sending data to Backend: " + resp
+			} else {
+				reply += "\n\nStrava Profile Picture Kak " + Pesan.Alias_name + " sudah berhasil di update."
+				reply += "\n\nCek Ulang di do.my.id yaa kak."
+			}
+
 		} else {
 			reply += "\n\nData Strava kak " + Pesan.Alias_name + " tidak ditemukan."
 			return

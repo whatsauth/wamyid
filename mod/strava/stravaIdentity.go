@@ -116,6 +116,14 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 		} else {
 			reply += "\n\nData Strava Kak " + alias + " sudah berhasil di simpan."
 			reply += "\n\nTambahin Strava Profile Picture kamu ke profile akun do.my.id kamu yaa \n" + stravaIdentity.Picture
+
+			resp := PushToBackend(stravaIdentity.PhoneNumber, stravaIdentity.Picture)
+			if resp != "" {
+				reply += "\n\nError sending data to Backend: " + resp
+			} else {
+				reply += "\n\nStrava Profile Picture Kak " + alias + " sudah berhasil di update."
+				reply += "\n\nCek Ulang di do.my.id yaa kak."
+			}
 		}
 	})
 
