@@ -73,5 +73,5 @@ func getCookieFromColly(c *colly.Collector, cookieName string) string {
 			return cookie.Value
 		}
 	}
-	return ""
+	return "Token not found"
 }
