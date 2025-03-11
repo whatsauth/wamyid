@@ -98,6 +98,12 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 
 	c.OnScraped(func(r *colly.Response) {
 		col := "strava_identity"
+
+		if stravaIdentity.Picture == "" {
+			reply += "\n\nMaaf kak, sistem tidak dapat mengambil foto profil Strava kamu. Pastikan profil Strava kamu dibuat public(everyone)."
+			return
+		}
+
 		// cek apakah data sudah ada di database
 		data, err := atdb.GetOneDoc[StravaIdentity](db, col, bson.M{"athlete_id": stravaIdentity.AthleteId})
 		if err != nil && err != mongo.ErrNoDocuments {
