@@ -60,9 +60,9 @@ func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 	}
 
 	if fullActivityURL != "" {
-		reply += "\n\nLink Profile Strava kamu: " + fullActivityURL
+		reply += "\n\nLink Activity Strava kamu: " + fullActivityURL
 	} else {
-		reply += "\n\nLink Profile Strava kamu: " + rawUrl
+		reply += "\n\nLink Activity Strava kamu: " + rawUrl
 	}
 
 	return reply
@@ -126,13 +126,6 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		// cek apakah ada map atau tidak di halaman strava
-		if !found {
-			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-			reply += "\nYang semangat dong... yang semangat dong..."
-			return
-		}
-
 		// cek apakah yang share link strava activity adalah pemilik akun strava
 		Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
 		if err != nil && err != mongo.ErrNoDocuments {
@@ -155,9 +148,34 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			return
 		}
 		if data.ActivityId == stravaActivity.ActivityId {
+			// simpan data ke database jika data belum ada
+			stravaActivity.CreatedAt = time.Now()
+			stravaActivity.Status = "Duplicate"
+
+			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+			if err != nil {
+				reply += "\n\nError saving data to MongoDB: " + err.Error()
+			}
+
 			reply += "\n\n*AOKWOKOKOWKOWKOWKKWOKOK* 🤣🤣"
 			reply += "\nHayoolooooo ngapain, Jangan Curang donggg! 😏 Kamu sudah pernah share aktivitas ini sebelumnya."
 			reply += "\nSana Lari lagi jangan malas!"
+			return
+		}
+
+		// cek apakah ada map atau tidak di halaman strava
+		if !found {
+			// simpan data ke database jika data belum ada
+			stravaActivity.CreatedAt = time.Now()
+			stravaActivity.Status = "Fraudulent"
+
+			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+			if err != nil {
+				reply += "\n\nError saving data to MongoDB: " + err.Error()
+			}
+
+			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+			reply += "\nYang semangat dong... yang semangat dong..."
 			return
 		}
 
