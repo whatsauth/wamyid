@@ -99,24 +99,22 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 			// 	StravaProfilePicture: stravaIdentity.Picture,
 			// 	PhoneNumber:          Pesan.Phone_number,
 			// }
-
-			reply += "\n\nhmmm " + datastrava.StravaProfilePicture + " " + datastrava.PhoneNumber
 			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
 			if err != nil {
 				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
 			}
 
-			reply += "\n\nStatus Code: " + string(statuscode)
-			reply += "\n\nResponse: " + httpresp.Response
-			reply += "\n\nInfo: " + httpresp.Info
+			// reply += "\n\nStatus Code: " + string(statuscode)
+			// reply += "\n\nResponse: " + httpresp.Response
+			// reply += "\n\nInfo: " + httpresp.Info
 
 			if statuscode != http.StatusOK {
 				reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
 				return
 			}
 
-			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
+			// reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 
 		} else {
 			reply += "\n\nData Strava kak " + Pesan.Alias_name + " tidak ditemukan."
