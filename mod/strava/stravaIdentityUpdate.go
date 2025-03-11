@@ -52,6 +52,11 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 			return
 		}
 
+		if stravaIdentity.Picture == "" {
+			reply += "\n\nMaaf kak, sistem tidak dapat mengambil foto profil Strava kamu. Pastikan profil Strava kamu dibuat public(everyone)."
+			return
+		}
+
 		if data.AthleteId == stravaIdentity.AthleteId {
 			// cek apakah data sudah up to date
 			if data.Picture == stravaIdentity.Picture {

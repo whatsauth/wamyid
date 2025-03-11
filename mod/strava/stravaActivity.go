@@ -126,6 +126,11 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
+		if stravaActivity.Picture == "" {
+			reply += "\n\nMaaf kak, sistem tidak dapat mengambil foto profil Strava kamu. Pastikan profil dan activity Strava kamu dibuat public(everyone)."
+			return
+		}
+
 		// cek apakah yang share link strava activity adalah pemilik akun strava
 		Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
 		if err != nil && err != mongo.ErrNoDocuments {
