@@ -2,6 +2,7 @@ package strava
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -92,20 +93,17 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				PhoneNumber:          Pesan.Phone_number,
 			}
 
-			reply += "\n\nData Strava: " + datastrava.StravaProfilePicture
-			reply += "\n\nPhone Number: " + datastrava.PhoneNumber
-			reply += "\n\nURL: " + conf.DomyikadoUserURL
-			reply += "\n\nSecret: " + conf.DomyikadoSecret
-
-			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secrets", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+			statuscode, httpresp, err := atapi.PostStructWithToken[Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
 			if err != nil {
 				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
 			}
 
-			// reply += "\n\nStatus Code: " + string(statuscode)
-			// reply += "\n\nResponse: " + httpresp.Response
-			// reply += "\n\nInfo: " + httpresp.Info
+			reply += "\n\nStatus Code: " + strconv.Itoa(statuscode)
+			reply += "\n\nResponse: " + httpresp.Response
+			reply += "\n\nInfo: " + httpresp.Info
+			reply += "\n\nLocation: " + httpresp.Location
+			reply += "\n\nStatus: " + httpresp.Status
 
 			if statuscode != http.StatusOK {
 				reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
