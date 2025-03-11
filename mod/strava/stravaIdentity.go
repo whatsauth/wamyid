@@ -127,8 +127,8 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 
 		type DataStrava struct {
-			StravaProfilePicture string `bson:"stravaprofilepicture" json:"stravaprofilepicture"`
-			PhoneNumber          string `bson:"phonenumber" json:"phonenumber"`
+			StravaProfilePicture string `json:"stravaprofilepicture"`
+			PhoneNumber          string `json:"phonenumber"`
 		}
 
 		datastrava := DataStrava{
@@ -147,7 +147,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 			return
 		}
 
-		// reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
+		reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 	})
 
 	err := c.Visit(url)

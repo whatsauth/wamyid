@@ -103,7 +103,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				return
 			}
 
-			// reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
+			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 
 		} else {
 			reply += "\n\nData Strava kak " + Pesan.Alias_name + " tidak ditemukan."
