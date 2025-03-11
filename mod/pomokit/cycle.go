@@ -233,11 +233,11 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
         return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
     }
 
-    // Ekstrak nilai-nilai dengan regex yang diperketat
-    milestone := extractWithRegex(lines, `^Milestone\s*:\s*(.+)$`)
-    version := extractWithRegex(lines, `^Version\s*:\s*(.+)$`)
-    hostname := extractWithRegex(lines, `^Hostname\s*:\s*(.+)$`)
-    ipRaw := extractWithRegex(lines, `^IP\s*:\s*(.+)$`)
+    // Ekstrak nilai-nilai dengan regex yang lebih fleksibel
+    milestone := extractWithRegex(lines, `(?i)^Milestone\s*:\s*(.+)$`)
+    version := extractWithRegex(lines, `(?i)^Version\s*:\s*(.+)$`)
+    hostname := extractWithRegex(lines, `(?i)^Hostname\s*:\s*(.+)$`)
+    ipRaw := extractWithRegex(lines, `(?i)^IP\s*:\s*(.+)$`)
     
     // Format IP jika perlu
     ip := ipRaw
@@ -287,11 +287,9 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 func extractWithRegex(lines []string, pattern string) string {
     re := regexp.MustCompile(pattern)
     for _, line := range lines {
-        if re.MatchString(line) {
-            matches := re.FindStringSubmatch(line)
-            if len(matches) > 1 {
-                return strings.TrimSpace(matches[1])
-            }
+        matches := re.FindStringSubmatch(line)
+        if len(matches) > 1 {
+            return strings.TrimSpace(matches[1])
         }
     }
     return ""
