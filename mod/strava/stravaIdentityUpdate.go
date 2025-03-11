@@ -2,7 +2,6 @@ package strava
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -99,11 +98,11 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				return
 			}
 
-			reply += "\n\nStatus Code: " + strconv.Itoa(statuscode)
-			reply += "\n\nResponse: " + httpresp.Response
-			reply += "\n\nInfo: " + httpresp.Info
-			reply += "\n\nLocation: " + httpresp.Location
-			reply += "\n\nStatus: " + httpresp.Status
+			// reply += "\n\nStatus Code: " + strconv.Itoa(statuscode)
+			// reply += "\n\nResponse: " + httpresp.Response
+			// reply += "\n\nInfo: " + httpresp.Info
+			// reply += "\n\nLocation: " + httpresp.Location
+			// reply += "\n\nStatus: " + httpresp.Status
 
 			if statuscode != http.StatusOK {
 				reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
