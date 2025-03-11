@@ -127,7 +127,7 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 
 	c.OnScraped(func(r *colly.Response) {
 		if stravaActivity.Picture == "" {
-			reply += "\n\nMaaf kak, sistem tidak dapat mengambil foto profil Strava kamu. Pastikan profil dan activity Strava kamu dibuat public(everyone)."
+			reply += "\n\nMaaf kak, sistem tidak dapat mengambil foto profil Strava kamu. Pastikan profil dan activity Strava kamu dibuat public(everyone). doc: https://www.do.my.id/mentalhealt-strava"
 			return
 		}
 
@@ -162,7 +162,6 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 				reply += "\n\nError saving data to MongoDB: " + err.Error()
 			}
 
-			reply += "\n\n*AOKWOKOKOWKOWKOWKKWOKOK* 🤣🤣"
 			reply += "\nHayoolooooo ngapain, Jangan Curang donggg! 😏 Kamu sudah pernah share aktivitas ini sebelumnya."
 			reply += "\nSana Lari lagi jangan malas!"
 			return
