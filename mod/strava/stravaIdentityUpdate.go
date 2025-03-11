@@ -92,7 +92,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				PhoneNumber:          Pesan.Phone_number,
 			}
 
-			statuscode, httpresp, err := atapi.PostStructWithToken[Response]("login", conf.DomyikadoSecret, datastrava, conf.DomyikadoAddUserURL)
+			statuscode, httpresp, err := atapi.PostStructWithToken[Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoAddUserURL)
 			if err != nil {
 				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
