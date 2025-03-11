@@ -28,17 +28,10 @@ type StravaActivity struct {
 }
 
 type Config struct {
-	PhoneNumber         string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
-	LeaflyURL           string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
-	LeaflySecret        string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
-	DomyikadoAddUserURL string `json:"domyikadoadduserurl,omitempty" bson:"domyikadoadduserurl,omitempty"`
-	DomyikadoSecret     string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
-	KimseokgisURL       string `json:"urlkimseokgis" bson:"urlkimseokgis"`
-}
-
-type Response struct {
-	Response string `json:"response"`
-	Info     string `json:"info,omitempty"`
-	Status   string `json:"status,omitempty"`
-	Location string `json:"location,omitempty"`
+	PhoneNumber      string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	LeaflyURL        string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
+	LeaflySecret     string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+	DomyikadoUserURL string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
+	DomyikadoSecret  string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
+	KimseokgisURL    string `json:"urlkimseokgis" bson:"urlkimseokgis"`
 }
