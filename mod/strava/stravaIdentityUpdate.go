@@ -106,12 +106,17 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
 			}
+
+			reply += "\n\nStatus Code: " + string(statuscode)
+			reply += "\n\nResponse: " + httpresp.Response
+			reply += "\n\nInfo: " + httpresp.Info
+
 			if statuscode != http.StatusOK {
 				reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
 				return
 			}
 
-			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak. " + httpresp.Response
+			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 
 		} else {
 			reply += "\n\nData Strava kak " + Pesan.Alias_name + " tidak ditemukan."
