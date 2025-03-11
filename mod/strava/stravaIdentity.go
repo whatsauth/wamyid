@@ -127,8 +127,8 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 
 		type DataStrava struct {
-			StravaProfilePicture string `json:"stravaprofilepicture"`
-			PhoneNumber          string `json:"phonenumber"`
+			StravaProfilePicture string `bson:"stravaprofilepicture" json:"stravaprofilepicture"`
+			PhoneNumber          string `bson:"phonenumber" json:"phonenumber"`
 		}
 
 		datastrava := DataStrava{

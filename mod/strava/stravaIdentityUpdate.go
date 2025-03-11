@@ -83,8 +83,8 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 			}
 
 			type DataStrava struct {
-				StravaProfilePicture string `json:"stravaprofilepicture"`
-				PhoneNumber          string `json:"phonenumber"`
+				StravaProfilePicture string `bson:"stravaprofilepicture" json:"stravaprofilepicture"`
+				PhoneNumber          string `bson:"phonenumber" json:"phonenumber"`
 			}
 
 			datastrava := DataStrava{
@@ -92,14 +92,12 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				PhoneNumber:          Pesan.Phone_number,
 			}
 
-			// datastrava := struct {
-			// 	StravaProfilePicture string `json:"stravaprofilepicture"`
-			// 	PhoneNumber          string `json:"phonenumber"`
-			// }{
-			// 	StravaProfilePicture: stravaIdentity.Picture,
-			// 	PhoneNumber:          Pesan.Phone_number,
-			// }
-			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+			reply += "\n\nData Strava: " + datastrava.StravaProfilePicture
+			reply += "\n\nPhone Number: " + datastrava.PhoneNumber
+			reply += "\n\nURL: " + conf.DomyikadoUserURL
+			reply += "\n\nSecret: " + conf.DomyikadoSecret
+
+			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secrets", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
 			if err != nil {
 				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
