@@ -8,6 +8,7 @@ import (
 	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
+	"github.com/whatsauth/watoken"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -92,7 +93,13 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				PhoneNumber:          Pesan.Phone_number,
 			}
 
-			statuscode, httpresp, err := atapi.PostStructWithToken[Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoAddUserURL)
+			token, err := watoken.EncodeforHours(datastrava.PhoneNumber, Pesan.Alias_name, conf.DomyikadoSecret, 1)
+			if err != nil {
+				reply += "\n\nError encoding token: " + err.Error()
+				return
+			}
+
+			statuscode, httpresp, err := atapi.PostStructWithToken[Response]("login", token, datastrava, conf.DomyikadoAddUserURL)
 			if err != nil {
 				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
