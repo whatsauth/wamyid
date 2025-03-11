@@ -216,7 +216,7 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
         return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
     }
 
-    // Normalisasi line endings
+    // Normalisasi line endings dan split pesan menjadi baris-baris
     normalizedMsg := strings.ReplaceAll(strings.ReplaceAll(Pesan.Message, "\r\n", "\n"), "\r", "\n")
     lines := strings.Split(normalizedMsg, "\n")
     
@@ -227,26 +227,17 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
     hostname := ""
     ip := ""
     
-    // Flag untuk melacak field yang sudah ditemukan
-    foundFields := map[string]bool{
-        "milestone": false,
-        "version": false,
-        "hostname": false,
-        "ip": false,
-    }
-    
     // Ekstrak cycle dari baris pertama
     if len(lines) > 0 {
-        cycleText := strings.ToLower(lines[0])
-        if strings.Contains(cycleText, "start") && strings.Contains(cycleText, "cycle") {
-            // Cari angka di antara "start" dan "cycle"
-            parts := strings.Fields(cycleText)
-            for i, part := range parts {
-                if part == "start" && i+1 < len(parts) {
-                    cycleNum, err := strconv.Atoi(parts[i+1])
-                    if err == nil {
-                        cycle = cycleNum
-                    }
+        firstLine := strings.ToLower(lines[0])
+        if strings.Contains(firstLine, "start") && strings.Contains(firstLine, "cycle") {
+            // Regex simple untuk menemukan angka
+            re := regexp.MustCompile(`(\d+)`)
+            matches := re.FindStringSubmatch(firstLine)
+            if len(matches) > 0 {
+                cycleNum, err := strconv.Atoi(matches[0])
+                if err == nil {
+                    cycle = cycleNum
                 }
             }
         }
@@ -256,37 +247,36 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
         return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
     }
     
-    // Parsing nilai dari setiap baris dengan pemisah ':'
-    for i := 1; i < len(lines); i++ {
-        line := strings.TrimSpace(lines[i])
+    // Parsing nilai-nilai lain dari setiap baris (satu baris satu field)
+    for _, line := range lines[1:] {
+        line = strings.TrimSpace(line)
         if line == "" {
-            continue
+            continue // Lewati baris kosong
         }
         
-        // Cari pemisah ':'
+        // Cari pemisah ":" dalam baris
         parts := strings.SplitN(line, ":", 2)
         if len(parts) != 2 {
-            continue
+            continue // Lewati baris yang tidak memiliki ":"
         }
         
+        // Ekstrak key dan value
         key := strings.ToLower(strings.TrimSpace(parts[0]))
         value := strings.TrimSpace(parts[1])
         
-        // Periksa apakah value kosong setelah trimming
+        // Lewati jika value kosong
         if value == "" {
             continue
         }
         
+        // Tetapkan nilai berdasarkan key
         switch key {
         case "milestone":
             milestone = value
-            foundFields["milestone"] = true
         case "version":
             version = value
-            foundFields["version"] = true
         case "hostname":
             hostname = value
-            foundFields["hostname"] = true
         case "ip":
             ip = value
             // Format IP jika diperlukan
@@ -296,16 +286,22 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
                     ip = "https://whatismyipaddress.com/ip/" + match[1]
                 }
             }
-            foundFields["ip"] = true
         }
     }
     
-    // Periksa field yang kosong dan berikan error
+    // Periksa field yang kosong
     var missingFields []string
-    for field, found := range foundFields {
-        if !found {
-            missingFields = append(missingFields, field)
-        }
+    if milestone == "" {
+        missingFields = append(missingFields, "milestone")
+    }
+    if version == "" {
+        missingFields = append(missingFields, "version")
+    }
+    if hostname == "" {
+        missingFields = append(missingFields, "hostname")
+    }
+    if ip == "" {
+        missingFields = append(missingFields, "ip")
     }
     
     // Jika ada field yang tidak ditemukan, kirim pesan error
