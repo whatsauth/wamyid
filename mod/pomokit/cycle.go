@@ -271,7 +271,7 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	return fmt.Sprintf(
 		"🍅 *Pomodoro Cycle %d Dimulai!*\n"+
 			"Nama: %s\n"+
-			"Milestone: %s\n\n"+
+			"Milestone: %s\n"+
 			"Version: %s\n"+
 			"Hostname: %s\n"+
 			"IP: %s\n"+
