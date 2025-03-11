@@ -211,125 +211,107 @@ func getPublicKey(db *mongo.Database) (string, error) {
 
 // HandlePomodoroStart menangani pesan permintaan untuk memulai siklus Pomodoro
 func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
-    // Validasi input dasar
-    if Pesan.Message == "" {
-        return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
-    }
+	// Validasi input dasar
+	if Pesan.Message == "" {
+		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
+	}
 
-    // Normalisasi line endings dan split pesan menjadi baris-baris
-    normalizedMsg := strings.ReplaceAll(strings.ReplaceAll(Pesan.Message, "\r\n", "\n"), "\r", "\n")
-    lines := strings.Split(normalizedMsg, "\n")
-    
-    // Variabel untuk menyimpan nilai
-    cycle := 0
-    milestone := ""
-    version := ""
-    hostname := ""
-    ip := ""
-    
-    // Ekstrak cycle dari baris pertama
-    if len(lines) > 0 {
-        firstLine := strings.ToLower(lines[0])
-        if strings.Contains(firstLine, "start") && strings.Contains(firstLine, "cycle") {
-            // Regex simple untuk menemukan angka
-            re := regexp.MustCompile(`(\d+)`)
-            matches := re.FindStringSubmatch(firstLine)
-            if len(matches) > 0 {
-                cycleNum, err := strconv.Atoi(matches[0])
-                if err == nil {
-                    cycle = cycleNum
-                }
-            }
-        }
-    }
-    
-    if cycle == 0 {
-        return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
-    }
-    
-    // Parsing nilai-nilai lain dari setiap baris (satu baris satu field)
-    for _, line := range lines[1:] {
-        line = strings.TrimSpace(line)
-        if line == "" {
-            continue // Lewati baris kosong
-        }
-        
-        // Cari pemisah ":" dalam baris
-        parts := strings.SplitN(line, ":", 2)
-        if len(parts) != 2 {
-            continue // Lewati baris yang tidak memiliki ":"
-        }
-        
-        // Ekstrak key dan value
-        key := strings.ToLower(strings.TrimSpace(parts[0]))
-        value := strings.TrimSpace(parts[1])
-        
-        // Lewati jika value kosong
-        if value == "" {
-            continue
-        }
-        
-        // Tetapkan nilai berdasarkan key
-        switch key {
-        case "milestone":
-            milestone = value
-        case "version":
-            version = value
-        case "hostname":
-            hostname = value
-        case "ip":
-            ip = value
-            // Format IP jika diperlukan
-            if !strings.HasPrefix(ip, "https://") && strings.Contains(ip, ".") {
-                ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-                if match := ipRegex.FindStringSubmatch(ip); len(match) > 1 {
-                    ip = "https://whatismyipaddress.com/ip/" + match[1]
-                }
-            }
-        }
-    }
-    
-    // Periksa field yang kosong
-    var missingFields []string
-    if milestone == "" {
-        missingFields = append(missingFields, "milestone")
-    }
-    if version == "" {
-        missingFields = append(missingFields, "version")
-    }
-    if hostname == "" {
-        missingFields = append(missingFields, "hostname")
-    }
-    if ip == "" {
-        missingFields = append(missingFields, "ip")
-    }
-    
-    // Jika ada field yang tidak ditemukan, kirim pesan error
-    if len(missingFields) > 0 {
-        return fmt.Sprintf("Wah kak %s, beberapa informasi penting belum diisi: %s. Mohon lengkapi ya!", 
-            Pesan.Alias_name, 
-            strings.Join(missingFields, ", "))
-    }
-    
-    // Format waktu
-    loc, _ := time.LoadLocation("Asia/Jakarta")
-    currentTime := time.Now().In(loc)
-    
-    return fmt.Sprintf(
-        "🍅 *Pomodoro Cycle %d Dimulai!*\n"+
-            "Nama: %s\n"+
-            "Milestone: %s\n"+
-            "Version: %s\n"+
-            "Hostname: %s\n"+
-            "IP: %s\n"+
-            "📅 %s\n\n"+
-            "Semangat kak! Waktu kerja nya dimulai 🚀",
-        cycle,
-        Pesan.Alias_name,
-        milestone,
-        version,
-        hostname,
-        ip,
-        currentTime.Format("2006-01-02 🕒15:04 WIB"),
-    )
+	// Pisahkan pesan menjadi baris-baris
+	lines := strings.Split(Pesan.Message, "\n")
+	
+	// Bersihkan setiap baris dari spasi berlebih
+	for i := range lines {
+		lines[i] = strings.TrimSpace(lines[i])
+	}
+	
+	// Ekstrak cycle dari baris pertama atau dari seluruh pesan jika tidak ditemukan
+	cycle := 0
+	if strings.Contains(lines[0], "Start") && strings.Contains(lines[0], "cycle") {
+		cycle = extractStartCycleNumber(lines[0])
+	} else {
+		cycle = extractStartCycleNumber(Pesan.Message)
+	}
+	
+	// Validasi cycle
+	if cycle == 0 {
+		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
+	}
+
+	// Ekstrak nilai-nilai menggunakan regex yang lebih fleksibel
+	milestone := extractWithRegex(lines, `Milestone\s*:\s*(.+)`)
+	version := extractWithRegex(lines, `Version\s*:\s*(.+)`)
+	hostname := extractWithRegex(lines, `Hostname\s*:\s*(.+)`)
+	ipRaw := extractWithRegex(lines, `IP\s*:\s*(.+)`)
+	
+	// Format IP jika perlu
+	ip := ipRaw
+	if !strings.HasPrefix(ipRaw, "https://whatismyipaddress.com") && ipRaw != "" {
+		// Cek apakah ini adalah alamat IP
+		ipRegex := regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+		ipMatch := ipRegex.FindStringSubmatch(ipRaw)
+		if len(ipMatch) > 1 {
+			ip = "https://whatismyipaddress.com/ip/" + ipMatch[1]
+		}
+	}
+	
+	// Set nilai default jika kosong
+	if version == "" {
+		version = "1.0.0"
+	}
+	
+	if milestone == "" {
+		milestone = "Tidak ada milestone"
+	}
+
+	// Lokasi waktu Indonesia
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	currentTime := time.Now().In(loc)
+
+	// Format respons dengan baris baru yang jelas antara tiap bagian
+	return fmt.Sprintf(
+		"🍅 *Pomodoro Cycle %d Dimulai!*\n"+
+			"Nama: %s\n"+
+			"Milestone: %s\n\n"+
+			"Version: %s\n"+
+			"Hostname: %s\n"+
+			"IP: %s\n"+
+			"📅 %s\n\n"+
+			"Semangat kak! Waktu kerja nya dimulai 🚀",
+		cycle,
+		Pesan.Alias_name,
+		milestone,
+		version,
+		hostname,
+		ip,
+		currentTime.Format("2006-01-02 🕒15:04 WIB"),
+	)
+}
+
+// Fungsi untuk ekstraksi cycle dari pesan Start
+func extractStartCycleNumber(msg string) int {
+	re := regexp.MustCompile(`Start\s+(\d+)\s+cycle`)
+	matches := re.FindStringSubmatch(msg)
+	if len(matches) > 1 {
+		cycle, _ := strconv.Atoi(matches[1])
+		return cycle
+	}
+	return 0
+}
+
+// Fungsi untuk mengekstrak nilai dengan regex yang lebih fleksibel dan menghindari kontaminasi nilai
+func extractWithRegex(lines []string, pattern string) string {
+	re := regexp.MustCompile(pattern)
+	for _, line := range lines {
+		matches := re.FindStringSubmatch(line)
+		if len(matches) > 1 {
+			// Ekstrak bagian yang sesuai dan hapus teks pattern lain yang mungkin terbawa
+			value := matches[1]
+			// Bersihkan dari pattern field lain yang mungkin tercampur
+			cleanValue := strings.Split(value, "Version")[0]
+			cleanValue = strings.Split(cleanValue, "Hostname")[0]
+			cleanValue = strings.Split(cleanValue, "IP")[0]
+			return strings.TrimSpace(cleanValue)
+		}
+	}
+	return ""
 }
