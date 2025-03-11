@@ -2,7 +2,6 @@ package strava
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -143,9 +142,9 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 			return
 		}
 
-		reply += "\n\nStatus Code: " + strconv.Itoa(statuscode)
-		reply += "\n\nResponse: " + httpresp.Response
-		reply += "\n\nInfo: " + httpresp.Info
+		// reply += "\n\nStatus Code: " + strconv.Itoa(statuscode)
+		// reply += "\n\nResponse: " + httpresp.Response
+		// reply += "\n\nInfo: " + httpresp.Info
 
 		if statuscode != http.StatusOK {
 			reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
