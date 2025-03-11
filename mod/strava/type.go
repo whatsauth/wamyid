@@ -24,6 +24,7 @@ type StravaActivity struct {
 	MovingTime   string    `bson:"moving_time" json:"moving_time"`
 	Elevation    string    `bson:"elevation" json:"elevation"`
 	LinkActivity string    `bson:"link_activity" json:"link_activity"`
+	Status       string    `bson:"status" json:"status"`
 	CreatedAt    time.Time `bson:"created_at" json:"created_at"`
 }
 

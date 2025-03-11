@@ -133,15 +133,6 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			return
 		}
 
-		// cek apakah jarak lari kurang dari 5 km
-		distanceFloat := parseDistance(stravaActivity.Distance)
-		if distanceFloat < 3 {
-			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
-			reply += "\nSatu hari minimal 3 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi"
-			reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
-			return
-		}
-
 		// cek apakah yang share link strava activity adalah pemilik akun strava
 		Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
 		if err != nil && err != mongo.ErrNoDocuments {
@@ -170,22 +161,42 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			return
 		}
 
-		stravaActivity.CreatedAt = time.Now()
+		// cek apakah jarak lari kurang dari 5 km
+		distanceFloat := parseDistance(stravaActivity.Distance)
+		if distanceFloat < 3 {
+			// simpan data ke database jika data belum ada
+			stravaActivity.CreatedAt = time.Now()
+			stravaActivity.Status = "Invalid"
 
-		// simpan data ke database jika data belum ada
-		_, err = atdb.InsertOneDoc(db, col, stravaActivity)
-		if err != nil {
-			reply += "\n\nError saving data to MongoDB: " + err.Error()
+			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+			if err != nil {
+				reply += "\n\nError saving data to MongoDB: " + err.Error()
+			}
+
+			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
+			reply += "\nSatu hari minimal 3 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi"
+			reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+			return
+
 		} else {
-			reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀"
-			reply += "\n\n- Name: " + stravaActivity.Name
-			reply += "\n- Title: " + stravaActivity.Title
-			reply += "\n- Date Time: " + stravaActivity.DateTime
-			reply += "\n- Type Sport: " + stravaActivity.TypeSport
-			reply += "\n- Distance: " + stravaActivity.Distance
-			reply += "\n- Moving Time: " + stravaActivity.MovingTime
-			reply += "\n- Elevation: " + stravaActivity.Elevation
-			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+			// simpan data ke database jika data belum ada
+			stravaActivity.CreatedAt = time.Now()
+			stravaActivity.Status = "Valid"
+
+			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+			if err != nil {
+				reply += "\n\nError saving data to MongoDB: " + err.Error()
+			} else {
+				reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀"
+				reply += "\n\n- Name: " + stravaActivity.Name
+				reply += "\n- Title: " + stravaActivity.Title
+				reply += "\n- Date Time: " + stravaActivity.DateTime
+				reply += "\n- Type Sport: " + stravaActivity.TypeSport
+				reply += "\n- Distance: " + stravaActivity.Distance
+				reply += "\n- Moving Time: " + stravaActivity.MovingTime
+				reply += "\n- Elevation: " + stravaActivity.Elevation
+				reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+			}
 		}
 	})
 
