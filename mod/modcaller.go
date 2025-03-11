@@ -72,7 +72,7 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 	case "pomodoro-start":
 		reply = pomokit.HandlePomodoroStart(Profile, Pesan, db)
 	case "strava-identity":
-		reply = strava.StravaIdentityHandler(Pesan, db)
+		reply = strava.StravaIdentityHandler(Profile, Pesan, db)
 	case "strava-activity":
 		reply = strava.StravaActivityHandler(Pesan, db)
 	case "strava-update-identity":

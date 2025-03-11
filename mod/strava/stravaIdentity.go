@@ -1,10 +1,13 @@
 package strava
 
 import (
+	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,7 +16,7 @@ import (
 
 var athleteId string
 
-func StravaIdentityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+func StravaIdentityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Profile Stava kamu: "
 
 	var fullAthleteURL string
@@ -32,7 +35,7 @@ func StravaIdentityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 	}
 
 	if strings.Contains(rawUrl, domWeb) {
-		reply += scrapeStravaIdentity(db, rawUrl, Pesan.Phone_number, Pesan.Alias_name)
+		reply += scrapeStravaIdentity(db, rawUrl, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 
 	} else if strings.Contains(rawUrl, domApp) {
 		c.OnHTML("a", func(e *colly.HTMLElement) {
@@ -47,7 +50,7 @@ func StravaIdentityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 					athleteId = strings.Split(athleteId, "?")[0]
 					fullAthleteURL = "https://www.strava.com" + path + athleteId
 
-					reply += scrapeStravaIdentity(db, fullAthleteURL, Pesan.Phone_number, Pesan.Alias_name)
+					reply += scrapeStravaIdentity(db, fullAthleteURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 				}
 			}
 		})
@@ -67,7 +70,7 @@ func StravaIdentityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 	return reply
 }
 
-func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
+func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias string) string {
 	reply := ""
 
 	c := colly.NewCollector(
@@ -117,6 +120,39 @@ func scrapeStravaIdentity(db *mongo.Database, url, phone, alias string) string {
 			reply += "\n\nData Strava Kak " + alias + " sudah berhasil di simpan."
 			reply += "\n\nTambahin Strava Profile Picture kamu ke profile akun do.my.id kamu yaa \n" + stravaIdentity.Picture
 		}
+
+		conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": profilePhone})
+		if err != nil {
+			reply += "\n\nWah kak " + alias + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+			return
+		}
+
+		type DataStrava struct {
+			StravaProfilePicture string `json:"stravaprofilepicture"`
+			PhoneNumber          string `json:"phonenumber"`
+		}
+
+		datastrava := DataStrava{
+			StravaProfilePicture: stravaIdentity.Picture,
+			PhoneNumber:          phone,
+		}
+
+		statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+		if err != nil {
+			reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
+			return
+		}
+
+		reply += "\n\nStatus Code: " + strconv.Itoa(statuscode)
+		reply += "\n\nResponse: " + httpresp.Response
+		reply += "\n\nInfo: " + httpresp.Info
+
+		if statuscode != http.StatusOK {
+			reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+			return
+		}
+
+		// reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 	})
 
 	err := c.Visit(url)
