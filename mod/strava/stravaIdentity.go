@@ -136,7 +136,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 			PhoneNumber:          phone,
 		}
 
-		statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+		statuscode, httpresp, err := atapi.PostStructWithToken[Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoAddUserURL)
 		if err != nil {
 			reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 			return
