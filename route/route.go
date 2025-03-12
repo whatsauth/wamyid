@@ -26,6 +26,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.PostInboxNomor(w, r)
 	case method == "POST" && helper.URLParam(path, "/webhook/telebot/:nomorwa"):
 		controller.TelebotWebhook(w, r)
+	case method == "GET" && helper.URLParam(path, "/strava/activities"):
+		controller.GetStravaActivities(w, r)
 	default:
 		controller.NotFound(w, r)
 	}
