@@ -8,6 +8,7 @@ import (
 
 type PomodoroReport struct {
     ID            primitive.ObjectID `bson:"_id,omitempty"`
+    Name          string             `bson:"name"`
     PhoneNumber   string             `bson:"phonenumber,omitempty"`
     Cycle         int                `bson:"cycle"`
     Hostname      string             `bson:"hostname"`
@@ -21,4 +22,6 @@ type PomodoroReport struct {
 
 type Config struct {
     PublicKeyPomokit    string `json:"publickeypomokit,omitempty" bson:"publickeypomokit,omitempty"`
+    DomyikadoAllUserURL string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+    Login               string `json:"login,omitempty" bson:"login,omitempty"`
 }
