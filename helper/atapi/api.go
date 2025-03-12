@@ -77,3 +77,29 @@ func GetWithBearer[T any](tokenbearer string, urltarget string) (statusCode int,
 	}
 	return
 }
+
+func GetWithToken[T any](tokenkey string, tokenvalue string, urltarget string) (statusCode int, result T, err error) {
+	client := http.Client{}
+	req, err := http.NewRequest("GET", urltarget, nil)
+	if err != nil {
+		return
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add(tokenkey, tokenvalue)
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	statusCode = resp.StatusCode
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	if err = json.Unmarshal(respBody, &result); err != nil {
+		rawstring := string(respBody)
+		err = errors.New("Not A Valid JSON Response from " + urltarget + ". CONTENT: " + rawstring)
+		return
+	}
+	return
+}
