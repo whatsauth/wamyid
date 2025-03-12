@@ -21,7 +21,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	// 1. Validasi input dasar
 
 	// Tambahkan pengambilan data user untuk mendapatkan nama
-	userData, err := GetUserData(Pesan.Phone_number, Profile, Pesan, db)
+	userData, err := GetUserData(Profile, Pesan, db)
 	var userName string
 	if err != nil {
 		// Jika gagal, gunakan alias_name sebagai fallback
@@ -133,7 +133,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 }
 
 // Tambahkan fungsi untuk mengambil data user
-func GetUserData(phoneNumber string, Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (daftar.Userdomyikado, error) {
+func GetUserData(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (daftar.Userdomyikado, error) {
     var result daftar.Userdomyikado
     conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
     if err != nil {
@@ -152,7 +152,7 @@ func GetUserData(phoneNumber string, Profile itmodel.Profile, Pesan itmodel.Iteu
     }
     
     // Gunakan phoneNumber dari parameter (Pesan.Phone_number di pemanggilan fungsi)
-    targetPhoneNumber := phoneNumber
+    targetPhoneNumber := Pesan.Phone_number
     
     // Mencari user dengan nomor telepon yang sesuai
     for _, user := range allUsers {
@@ -259,7 +259,7 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	// Validasi input dasar
 
 	// Tambahkan pengambilan data user untuk mendapatkan nama
-	userData, err := GetUserData(Pesan.Phone_number, Profile, Pesan, db)
+	userData, err := GetUserData(Profile, Pesan, db)
 	var userName string
 	if err != nil {
 		// Jika gagal, gunakan alias_name sebagai fallback
