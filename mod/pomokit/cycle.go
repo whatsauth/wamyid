@@ -25,8 +25,8 @@ func GetUserData(phoneNumber string, Profile itmodel.Profile, Pesan itmodel.Iteu
         return result, fmt.Errorf("gagal mengambil config: %v", err)
     }
     
-    // Mendapatkan token login dari Profile
-    statusCode, userData, err := atapi.GetWithToken[daftar.Userdomyikado]("login", Profile.Token, conf.DomyikadoAllUserURL)
+    // Mendapatkan semua data user
+    statusCode, allUsers, err := atapi.GetWithToken[[]daftar.Userdomyikado]("login", Profile.Token, conf.DomyikadoAllUserURL)
     
     if err != nil {
         return result, err
@@ -36,7 +36,17 @@ func GetUserData(phoneNumber string, Profile itmodel.Profile, Pesan itmodel.Iteu
         return result, fmt.Errorf("failed to get user data: status code %d", statusCode)
     }
     
-    return userData, nil
+    // Gunakan phoneNumber dari parameter (Pesan.Phone_number di pemanggilan fungsi)
+    targetPhoneNumber := phoneNumber
+    
+    // Mencari user dengan nomor telepon yang sesuai
+    for _, user := range allUsers {
+        if user.PhoneNumber == targetPhoneNumber {
+            return user, nil
+        }
+    }
+    
+    return result, fmt.Errorf("user dengan nomor telepon %s tidak ditemukan", targetPhoneNumber)
 }
 
 func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
