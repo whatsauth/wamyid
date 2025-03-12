@@ -8,12 +8,36 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gocroot/mod/daftar"
+	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"github.com/whatsauth/watoken"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+// Tambahkan fungsi untuk mengambil data user
+func GetUserData(phoneNumber string, Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (daftar.Userdomyikado, error) {
+    var result daftar.Userdomyikado
+    conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
+    if err != nil {
+        return result, fmt.Errorf("gagal mengambil config: %v", err)
+    }
+    
+    // Mendapatkan token login dari Profile
+    statusCode, userData, err := atapi.GetWithToken[daftar.Userdomyikado]("login", Profile.Token, conf.DomyikadoAllUserURL)
+    
+    if err != nil {
+        return result, err
+    }
+    
+    if statusCode != 200 {
+        return result, fmt.Errorf("failed to get user data: status code %d", statusCode)
+    }
+    
+    return userData, nil
+}
 
 func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	// 1. Validasi input dasar
@@ -27,27 +51,37 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	}
 
 	hostname := extractValue(Pesan.Message, "Hostname : ")
-	// Perbaikan: Pastikan hostname tidak menyertakan "IP" 
-	// hostname = strings.TrimSuffix(hostname, "IP")
-	ip := extractIP(Pesan.Message) // Gunakan fungsi khusus IP
+	ip := extractIP(Pesan.Message)
 	screenshots := extractNumber(Pesan.Message, "Jumlah ScreenShoot : ")
-	pekerjaan := extractActivities(Pesan.Message) // Update parameter
+	pekerjaan := extractActivities(Pesan.Message)
 	token := extractToken(Pesan.Message)
+
+	// Tambahkan pengambilan data user untuk mendapatkan nama
+	userData, err := GetUserData(Pesan.Phone_number, Profile, Pesan, db)
+	var userName string
+	if err != nil {
+		// Jika gagal, gunakan alias_name sebagai fallback
+		userName = Pesan.Alias_name
+		fmt.Printf("Warning: Failed to get user data: %v. Using alias_name instead.\n", err)
+	} else {
+		// Jika berhasil, gunakan nama dari data user
+		userName = userData.Name
+	}
 
 	// 3. Verifikasi public key
 	publicKey, err := getPublicKey(db)
 	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memuat public key: " + err.Error()
+		return "Wah kak " + userName + ", sistem gagal memuat public key: " + err.Error()
 	}
 
 	// Cek apakah token sudah pernah digunakan di koleksi pomokit
 	isUsed, err := isTokenUsed(db, token)
 	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + ", sistem gagal memeriksa token: " + err.Error()
+		return "Wah kak " + userName + ", sistem gagal memeriksa token: " + err.Error()
 	}
 
 	if isUsed {
-		return "Wah kak " + Pesan.Alias_name + ", token ini sudah pernah digunakan sebelumnya"
+		return "Wah kak " + userName + ", token ini sudah pernah digunakan sebelumnya"
 	}
 
 	// 4. Decode token
@@ -65,9 +99,9 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		}
 
 		return fmt.Sprintf("Wah kak %s, %s: %v",
-			Pesan.Alias_name,
+			userName,
 			errorMsg,
-			strings.Split(err.Error(), ":")[0], // Ambil pesan error utama
+			strings.Split(err.Error(), ":")[0],
 		)
 	}
 
@@ -85,6 +119,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	report := PomodoroReport{
 		PhoneNumber: Pesan.Phone_number,
+		Name:        userName,
 		Cycle:       cycle,
 		Hostname:    hostname,
 		IP:          ip,
@@ -97,7 +132,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 
 	_, err = atdb.InsertOneDoc(db, "pomokit", report)
 	if err != nil {
-		return "Wah kak " + Pesan.Alias_name + ", gagal menyimpan laporan: " + err.Error()
+		return "Wah kak " + userName + ", gagal menyimpan laporan: " + err.Error()
 	}
 
 	// 7. Generate response
@@ -110,12 +145,12 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			"🔗 Alamat URL %s\n"+
 			"📅 %s",
 		cycle,
-		Pesan.Alias_name,
+		userName,
 		hostname,
 		ip,
 		pekerjaan,
 		url,
-		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"), // ini dikonversi
+		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"),
 	)
 }
 
@@ -216,6 +251,18 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
 	}
 
+	// Tambahkan pengambilan data user untuk mendapatkan nama
+	userData, err := GetUserData(Pesan.Phone_number, Profile, Pesan, db)
+	var userName string
+	if err != nil {
+		// Jika gagal, gunakan alias_name sebagai fallback
+		userName = Pesan.Alias_name
+		fmt.Printf("Warning: Failed to get user data: %v. Using alias_name instead.\n", err)
+	} else {
+		// Jika berhasil, gunakan nama dari data user
+		userName = userData.Name
+	}
+
 	// Pisahkan pesan menjadi baris-baris
 	lines := strings.Split(Pesan.Message, "\n")
 	
@@ -234,7 +281,7 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	
 	// Validasi cycle
 	if cycle == 0 {
-		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
+		return "Wah kak " + userName + ", format cycle tidak valid. Contoh: 'Pomodoro Start 1 cycle'"
 	}
 
 	// Ekstrak nilai-nilai menggunakan regex yang lebih fleksibel
@@ -278,7 +325,7 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 			"📅 %s\n\n"+
 			"Semangat kak! Waktu kerja nya dimulai 🚀",
 		cycle,
-		Pesan.Alias_name,
+		userName,
 		milestone,
 		version,
 		hostname,
