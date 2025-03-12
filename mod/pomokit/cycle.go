@@ -17,54 +17,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Tambahkan fungsi untuk mengambil data user
-func GetUserData(phoneNumber string, Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (daftar.Userdomyikado, error) {
-    var result daftar.Userdomyikado
-    conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
-    if err != nil {
-        return result, fmt.Errorf("gagal mengambil config: %v", err)
-    }
-    
-    // Mendapatkan semua data user
-    statusCode, allUsers, err := atapi.GetWithToken[[]daftar.Userdomyikado]("login", Profile.Token, conf.DomyikadoAllUserURL)
-    
-    if err != nil {
-        return result, err
-    }
-    
-    if statusCode != 200 {
-        return result, fmt.Errorf("failed to get user data: status code %d", statusCode)
-    }
-    
-    // Gunakan phoneNumber dari parameter (Pesan.Phone_number di pemanggilan fungsi)
-    targetPhoneNumber := phoneNumber
-    
-    // Mencari user dengan nomor telepon yang sesuai
-    for _, user := range allUsers {
-        if user.PhoneNumber == targetPhoneNumber {
-            return user, nil
-        }
-    }
-    
-    return result, fmt.Errorf("user dengan nomor telepon %s tidak ditemukan", targetPhoneNumber)
-}
-
 func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	// 1. Validasi input dasar
-	if Pesan.Message == "" {
-		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
-	}
-
-	cycle := extractCycleNumber(Pesan.Message)
-	if cycle == 0 {
-		return "Wah kak " + Pesan.Alias_name + ", format cycle tidak valid. Contoh: 'Iteung Pomodoro Report 1 cycle'"
-	}
-
-	hostname := extractValue(Pesan.Message, "Hostname : ")
-	ip := extractIP(Pesan.Message)
-	screenshots := extractNumber(Pesan.Message, "Jumlah ScreenShoot : ")
-	pekerjaan := extractActivities(Pesan.Message)
-	token := extractToken(Pesan.Message)
 
 	// Tambahkan pengambilan data user untuk mendapatkan nama
 	userData, err := GetUserData(Pesan.Phone_number, Profile, Pesan, db)
@@ -77,6 +31,20 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		// Jika berhasil, gunakan nama dari data user
 		userName = userData.Name
 	}
+	if Pesan.Message == "" {
+		return "Wah kak " + userName + ", pesan tidak boleh kosong"
+	}
+
+	cycle := extractCycleNumber(Pesan.Message)
+	if cycle == 0 {
+		return "Wah kak " + userName + ", format cycle tidak valid. Contoh: 'Iteung Pomodoro Report 1 cycle'"
+	}
+
+	hostname := extractValue(Pesan.Message, "Hostname : ")
+	ip := extractIP(Pesan.Message)
+	screenshots := extractNumber(Pesan.Message, "Jumlah ScreenShoot : ")
+	pekerjaan := extractActivities(Pesan.Message)
+	token := extractToken(Pesan.Message)
 
 	// 3. Verifikasi public key
 	publicKey, err := getPublicKey(db)
@@ -162,6 +130,38 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		url,
 		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"),
 	)
+}
+
+// Tambahkan fungsi untuk mengambil data user
+func GetUserData(phoneNumber string, Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (daftar.Userdomyikado, error) {
+    var result daftar.Userdomyikado
+    conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
+    if err != nil {
+        return result, fmt.Errorf("gagal mengambil config: %v", err)
+    }
+    
+    // Mendapatkan semua data user
+    statusCode, allUsers, err := atapi.GetWithToken[[]daftar.Userdomyikado]("login", Profile.Token, conf.DomyikadoAllUserURL)
+    
+    if err != nil {
+        return result, err
+    }
+    
+    if statusCode != 200 {
+        return result, fmt.Errorf("failed to get user data: status code %d", statusCode)
+    }
+    
+    // Gunakan phoneNumber dari parameter (Pesan.Phone_number di pemanggilan fungsi)
+    targetPhoneNumber := phoneNumber
+    
+    // Mencari user dengan nomor telepon yang sesuai
+    for _, user := range allUsers {
+        if user.PhoneNumber == targetPhoneNumber {
+            return user, nil
+        }
+    }
+    
+    return result, fmt.Errorf("user dengan nomor telepon %s tidak ditemukan", targetPhoneNumber)
 }
 
 // Fungsi untuk memeriksa apakah token sudah digunakan menggunakan koleksi pomokit
@@ -257,9 +257,6 @@ func getPublicKey(db *mongo.Database) (string, error) {
 // HandlePomodoroStart menangani pesan permintaan untuk memulai siklus Pomodoro
 func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	// Validasi input dasar
-	if Pesan.Message == "" {
-		return "Wah kak " + Pesan.Alias_name + ", pesan tidak boleh kosong"
-	}
 
 	// Tambahkan pengambilan data user untuk mendapatkan nama
 	userData, err := GetUserData(Pesan.Phone_number, Profile, Pesan, db)
@@ -271,6 +268,10 @@ func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, d
 	} else {
 		// Jika berhasil, gunakan nama dari data user
 		userName = userData.Name
+	}
+
+	if Pesan.Message == "" {
+		return "Wah kak " + userName + ", pesan tidak boleh kosong"
 	}
 
 	// Pisahkan pesan menjadi baris-baris
