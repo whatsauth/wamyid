@@ -22,6 +22,6 @@ type PomodoroReport struct {
 
 type Config struct {
     PublicKeyPomokit    string `json:"publickeypomokit,omitempty" bson:"publickeypomokit,omitempty"`
-    DomyikadoAllUserURL string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+    DomyikadoAllUserURL string `json:"domyikadoalluserurl,omitempty" bson:"domyikadoalluserurl,omitempty"`
     Login               string `json:"login,omitempty" bson:"login,omitempty"`
 }
