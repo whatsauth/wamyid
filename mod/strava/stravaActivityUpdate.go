@@ -14,7 +14,7 @@ import (
 func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Stava kamu hari ini: "
 
-	reply += maintenance(Pesan.Phone_number)
+	reply = maintenance(Pesan.Phone_number)
 
 	// cek apakah akun strava sudah terdaftar di database
 	Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": Pesan.Phone_number})

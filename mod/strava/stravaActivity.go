@@ -71,7 +71,7 @@ func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	reply := ""
 
-	reply += maintenance(phone)
+	reply = maintenance(phone)
 
 	c := colly.NewCollector(
 		colly.AllowedDomains(domWeb),
