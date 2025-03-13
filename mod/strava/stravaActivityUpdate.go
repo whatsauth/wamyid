@@ -154,7 +154,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 					return
 				} else {
 					// simpan data ke database jika data belum ada
-					stravaActivity.CreatedAt = time.Now()
+					stravaActivity.UpdatedAt = time.Now()
 					stravaActivity.Status = "Valid"
 
 					updateData := bson.M{
