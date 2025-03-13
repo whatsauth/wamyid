@@ -105,6 +105,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Pekerjaan:   pekerjaan,
 		Token:       token,
 		URLPekerjaan: url,
+		WaGroupID:   Pesan.Group_id,
 		CreatedAt:   time.Now().In(loc),
 	}
 
@@ -132,14 +133,13 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	)
 }
 
-// Tambahkan fungsi untuk mengambil data user
+// Tambahkan fungsi untuk mengambil data user dari db web
 func GetUserData(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) (daftar.Userdomyikado, error) {
     var result daftar.Userdomyikado
     conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
     if err != nil {
         return result, fmt.Errorf("gagal mengambil config: %v", err)
     }
-    
     // Mendapatkan semua data user
     statusCode, allUsers, err := atapi.GetWithToken[[]daftar.Userdomyikado]("login", Profile.Token, conf.DomyikadoAllUserURL)
     

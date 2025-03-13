@@ -7,21 +7,21 @@ import (
 )
 
 type PomodoroReport struct {
-    ID            primitive.ObjectID `bson:"_id,omitempty"`
-    Name          string             `bson:"name"`
-    PhoneNumber   string             `bson:"phonenumber,omitempty"`
-    Cycle         int                `bson:"cycle"`
-    Hostname      string             `bson:"hostname"`
-    IP            string             `bson:"ip"`
-    Screenshots   int                `bson:"screenshots"`
-    Pekerjaan     string             `bson:"pekerjaan"`
-    Token         string             `bson:"token"`
-    URLPekerjaan  string             `bson:"urlpekerjaan"`
-    CreatedAt     time.Time          `bson:"createdAt"`
+    ID            primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+    Name          string             `bson:"name" json:"name"`
+    PhoneNumber   string             `bson:"phonenumber,omitempty" json:"phonenumber,omitempty"`
+    Cycle         int                `bson:"cycle" json:"cycle"`
+    Hostname      string             `bson:"hostname" json:"hostname"`
+    IP            string             `bson:"ip" json:"ip"`
+    Screenshots   int                `bson:"screenshots" json:"screenshots"`
+    Pekerjaan     string             `bson:"pekerjaan" json:"pekerjaan"`
+    Token         string             `bson:"token" json:"token"`
+    URLPekerjaan  string             `bson:"urlpekerjaan" json:"urlpekerjaan"`
+    WaGroupID     string             `bson:"wagroupid" json:"wagroupid"`
+    CreatedAt     time.Time          `bson:"createdAt" json:"createdAt"`
 }
 
 type Config struct {
     PublicKeyPomokit    string `json:"publickeypomokit,omitempty" bson:"publickeypomokit,omitempty"`
     DomyikadoAllUserURL string `json:"domyikadoalluserurl,omitempty" bson:"domyikadoalluserurl,omitempty"`
-    Login               string `json:"login,omitempty" bson:"login,omitempty"`
 }
