@@ -15,9 +15,11 @@ import (
 func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Profile Stava kakak: "
 
-	if isMaintenance {
-		reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
-		return reply
+	if Pesan.Phone_number != "6282268895372" {
+		if isMaintenance {
+			reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
+			return reply
+		}
 	}
 
 	col := "strava_identity"

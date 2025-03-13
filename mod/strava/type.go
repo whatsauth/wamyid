@@ -4,6 +4,15 @@ import (
 	"time"
 )
 
+type Config struct {
+	PhoneNumber      string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	LeaflyURL        string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
+	LeaflySecret     string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+	DomyikadoUserURL string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
+	DomyikadoSecret  string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
+	KimseokgisURL    string `json:"urlkimseokgis" bson:"urlkimseokgis"`
+}
+
 type StravaIdentity struct {
 	AthleteId     string    `bson:"athlete_id" json:"athlete_id"`
 	Picture       string    `bson:"picture" json:"picture"`
@@ -26,13 +35,27 @@ type StravaActivity struct {
 	LinkActivity string    `bson:"link_activity" json:"link_activity"`
 	Status       string    `bson:"status" json:"status"`
 	CreatedAt    time.Time `bson:"created_at" json:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at" json:"updated_at"`
+	// Location     []GeoPoint `bson:"location" json:"created_at"`
 }
 
-type Config struct {
-	PhoneNumber      string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
-	LeaflyURL        string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
-	LeaflySecret     string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
-	DomyikadoUserURL string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
-	DomyikadoSecret  string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
-	KimseokgisURL    string `json:"urlkimseokgis" bson:"urlkimseokgis"`
-}
+// Struktur untuk data lokasi dari Strava
+// type StravaData struct {
+// 	Props struct {
+// 		PageProps struct {
+// 			Activity struct {
+// 				Streams struct {
+// 					Location []struct {
+// 						Lat float64 `json:"lat"`
+// 						Lng float64 `json:"lng"`
+// 					} `json:"location"`
+// 				} `json:"streams"`
+// 			} `json:"activity"`
+// 		} `json:"pageProps"`
+// 	} `json:"props"`
+// }
+
+// type GeoPoint struct {
+// 	Type        string    `bson:"type"`
+// 	Coordinates []float64 `bson:"coordinates"`
+// }

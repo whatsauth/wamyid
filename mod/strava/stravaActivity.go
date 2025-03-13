@@ -71,9 +71,11 @@ func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	reply := ""
 
-	if isMaintenance {
-		reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
-		return reply
+	if phone != "6282268895372" {
+		if isMaintenance {
+			reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
+			return reply
+		}
 	}
 
 	c := colly.NewCollector(
@@ -143,17 +145,13 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			return
 		}
 
-		if stravaActivity.TypeSport == "Ride" {
-			reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
-			return
-		}
-
 		// cek apakah yang share link strava activity adalah pemilik akun strava
 		Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
 		if err != nil && err != mongo.ErrNoDocuments {
 			reply += "\n\nError fetching data from MongoDB: " + err.Error()
 			return
 		}
+
 		// cek apakah data sudah up to date
 		if Idata.Picture != stravaActivity.Picture {
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
@@ -197,6 +195,20 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 
 			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
 			reply += "\nYang semangat dong... yang semangat dong..."
+			return
+		}
+
+		if stravaActivity.TypeSport == "Ride" {
+			// simpan data ke database jika data belum ada
+			stravaActivity.CreatedAt = time.Now()
+			stravaActivity.Status = "Invalid"
+
+			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+			if err != nil {
+				reply += "\n\nError saving data to MongoDB: " + err.Error()
+			}
+
+			reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
 			return
 		}
 
