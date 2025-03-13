@@ -175,10 +175,10 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 
 					} else {
 						reply += "\n\nHaiiiii kak, " + "*" + Pesan.Alias_name + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa yang di update!! 😀"
-						reply += "\n\n- Name: " + stravaActivity.Name
-						reply += "\n- Title: " + stravaActivity.Title
-						reply += "\n- Date Time: " + stravaActivity.DateTime
-						reply += "\n- Type Sport: " + stravaActivity.TypeSport
+						reply += "\n\n- Name: " + data.Name
+						reply += "\n- Title: " + data.Title
+						reply += "\n- Date Time: " + data.DateTime
+						reply += "\n- Type Sport: " + data.TypeSport
 						reply += "\n- Distance: " + stravaActivity.Distance
 						reply += "\n- Moving Time: " + stravaActivity.MovingTime
 						reply += "\n- Elevation: " + stravaActivity.Elevation
