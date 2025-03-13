@@ -44,6 +44,12 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 		colly.AllowedDomains(domWeb),
 	)
 
+	// ambil link strava activity dari pesan
+	rawUrl := extractStravaLink(Pesan.Message)
+	if rawUrl == "" {
+		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
+	}
+
 	stravaActivity := StravaActivity{}
 	stravaActivity.ActivityId = data.ActivityId
 
@@ -101,32 +107,6 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 			return
 		}
 
-		// if cekActivityId {
-		// 	if cekData {
-		// 		stravaActivity.UpdatedAt = time.Now()
-
-		// 		updateData := bson.M{
-		// 			"distance":    stravaActivity.Distance,
-		// 			"moving_time": stravaActivity.MovingTime,
-		// 			"elevation":   stravaActivity.Elevation,
-		// 			"updated_at":  stravaActivity.UpdatedAt,
-		// 		}
-
-		// 		// update data ke database jika ada perubahan
-		// 		_, err := atdb.UpdateDoc(db, col, bson.M{"activity_id": stravaActivity.ActivityId}, bson.M{"$set": updateData})
-		// 		if err != nil {
-		// 			reply += "\n\nError updating data to MongoDB: " + err.Error()
-		// 			return
-		// 		}
-
-		// 		reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah di update."
-		// 		return
-		// 	}
-		// } else {
-		// 	reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
-		// 	return
-		// }
-
 		// cek apakah ada map atau tidak di halaman strava
 		if !found {
 			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
@@ -140,7 +120,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 		}
 
 		distanceFloat := parseDistance(stravaActivity.Distance)
-		if data.Distance == "" && data.MovingTime == "" {
+		if data.Distance == "" && data.MovingTime == "" && data.Status == "Invalid" {
 			if distanceFloat < 3 {
 				stravaActivity.UpdatedAt = time.Now()
 				stravaActivity.Status = "Invalid"
@@ -199,7 +179,9 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 		}
 	})
 
-	err = c.Visit(data.LinkActivity)
+	rawUrl = data.LinkActivity
+
+	err = c.Visit(rawUrl)
 	if err != nil {
 		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(3)"
 	}
