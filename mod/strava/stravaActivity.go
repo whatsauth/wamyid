@@ -71,6 +71,11 @@ func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	reply := ""
 
+	if isMaintenance {
+		reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
+		return reply
+	}
+
 	c := colly.NewCollector(
 		colly.AllowedDomains(domWeb),
 	)
@@ -121,20 +126,6 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			}
 		})
 	})
-
-	// c.OnHTML("div.Stat_stat__hhbSV", func(e *colly.HTMLElement) {
-	// 	label := e.ChildText("span.Stat_statLabel__9Qe6h")
-	// 	value := e.ChildText("div.Stat_statValue__jbFOA")
-
-	// 	switch strings.ToLower(label) {
-	// 	case "distance":
-	// 		stravaActivity.Distance = value
-	// 	case "time":
-	// 		stravaActivity.MovingTime = value
-	// 	case "elevation":
-	// 		stravaActivity.Elevation = value
-	// 	}
-	// })
 
 	found := false
 	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {

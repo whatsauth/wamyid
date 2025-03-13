@@ -15,6 +15,11 @@ import (
 func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Profile Stava kakak: "
 
+	if isMaintenance {
+		reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
+		return reply
+	}
+
 	col := "strava_identity"
 	// cek apakah akun strava sudah terdaftar di database
 	data, err := atdb.GetOneDoc[StravaIdentity](db, col, bson.M{"phone_number": Pesan.Phone_number})
