@@ -72,7 +72,10 @@ func StravaIdentityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias string) string {
 	reply := ""
 
-	reply = maintenance(phone)
+	if msg := maintenance(phone); msg != "" {
+		reply += msg
+		return reply
+	}
 
 	c := colly.NewCollector(
 		colly.AllowedDomains(domWeb),
