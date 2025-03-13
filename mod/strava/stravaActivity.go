@@ -129,10 +129,10 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		})
 	})
 
-	found := false
-	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
-		found = true
-	})
+	// found := false
+	// c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
+	// 	found = true
+	// })
 
 	c.OnScraped(func(r *colly.Response) {
 		if stravaActivity.Distance == "" || stravaActivity.MovingTime == "" {
@@ -183,20 +183,20 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		}
 
 		// cek apakah ada map atau tidak di halaman strava
-		if !found {
-			// simpan data ke database jika data belum ada
-			stravaActivity.CreatedAt = time.Now()
-			stravaActivity.Status = "Fraudulent"
+		// if !found {
+		// 	// simpan data ke database jika data belum ada
+		// 	stravaActivity.CreatedAt = time.Now()
+		// 	stravaActivity.Status = "Fraudulent"
 
-			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
-			if err != nil {
-				reply += "\n\nError saving data to MongoDB: " + err.Error()
-			}
+		// 	_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+		// 	if err != nil {
+		// 		reply += "\n\nError saving data to MongoDB: " + err.Error()
+		// 	}
 
-			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-			reply += "\nYang semangat dong... yang semangat dong..."
-			return
-		}
+		// 	reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+		// 	reply += "\nYang semangat dong... yang semangat dong..."
+		// 	return
+		// }
 
 		if stravaActivity.TypeSport == "Ride" {
 			// simpan data ke database jika data belum ada
