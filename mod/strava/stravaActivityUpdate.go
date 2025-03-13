@@ -53,6 +53,15 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 	stravaActivity := StravaActivity{}
 	stravaActivity.ActivityId = data.ActivityId
 
+	c.OnHTML("main", func(e *colly.HTMLElement) {
+		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
+			imgTitle := imgEl.Attr("title")
+			if imgTitle == stravaActivity.Name {
+				stravaActivity.Picture = imgEl.Attr("src")
+			}
+		})
+	})
+
 	c.OnHTML("div", func(e *colly.HTMLElement) {
 		e.ForEach("span", func(_ int, el *colly.HTMLElement) {
 			label := strings.ToLower(strings.TrimSpace(el.Text))
@@ -119,62 +128,67 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 			return
 		}
 
-		distanceFloat := parseDistance(stravaActivity.Distance)
-		if data.Distance == "" && data.MovingTime == "" && data.Status == "Invalid" {
-			if distanceFloat < 3 {
-				stravaActivity.UpdatedAt = time.Now()
-				stravaActivity.Status = "Invalid"
+		if data.Distance == "" && data.MovingTime == "" {
+			if data.Status == "Invalid" {
+				distanceFloat := parseDistance(stravaActivity.Distance)
+				if distanceFloat < 3 {
+					stravaActivity.UpdatedAt = time.Now()
+					stravaActivity.Status = "Invalid"
 
-				updateData := bson.M{
-					"distance":    stravaActivity.Distance,
-					"moving_time": stravaActivity.MovingTime,
-					"elevation":   stravaActivity.Elevation,
-					"updated_at":  stravaActivity.UpdatedAt,
-					"status":      stravaActivity.Status,
-				}
+					updateData := bson.M{
+						"distance":    stravaActivity.Distance,
+						"moving_time": stravaActivity.MovingTime,
+						"elevation":   stravaActivity.Elevation,
+						"updated_at":  stravaActivity.UpdatedAt,
+						"status":      stravaActivity.Status,
+					}
 
-				// update data ke database jika ada perubahan
-				_, err := atdb.UpdateDoc(db, col, bson.M{"activity_id": stravaActivity.ActivityId}, bson.M{"$set": updateData})
-				if err != nil {
-					reply += "\n\nError updating data to MongoDB: " + err.Error()
+					// update data ke database jika ada perubahan
+					_, err := atdb.UpdateDoc(db, col, bson.M{"activity_id": stravaActivity.ActivityId}, bson.M{"$set": updateData})
+					if err != nil {
+						reply += "\n\nError updating data to MongoDB: " + err.Error()
+						return
+					}
+
+					reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
+					reply += "\nSatu hari minimal 3 km, masa kamu cuma " + stravaActivity.Distance + " aja"
+					reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 					return
-				}
+				} else {
+					// simpan data ke database jika data belum ada
+					stravaActivity.CreatedAt = time.Now()
+					stravaActivity.Status = "Valid"
 
-				reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
-				reply += "\nSatu hari minimal 3 km, masa kamu cuma " + stravaActivity.Distance + " aja"
-				reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
-				return
+					updateData := bson.M{
+						"distance":    stravaActivity.Distance,
+						"moving_time": stravaActivity.MovingTime,
+						"elevation":   stravaActivity.Elevation,
+						"updated_at":  stravaActivity.UpdatedAt,
+						"status":      stravaActivity.Status,
+					}
+
+					// update data ke database jika ada perubahan
+					_, err := atdb.UpdateDoc(db, col, bson.M{"activity_id": stravaActivity.ActivityId}, bson.M{"$set": updateData})
+					if err != nil {
+						reply += "\n\nError updating data to MongoDB: " + err.Error()
+						return
+
+					} else {
+						reply += "\n\nHaiiiii kak, " + "*" + Pesan.Alias_name + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa yang di update!! 😀"
+						reply += "\n\n- Name: " + stravaActivity.Name
+						reply += "\n- Title: " + stravaActivity.Title
+						reply += "\n- Date Time: " + stravaActivity.DateTime
+						reply += "\n- Type Sport: " + stravaActivity.TypeSport
+						reply += "\n- Distance: " + stravaActivity.Distance
+						reply += "\n- Moving Time: " + stravaActivity.MovingTime
+						reply += "\n- Elevation: " + stravaActivity.Elevation
+						reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+					}
+				}
 
 			} else {
-				// simpan data ke database jika data belum ada
-				stravaActivity.CreatedAt = time.Now()
-				stravaActivity.Status = "Valid"
-
-				updateData := bson.M{
-					"distance":    stravaActivity.Distance,
-					"moving_time": stravaActivity.MovingTime,
-					"elevation":   stravaActivity.Elevation,
-					"updated_at":  stravaActivity.UpdatedAt,
-					"status":      stravaActivity.Status,
-				}
-
-				// update data ke database jika ada perubahan
-				_, err := atdb.UpdateDoc(db, col, bson.M{"activity_id": stravaActivity.ActivityId}, bson.M{"$set": updateData})
-				if err != nil {
-					reply += "\n\nError updating data to MongoDB: " + err.Error()
-					return
-
-				} else {
-					reply += "\n\nHaiiiii kak, " + "*" + Pesan.Alias_name + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa yang di update!! 😀"
-					reply += "\n\n- Name: " + stravaActivity.Name
-					reply += "\n- Title: " + stravaActivity.Title
-					reply += "\n- Date Time: " + stravaActivity.DateTime
-					reply += "\n- Type Sport: " + stravaActivity.TypeSport
-					reply += "\n- Distance: " + stravaActivity.Distance
-					reply += "\n- Moving Time: " + stravaActivity.MovingTime
-					reply += "\n- Elevation: " + stravaActivity.Elevation
-					reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
-				}
+				reply += "\n\nMaaf kak, Tidak bisa mengambil data aktivitas kamu."
+				return
 			}
 		}
 	})
