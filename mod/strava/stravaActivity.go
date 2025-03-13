@@ -106,19 +106,35 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 		activities = append(activities, stravaActivity)
 	})
 
-	c.OnHTML("div.Stat_stat__hhbSV", func(e *colly.HTMLElement) {
-		label := e.ChildText("span.Stat_statLabel__9Qe6h")
-		value := e.ChildText("div.Stat_statValue__jbFOA")
+	c.OnHTML("div", func(e *colly.HTMLElement) {
+		e.ForEach("span", func(_ int, el *colly.HTMLElement) {
+			label := strings.ToLower(strings.TrimSpace(el.Text))
+			value := strings.TrimSpace(el.DOM.Next().Text()) // Ambil elemen di sebelahnya
 
-		switch strings.ToLower(label) {
-		case "distance":
-			stravaActivity.Distance = value
-		case "time":
-			stravaActivity.MovingTime = value
-		case "elevation":
-			stravaActivity.Elevation = value
-		}
+			switch label {
+			case "distance":
+				stravaActivity.Distance = value
+			case "time":
+				stravaActivity.MovingTime = value
+			case "elevation":
+				stravaActivity.Elevation = value
+			}
+		})
 	})
+
+	// c.OnHTML("div.Stat_stat__hhbSV", func(e *colly.HTMLElement) {
+	// 	label := e.ChildText("span.Stat_statLabel__9Qe6h")
+	// 	value := e.ChildText("div.Stat_statValue__jbFOA")
+
+	// 	switch strings.ToLower(label) {
+	// 	case "distance":
+	// 		stravaActivity.Distance = value
+	// 	case "time":
+	// 		stravaActivity.MovingTime = value
+	// 	case "elevation":
+	// 		stravaActivity.Elevation = value
+	// 	}
+	// })
 
 	found := false
 	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
@@ -126,8 +142,18 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
+		if stravaActivity.Distance == "" || stravaActivity.MovingTime == "" {
+			reply += "\n\nMaaf kak, kami tidak dapat mengambil data aktivitas kamu. Coba hubungi admin ya."
+			return
+		}
+
 		if stravaActivity.Picture == "" {
 			reply += "\n\nMaaf kak, sistem tidak dapat mengambil foto profil Strava kamu. Pastikan profil dan activity Strava kamu dibuat public(everyone). doc: https://www.do.my.id/mentalhealt-strava"
+			return
+		}
+
+		if stravaActivity.TypeSport == "Ride" {
+			reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
 			return
 		}
 
