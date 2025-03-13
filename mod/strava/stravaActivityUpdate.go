@@ -76,10 +76,10 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 		})
 	})
 
-	// found := false
-	// c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
-	// 	found = true
-	// })
+	found := false
+	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
+		found = true
+	})
 
 	c.OnScraped(func(r *colly.Response) {
 		if data.ActivityId == "" {
@@ -115,11 +115,11 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 		}
 
 		// cek apakah ada map atau tidak di halaman strava
-		// if !found {
-		// 	reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
-		// 	reply += "\nYang semangat dong... yang semangat dong..."
-		// 	return
-		// }
+		if !found {
+			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+			reply += "\nYang semangat dong... yang semangat dong..."
+			return
+		}
 
 		if stravaActivity.TypeSport == "Ride" {
 			reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
