@@ -72,12 +72,7 @@ func StravaIdentityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias string) string {
 	reply := ""
 
-	// if phone != "6282268895372" {
-	// 	if isMaintenance {
-	// 		reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
-	// 		return reply
-	// 	}
-	// }
+	reply += maintenance(phone)
 
 	c := colly.NewCollector(
 		colly.AllowedDomains(domWeb),

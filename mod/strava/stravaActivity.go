@@ -71,12 +71,7 @@ func StravaActivityHandler(Pesan itmodel.IteungMessage, db *mongo.Database) stri
 func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 	reply := ""
 
-	if phone != "6282268895372" {
-		if isMaintenance {
-			reply += "\n\nMaaf kak, sistem sedang maintenance. Coba lagi nanti ya."
-			return reply
-		}
-	}
+	reply += maintenance(phone)
 
 	c := colly.NewCollector(
 		colly.AllowedDomains(domWeb),
