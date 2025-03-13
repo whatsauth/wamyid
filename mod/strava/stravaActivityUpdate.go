@@ -187,9 +187,12 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 				}
 
 			} else {
-				reply += "\n\nMaaf kak, Tidak bisa mengambil data aktivitas kamu."
+				reply += "\n\nMaaf kak, Tidak bisa mengambil data aktivitas kamu.(1)"
 				return
 			}
+		} else {
+			reply += "\n\nMaaf kak, Tidak bisa mengambil data aktivitas kamu.(2)"
+			return
 		}
 	})
 
