@@ -140,11 +140,13 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 		type DataStrava struct {
 			StravaProfilePicture string `json:"stravaprofilepicture"`
 			PhoneNumber          string `json:"phonenumber"`
+			Name                 string `json:"name"`
 		}
 
 		datastrava := DataStrava{
 			StravaProfilePicture: stravaIdentity.Picture,
 			PhoneNumber:          phone,
+			Name:                 alias,
 		}
 
 		statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
