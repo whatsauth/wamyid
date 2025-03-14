@@ -64,10 +64,10 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 
 		if data.AthleteId == stravaIdentity.AthleteId {
 			// cek apakah data sudah up to date
-			if data.Picture == stravaIdentity.Picture {
-				reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
-				return
-			}
+			// if data.Picture == stravaIdentity.Picture {
+			// 	reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
+			// 	return
+			// }
 
 			stravaIdentity.UpdatedAt = time.Now()
 
