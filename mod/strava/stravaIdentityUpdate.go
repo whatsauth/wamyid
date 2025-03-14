@@ -92,16 +92,10 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 				return
 			}
 
-			type DataStrava struct {
-				StravaProfilePicture string `json:"stravaprofilepicture"`
-				PhoneNumber          string `json:"phonenumber"`
-				Name                 string `json:"name"`
-			}
-
-			datastrava := DataStrava{
-				StravaProfilePicture: stravaIdentity.Picture,
-				PhoneNumber:          Pesan.Phone_number,
-				Name:                 Pesan.Alias_name,
+			datastrava := map[string]interface{}{
+				"stravaprofilepicture": stravaIdentity.Picture,
+				"phonenumber":          Pesan.Phone_number,
+				"name":                 Pesan.Alias_name,
 			}
 
 			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
