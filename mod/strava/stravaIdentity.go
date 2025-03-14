@@ -128,7 +128,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
 			reply += "\n\nData Strava Kak " + alias + " sudah berhasil di simpan."
-			reply += "\n\nTambahin Strava Profile Picture kamu ke profile akun do.my.id kamu yaa \n" + stravaIdentity.Picture
+			reply += "\n\nCek link di bawah ini apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa \n" + stravaIdentity.Picture
 		}
 
 		conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": profilePhone})

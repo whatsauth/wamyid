@@ -84,7 +84,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 			}
 
 			reply += "\n\nData kak " + Pesan.Alias_name + " sudah berhasil di update."
-			reply += "\n\nUpdate juga Strava Profile Picture kakak di profile akun do.my.id yaa \n" + stravaIdentity.Picture
+			reply += "\n\nCek link di bawah ini apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa \n" + stravaIdentity.Picture
 
 			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
 			if err != nil {
