@@ -193,6 +193,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 
 					datastrava := map[string]interface{}{
 						"stravaprofilepicture": stravaActivity.Picture,
+						"phonenumber":          Idata.PhoneNumber,
 						"name":                 Pesan.Alias_name,
 					}
 
@@ -206,8 +207,6 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 						reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
 						return
 					}
-
-					reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 				}
 
 			} else {

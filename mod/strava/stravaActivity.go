@@ -268,6 +268,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 
 			datastrava := map[string]interface{}{
 				"stravaprofilepicture": stravaActivity.Picture,
+				"phonenumber":          Idata.PhoneNumber,
 				"name":                 alias,
 			}
 
