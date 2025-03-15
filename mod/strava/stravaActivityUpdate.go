@@ -87,10 +87,12 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 		reply += "\ndistance: " + stravaActivity.Distance
 		reply += "\nmoving time: " + stravaActivity.MovingTime
 		reply += "\nelevation: " + stravaActivity.Elevation
+		reply += "\nurl: " + rawUrl
 
 		reply += "\n\ndata distance: " + data.Distance
 		reply += "\ndata moving time: " + data.MovingTime
 		reply += "\ndata elevation: " + data.Elevation
+		reply += "\n\nurl: " + data.LinkActivity
 
 		if data.ActivityId == "" {
 			reply += "\n\n Strava Activity kak " + Pesan.Alias_name + " tidak di temukan."
@@ -230,7 +232,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 		}
 	})
 
-	rawUrl = data.LinkActivity
+	// rawUrl = data.LinkActivity
 
 	err = c.Visit(rawUrl)
 	if err != nil {
