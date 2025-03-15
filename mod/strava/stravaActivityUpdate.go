@@ -84,8 +84,6 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		reply += stravaActivity.Distance + " " + stravaActivity.MovingTime + " " + stravaActivity.Elevation
-
 		if data.ActivityId == "" {
 			reply += "\n\n Strava Activity kak " + Pesan.Alias_name + " tidak di temukan."
 			return
@@ -101,7 +99,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 			return
 		}
 
-		if Idata.Picture != stravaActivity.Picture && stravaActivity.Picture != AdminPicture {
+		if Idata.Picture != stravaActivity.Picture {
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
 			reply += "\n\nAtau mungkin link yang kamu share bukan punya kamu 😏"
@@ -113,7 +111,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 			return
 		}
 
-		if data.Distance != "" && data.MovingTime != "" {
+		if strings.TrimSpace(data.Distance) != "" && strings.TrimSpace(data.MovingTime) != "" {
 			reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
 			return
 		}
