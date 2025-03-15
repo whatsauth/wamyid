@@ -31,8 +31,13 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 	}
 
 	col := "strava_activity"
+	filter := bson.M{
+		"phone_number": Idata.PhoneNumber,
+		"distance":     bson.M{"$eq": ""},
+		"moving_time":  bson.M{"$eq": ""},
+	}
 	// cek apakah akun strava sudah terdaftar di database
-	data, err := atdb.GetOneDoc[StravaActivity](db, col, bson.M{"picture": Idata.Picture})
+	data, err := atdb.GetOneDoc[StravaActivity](db, col, filter)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return "Kak, Strava Activity kamu tidak ditemukan di database. Silakan cek kembali."
@@ -41,7 +46,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 	}
 
 	c := colly.NewCollector(
-		colly.AllowedDomains(domWeb),
+		colly.AllowedDomains(domWeb, domApp),
 	)
 
 	// ambil link strava activity dari pesan
@@ -94,8 +99,8 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 		reply += "\ndata elevation: " + data.Elevation
 		reply += "\n\nurl: " + data.LinkActivity
 
-		if data.ActivityId == "" {
-			reply += "\n\n Strava Activity kak " + Pesan.Alias_name + " tidak di temukan."
+		if data.ActivityId != stravaActivity.ActivityId {
+			reply += "\n\nStrava Activity ID kak " + Pesan.Alias_name + " tidak sama."
 			return
 		}
 
@@ -113,11 +118,6 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
 			reply += "\n\nAtau mungkin link yang kamu share bukan punya kamu 😏"
-			return
-		}
-
-		if data.ActivityId != stravaActivity.ActivityId {
-			reply += "\n\nStrava Activity ID kak " + Pesan.Alias_name + " tidak sama."
 			return
 		}
 
