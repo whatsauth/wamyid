@@ -207,6 +207,9 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 						reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
 						return
 					}
+
+					reply += "\n\nStrava Profile Picture: " + stravaActivity.Picture
+					reply += "\n\nCek link di atas apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa"
 				}
 
 			} else {

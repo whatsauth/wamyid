@@ -283,7 +283,8 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				return
 			}
 
-			reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
+			reply += "\n\nStrava Profile Picture: " + stravaActivity.Picture
+			reply += "\n\nCek link di atas apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa"
 		}
 	})
 
