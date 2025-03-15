@@ -1,17 +1,19 @@
 package strava
 
 import (
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mongo.Database) string {
+func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Stava kamu hari ini: "
 
 	if msg := maintenance(Pesan.Phone_number); msg != "" {
@@ -182,6 +184,30 @@ func StravaActivityUpdateIfEmptyDataHandler(Pesan itmodel.IteungMessage, db *mon
 						reply += "\n- Elevation: " + stravaActivity.Elevation
 						reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 					}
+
+					conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
+					if err != nil {
+						reply += "\n\nWah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+						return
+					}
+
+					datastrava := map[string]interface{}{
+						"stravaprofilepicture": stravaActivity.Picture,
+						"name":                 Pesan.Alias_name,
+					}
+
+					statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+					if err != nil {
+						reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
+						return
+					}
+
+					if statuscode != http.StatusOK {
+						reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+						return
+					}
+
+					reply += "\n\nUpdate Strava Profile Picture berhasil dilakukan di do.my.id, silahkan cek di profile akun do.my.id kakak."
 				}
 
 			} else {
