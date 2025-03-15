@@ -166,6 +166,20 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			return
 		}
 		if data.ActivityId == stravaActivity.ActivityId {
+			createdAtFormated := formatDateTimeToIndo(stravaActivity.CreatedAt.Format("2006-01-02T15:04:05"))
+			reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Kamu sudah pernah share aktivitas ini sebelumnya pada tanggal " + createdAtFormated + "! Berikut data aktivitas kamu yang sudah tersimpan."
+			reply += "\n\n- Name: " + stravaActivity.Name
+			reply += "\n- Title: " + stravaActivity.Title
+			reply += "\n- Date Time: " + stravaActivity.DateTime
+			reply += "\n- Type Sport: " + stravaActivity.TypeSport
+			reply += "\n- Distance: " + stravaActivity.Distance
+			reply += "\n- Moving Time: " + stravaActivity.MovingTime
+			reply += "\n- Elevation: " + stravaActivity.Elevation
+			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+
+			reply += "\nJangan Curang yaaaa!"
+			reply += "\nSana Lari lagi jangan malas!"
+
 			// simpan data ke database jika data belum ada
 			stravaActivity.CreatedAt = time.Now()
 			stravaActivity.Status = "Duplicate"
@@ -174,9 +188,6 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			if err != nil {
 				reply += "\n\nError saving data to MongoDB: " + err.Error()
 			}
-
-			reply += "\nHayoolooooo ngapain, Jangan Curang donggg! 😏 Kamu sudah pernah share aktivitas ini sebelumnya."
-			reply += "\nSana Lari lagi jangan malas!"
 			return
 		}
 
