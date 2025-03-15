@@ -16,13 +16,62 @@ import (
 func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	reply := "Informasi Stava kamu hari ini: "
 
-	if msg := maintenance(Pesan.Phone_number); msg != "" {
+	c := colly.NewCollector(
+		colly.AllowedDomains(domWeb, domApp),
+	)
+
+	var fullActivityURL string
+
+	// ambil link strava activity dari pesan
+	rawUrl := extractStravaLink(Pesan.Message)
+	if rawUrl == "" {
+		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
+	}
+
+	if strings.Contains(rawUrl, domWeb) {
+		reply += scrapeStravaActivityUpdate(db, rawUrl, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
+
+	} else if strings.Contains(rawUrl, domApp) {
+		c.OnHTML("a", func(e *colly.HTMLElement) {
+			link := e.Attr("href")
+
+			path := "/activities/"
+			if strings.Contains(link, path) {
+				parts := strings.Split(link, path)
+
+				if len(parts) > 1 {
+					activityId = strings.Split(parts[1], "/")[0]
+					activityId = strings.Split(activityId, "?")[0]
+					fullActivityURL = "https://www.strava.com" + path + activityId
+
+					reply += scrapeStravaActivityUpdate(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
+				}
+			}
+		})
+	}
+
+	err := c.Visit(rawUrl)
+	if err != nil {
+		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(3) "
+	}
+
+	return reply
+}
+
+func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, alias string) string {
+	reply := ""
+
+	if msg := maintenance(phone); msg != "" {
 		reply += msg
 		return reply
 	}
 
+	c := colly.NewCollector(
+		colly.AllowedDomains(domWeb),
+	)
+
 	// cek apakah akun strava sudah terdaftar di database
-	Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": Pesan.Phone_number})
+	Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return "Kak, akun Strava kamu belum terdaftar. Silakan daftar dulu!"
@@ -43,16 +92,6 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 			return "Kak, Strava Activity kamu tidak ditemukan di database. Silakan cek kembali."
 		}
 		return "\n\nError fetching data dari MongoDB: " + err.Error()
-	}
-
-	c := colly.NewCollector(
-		colly.AllowedDomains(domWeb, domApp),
-	)
-
-	// ambil link strava activity dari pesan
-	rawUrl := extractStravaLink(Pesan.Message)
-	if rawUrl == "" {
-		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
 	}
 
 	stravaActivity := StravaActivity{}
@@ -89,18 +128,8 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		reply += "\ndistance: " + stravaActivity.Distance
-		reply += "\nmoving time: " + stravaActivity.MovingTime
-		reply += "\nelevation: " + stravaActivity.Elevation
-		reply += "\nurl: " + rawUrl
-
-		reply += "\n\ndata distance: " + data.Distance
-		reply += "\ndata moving time: " + data.MovingTime
-		reply += "\ndata elevation: " + data.Elevation
-		reply += "\n\nurl: " + data.LinkActivity
-
 		if data.ActivityId != stravaActivity.ActivityId {
-			reply += "\n\nStrava Activity ID kak " + Pesan.Alias_name + " tidak sama."
+			reply += "\n\nStrava Activity ID kak " + alias + " tidak sama."
 			return
 		}
 
@@ -122,7 +151,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 		}
 
 		if strings.TrimSpace(data.Distance) != "" && strings.TrimSpace(data.MovingTime) != "" {
-			reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
+			reply += "\n\nData Strava kak " + alias + " sudah up to date."
 			return
 		}
 
@@ -184,7 +213,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 						return
 
 					} else {
-						reply += "\n\nHaiiiii kak, " + "*" + Pesan.Alias_name + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa yang di update!! 😀"
+						reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa yang di update!! 😀"
 						reply += "\n\n- Name: " + data.Name
 						reply += "\n- Title: " + data.Title
 						reply += "\n- Date Time: " + data.DateTime
@@ -195,16 +224,16 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 						reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 					}
 
-					conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
+					conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": profilePhone})
 					if err != nil {
-						reply += "\n\nWah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+						reply += "\n\nWah kak " + alias + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
 						return
 					}
 
 					datastrava := map[string]interface{}{
 						"stravaprofilepicture": stravaActivity.Picture,
 						"phonenumber":          Idata.PhoneNumber,
-						"name":                 Pesan.Alias_name,
+						"name":                 alias,
 					}
 
 					statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
@@ -234,9 +263,9 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 
 	// rawUrl = data.LinkActivity
 
-	err = c.Visit(rawUrl)
+	err = c.Visit(url)
 	if err != nil {
-		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(3) " + rawUrl
+		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(3) "
 	}
 
 	return reply
