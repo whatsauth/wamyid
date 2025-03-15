@@ -84,6 +84,14 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 	})
 
 	c.OnScraped(func(r *colly.Response) {
+		reply += "\ndistance: " + stravaActivity.Distance
+		reply += "\nmoving time: " + stravaActivity.MovingTime
+		reply += "\nelevation: " + stravaActivity.Elevation
+
+		reply += "\n\ndata distance: " + data.Distance
+		reply += "\ndata moving time: " + data.MovingTime
+		reply += "\ndata elevation: " + data.Elevation
+
 		if data.ActivityId == "" {
 			reply += "\n\n Strava Activity kak " + Pesan.Alias_name + " tidak di temukan."
 			return
