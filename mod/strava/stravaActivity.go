@@ -166,7 +166,7 @@ func scrapeStravaActivity(db *mongo.Database, url, phone, alias string) string {
 			return
 		}
 		if data.ActivityId == stravaActivity.ActivityId {
-			createdAtFormated := formatDateTimeToIndo(stravaActivity.CreatedAt.Format("2006-01-02T15:04:05"))
+			createdAtFormated := formatDateTimeToIndo(data.CreatedAt.Format("2006-01-02T15:04:05"))
 			reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Kamu sudah pernah share aktivitas ini sebelumnya pada tanggal " + createdAtFormated + "! Berikut data aktivitas kamu yang sudah tersimpan."
 			reply += "\n\n- Name: " + stravaActivity.Name
 			reply += "\n- Title: " + stravaActivity.Title
