@@ -236,7 +236,7 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 
 	err = c.Visit(rawUrl)
 	if err != nil {
-		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(3)"
+		return "Link Profile Strava yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(3) " + rawUrl
 	}
 
 	return reply
