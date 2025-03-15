@@ -32,9 +32,9 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 
 	col := "strava_activity"
 	filter := bson.M{
-		"phone_number": Idata.PhoneNumber,
-		"distance":     bson.M{"$eq": ""},
-		"moving_time":  bson.M{"$eq": ""},
+		"picture":     Idata.Picture,
+		"distance":    bson.M{"$eq": ""},
+		"moving_time": bson.M{"$eq": ""},
 	}
 	// cek apakah akun strava sudah terdaftar di database
 	data, err := atdb.GetOneDoc[StravaActivity](db, col, filter)
