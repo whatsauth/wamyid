@@ -28,6 +28,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.TelebotWebhook(w, r)
 	case method == "GET" && path == "/strava/activities":
 		controller.GetStravaActivities(w, r)
+	case method == "GET" && path == "/data/pomokit":
+		controller.GetPomokitData(w, r)
 	default:
 		controller.NotFound(w, r)
 	}
