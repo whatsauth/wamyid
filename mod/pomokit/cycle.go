@@ -93,6 +93,8 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		url = urlMatch[1]
 	}
 
+	gtData := extractGTmetrixData(Pesan.Message)
+
 	// 6. Simpan ke database
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	report := PomodoroReport{
@@ -106,6 +108,12 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Token:       token,
 		URLPekerjaan: url,
 		WaGroupID:   Pesan.Group_id,
+		GTmetrixGrade:      gtData["Grade"],
+        GTmetrixPerformance: gtData["Performance"],
+        GTmetrixStructure:  gtData["Structure"],
+        LCP:                gtData["LCP"],
+        TBT:                gtData["TBT"],
+        CLS:                gtData["CLS"],
 		CreatedAt:   time.Now().In(loc),
 	}
 
@@ -122,6 +130,12 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			"IP: %s\n"+
 			"Aktivitas: %s\n"+
 			"🔗 Alamat URL %s\n"+
+			"📊 *Metrik GTmetrix*\n"+
+            "Grade: %s\n"+
+            "Performance: %s\n"+
+            "LCP: %s\n"+
+            "TBT: %s\n"+
+            "CLS: %s\n"+
 			"📅 %s",
 		cycle,
 		userName,
@@ -129,6 +143,11 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		ip,
 		pekerjaan,
 		url,
+		gtData["Grade"],
+        gtData["Performance"],
+        gtData["LCP"],
+        gtData["TBT"],
+        gtData["CLS"],
 		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"),
 	)
 }
@@ -252,6 +271,37 @@ func getPublicKey(db *mongo.Database) (string, error) {
 		return "", fmt.Errorf("konfigurasi tidak ditemukan")
 	}
 	return conf.PublicKeyPomokit, nil
+}
+
+func extractGTmetrixData(msg string) map[string]string {
+    data := make(map[string]string)
+    
+    // Ekstrak bagian GTmetrix
+    gtSection := regexp.MustCompile(`(?s)Rekap Data GTmetrix(.*?)$`)
+    matches := gtSection.FindStringSubmatch(msg)
+    if len(matches) < 2 {
+        return data
+    }
+    
+    // Definisikan pola untuk setiap metrik
+    patterns := map[string]*regexp.Regexp{
+        "Website":     regexp.MustCompile(`Website:\s*(.+)`),
+        "Grade":      regexp.MustCompile(`Grade:\s*(\w+)`),
+        "Performance": regexp.MustCompile(`Performance:\s*(\d+%)`),
+        "Structure":   regexp.MustCompile(`Structure:\s*(\d+%)`),
+        "LCP":         regexp.MustCompile(`LCP \(Largest Contentful Paint\):\s*([\d.]+s)`),
+        "TBT":         regexp.MustCompile(`TBT \(Total Blocking Time\):\s*([\d.]+ms)`),
+        "CLS":         regexp.MustCompile(`CLS \(Cumulative Layout Shift\):\s*([\d.]+)`),
+    }
+
+    for key, re := range patterns {
+        match := re.FindStringSubmatch(matches[1])
+        if len(match) > 1 {
+            data[key] = strings.TrimSpace(match[1])
+        }
+    }
+    
+    return data
 }
 
 // HandlePomodoroStart menangani pesan permintaan untuk memulai siklus Pomodoro
