@@ -87,6 +87,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 	stravaActivity := StravaActivity{}
 	stravaActivity.ActivityId = activityId
 	stravaActivity.LinkActivity = url
+	stravaActivity.PhoneNumber = phone
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
@@ -129,6 +130,20 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		})
 	})
 
+	// cek apakah yang share link strava activity adalah pemilik akun strava
+	Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
+	if err != nil && err != mongo.ErrNoDocuments {
+		reply += "\n\nError fetching data from MongoDB: " + err.Error()
+		return reply
+	}
+
+	if Idata.AthleteId != "" {
+		stravaActivity.AthleteId = Idata.AthleteId
+	} else {
+		reply += "\n\nAthlete ID tidak ditemukan. Pastikan akun Strava kamu sudah terhubung dengan sistem."
+		return reply
+	}
+
 	found := false
 	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
 		found = true
@@ -142,13 +157,6 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 
 		if stravaActivity.Picture == "" {
 			reply += "\n\nMaaf kak, sistem tidak dapat mengambil foto profil Strava kamu. Pastikan profil dan activity Strava kamu dibuat public(everyone). doc: https://www.do.my.id/mentalhealt-strava"
-			return
-		}
-
-		// cek apakah yang share link strava activity adalah pemilik akun strava
-		Idata, err := atdb.GetOneDoc[StravaIdentity](db, "strava_identity", bson.M{"phone_number": phone})
-		if err != nil && err != mongo.ErrNoDocuments {
-			reply += "\n\nError fetching data from MongoDB: " + err.Error()
 			return
 		}
 
@@ -268,6 +276,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 
 			datastrava := map[string]interface{}{
 				"stravaprofilepicture": stravaActivity.Picture,
+				"athleteid":            stravaActivity.AthleteId,
 				"phonenumber":          Idata.PhoneNumber,
 				"name":                 alias,
 			}
@@ -288,7 +297,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 	})
 
-	err := c.Visit(url)
+	err = c.Visit(url)
 	if err != nil {
 		return "Link Strava Activity yang anda kirimkan tidak valid. Silakan kirim ulang dengan link yang valid.(2)"
 	}

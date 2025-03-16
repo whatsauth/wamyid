@@ -81,7 +81,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 
 	col := "strava_activity"
 	filter := bson.M{
-		"picture":     Idata.Picture,
+		"athlete_id":  Idata.AthleteId,
 		"distance":    bson.M{"$eq": ""},
 		"moving_time": bson.M{"$eq": ""},
 	}
@@ -143,7 +143,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 			return
 		}
 
-		if Idata.Picture != stravaActivity.Picture {
+		if Idata.AthleteId != stravaActivity.AthleteId {
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
 			reply += "\n\nAtau mungkin link yang kamu share bukan punya kamu 😏"
@@ -232,6 +232,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 
 					datastrava := map[string]interface{}{
 						"stravaprofilepicture": stravaActivity.Picture,
+						"athleteid":            stravaActivity.AthleteId,
 						"phonenumber":          Idata.PhoneNumber,
 						"name":                 alias,
 					}

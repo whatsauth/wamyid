@@ -96,6 +96,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 
 			datastrava := map[string]interface{}{
 				"stravaprofilepicture": stravaIdentity.Picture,
+				"athleteid":            stravaIdentity.AthleteId,
 				"phonenumber":          Pesan.Phone_number,
 				"name":                 Pesan.Alias_name,
 			}
