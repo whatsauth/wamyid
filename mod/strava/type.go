@@ -16,6 +16,7 @@ type Config struct {
 type StravaIdentity struct {
 	AthleteId     string    `bson:"athlete_id" json:"athlete_id"`
 	Picture       string    `bson:"picture" json:"picture"`
+	Name          string    `bson:"name" json:"name"`
 	PhoneNumber   string    `bson:"phone_number" json:"phone_number"`
 	LinkIndentity string    `bson:"link_identity" json:"link_identity"`
 	CreatedAt     time.Time `bson:"created_at" json:"created_at"`

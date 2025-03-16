@@ -89,11 +89,11 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 	stravaIdentity.PhoneNumber = phone
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
-		name := e.ChildText("h2.Details_name__Wz5bH")
+		stravaIdentity.Name = e.ChildText("h2.Details_name__Wz5bH")
 
 		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
 			imgTitle := imgEl.Attr("title")
-			if imgTitle == name {
+			if imgTitle == stravaIdentity.Name {
 				stravaIdentity.Picture = imgEl.Attr("src")
 			}
 		})

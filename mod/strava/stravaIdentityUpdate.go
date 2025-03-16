@@ -41,11 +41,11 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 	stravaIdentity.AthleteId = data.AthleteId
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
-		name := e.ChildText("h2.Details_name__Wz5bH")
+		stravaIdentity.Name = e.ChildText("h2.Details_name__Wz5bH")
 
 		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
 			imgTitle := imgEl.Attr("title")
-			if imgTitle == name {
+			if imgTitle == stravaIdentity.Name {
 				stravaIdentity.Picture = imgEl.Attr("src")
 			}
 		})
@@ -73,6 +73,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 
 			updateData := bson.M{
 				"picture":    stravaIdentity.Picture,
+				"name":       stravaIdentity.Name,
 				"updated_at": stravaIdentity.UpdatedAt,
 			}
 
