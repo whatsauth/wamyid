@@ -145,22 +145,34 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	)
 
 	// Tambahkan informasi GTmetrix jika ada
-	if len(gtData) > 0 && gtData["Grade"] != "" {
-		response += fmt.Sprintf(
-			"📊 *GTmetrix Results*\n"+
-				"Grade: %s\n"+
-				"Performance: %s\n"+
-				"Structure: %s\n"+
-				"LCP: %s\n"+
-				"TBT: %s\n"+
-				"CLS: %s\n",
-			gtData["Grade"],
-			gtData["Performance"],
-			gtData["Structure"],
-			gtData["LCP"],
-			gtData["TBT"],
-			gtData["CLS"],
-		)
+	
+	hasGTmetrixData := strings.Contains(Pesan.Message, "Rekap Data GTmetrix")
+	if hasGTmetrixData {
+		response += "📊 *GTmetrix Results*\n"
+		
+		if gtData["Grade"] != "" {
+			response += fmt.Sprintf("Grade: %s\n", gtData["Grade"])
+		}
+		
+		if gtData["Performance"] != "" {
+			response += fmt.Sprintf("Performance: %s\n", gtData["Performance"])
+		}
+		
+		if gtData["Structure"] != "" {
+			response += fmt.Sprintf("Structure: %s\n", gtData["Structure"])
+		}
+		
+		if gtData["LCP"] != "" {
+			response += fmt.Sprintf("LCP: %s\n", gtData["LCP"])
+		}
+		
+		if gtData["TBT"] != "" {
+			response += fmt.Sprintf("TBT: %s\n", gtData["TBT"])
+		}
+		
+		if gtData["CLS"] != "" {
+			response += fmt.Sprintf("CLS: %s\n", gtData["CLS"])
+		}
 	}
 
 	// Tambahkan URL dan timestamp
@@ -310,24 +322,38 @@ func extractGTmetrixData(msg string) map[string]string {
         return data
     }
     
+    // Inisialisasi dengan nilai default kosong untuk memastikan field ada di database
+    data["Grade"] = ""
+    data["Performance"] = ""
+    data["Structure"] = ""
+    data["LCP"] = ""
+    data["TBT"] = ""
+    data["CLS"] = ""
+    data["Website"] = ""
+    
     // Ekstrak bagian GTmetrix dengan pendekatan yang lebih sederhana
     lines := strings.Split(msg, "\n")
     inGTmetrixSection := false
     
-    for _, line := range lines {
+    for i, line := range lines {
         trimmedLine := strings.TrimSpace(line)
         
         // Tandai kapan bagian GTmetrix dimulai
         if strings.Contains(trimmedLine, "Rekap Data GTmetrix") {
             inGTmetrixSection = true
+            
+            // Log untuk debugging
+            fmt.Printf("GTmetrix section found at line %d: %s\n", i, trimmedLine)
             continue
         }
         
         // Jika dalam bagian GTmetrix, proses setiap baris
         if inGTmetrixSection {
             // Deteksi jika kita sudah keluar dari bagian GTmetrix
-            // Periksa apakah baris mengandung token atau dibiarkan kosong
-            if strings.Contains(trimmedLine, "v4.public.") || trimmedLine == "" {
+            if (strings.Contains(trimmedLine, "v4.public.") || 
+                (trimmedLine == "Read more") ||
+                (trimmedLine == "")) {
+                fmt.Printf("End of GTmetrix section at line %d: %s\n", i, trimmedLine)
                 break
             }
             
@@ -336,6 +362,9 @@ func extractGTmetrixData(msg string) map[string]string {
             if len(parts) == 2 {
                 key := strings.TrimSpace(parts[0])
                 value := strings.TrimSpace(parts[1])
+                
+                // Log untuk debugging
+                fmt.Printf("GTmetrix parsing line %d: key=%s, value=%s\n", i, key, value)
                 
                 switch key {
                 case "Website":
@@ -357,9 +386,11 @@ func extractGTmetrixData(msg string) map[string]string {
         }
     }
     
+    // Log hasil akhir untuk debugging
+    fmt.Printf("Final GTmetrix data: %+v\n", data)
+    
     return data
 }
-
 // HandlePomodoroStart menangani pesan permintaan untuk memulai siklus Pomodoro
 func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	// Validasi input dasar
