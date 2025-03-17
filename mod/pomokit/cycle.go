@@ -317,11 +317,6 @@ func getPublicKey(db *mongo.Database) (string, error) {
 func extractGTmetrixData(msg string) map[string]string {
     data := make(map[string]string)
     
-    // Periksa apakah bagian GTmetrix ada dalam pesan
-    if !strings.Contains(msg, "Rekap Data GTmetrix") {
-        return data
-    }
-    
     // Inisialisasi dengan nilai default kosong untuk memastikan field ada di database
     data["Grade"] = ""
     data["Performance"] = ""
@@ -331,59 +326,59 @@ func extractGTmetrixData(msg string) map[string]string {
     data["CLS"] = ""
     data["Website"] = ""
     
-    // Ekstrak bagian GTmetrix dengan pendekatan yang lebih sederhana
-    lines := strings.Split(msg, "\n")
-    inGTmetrixSection := false
+    // Periksa apakah bagian GTmetrix ada dalam pesan
+    if !strings.Contains(msg, "Rekap Data GTmetrix") {
+        return data
+    }
     
-    for i, line := range lines {
-        trimmedLine := strings.TrimSpace(line)
-        
-        // Tandai kapan bagian GTmetrix dimulai
-        if strings.Contains(trimmedLine, "Rekap Data GTmetrix") {
-            inGTmetrixSection = true
-            
-            // Log untuk debugging
-            fmt.Printf("GTmetrix section found at line %d: %s\n", i, trimmedLine)
-            continue
-        }
-        
-        // Jika dalam bagian GTmetrix, proses setiap baris
-        if inGTmetrixSection {
-            // Deteksi jika kita sudah keluar dari bagian GTmetrix
-            if (strings.Contains(trimmedLine, "v4.public.") || 
-                (trimmedLine == "Read more") ||
-                (trimmedLine == "")) {
-                fmt.Printf("End of GTmetrix section at line %d: %s\n", i, trimmedLine)
-                break
-            }
-            
-            // Deteksi format "Key: Value"
-            parts := strings.SplitN(trimmedLine, ":", 2)
-            if len(parts) == 2 {
-                key := strings.TrimSpace(parts[0])
-                value := strings.TrimSpace(parts[1])
-                
-                // Log untuk debugging
-                fmt.Printf("GTmetrix parsing line %d: key=%s, value=%s\n", i, key, value)
-                
-                switch key {
-                case "Website":
-                    data["Website"] = value
-                case "Grade":
-                    data["Grade"] = value
-                case "Performance":
-                    data["Performance"] = value
-                case "Structure":
-                    data["Structure"] = value
-                case "LCP (Largest Contentful Paint)":
-                    data["LCP"] = value
-                case "TBT (Total Blocking Time)":
-                    data["TBT"] = value
-                case "CLS (Cumulative Layout Shift)":
-                    data["CLS"] = value
-                }
-            }
-        }
+    // Cari nilai-nilai spesifik menggunakan regex yang lebih tepat
+    gradeRegex := regexp.MustCompile(`Grade:\s*([A-F])`)
+    gradeMatch := gradeRegex.FindStringSubmatch(msg)
+    if len(gradeMatch) > 1 {
+        data["Grade"] = gradeMatch[1]
+        fmt.Printf("Extracted Grade: %s\n", data["Grade"])
+    }
+    
+    perfRegex := regexp.MustCompile(`Performance:\s*(\d+%)`)
+    perfMatch := perfRegex.FindStringSubmatch(msg)
+    if len(perfMatch) > 1 {
+        data["Performance"] = perfMatch[1]
+        fmt.Printf("Extracted Performance: %s\n", data["Performance"])
+    }
+    
+    structRegex := regexp.MustCompile(`Structure:\s*(\d+%)`)
+    structMatch := structRegex.FindStringSubmatch(msg)
+    if len(structMatch) > 1 {
+        data["Structure"] = structMatch[1]
+        fmt.Printf("Extracted Structure: %s\n", data["Structure"])
+    }
+    
+    lcpRegex := regexp.MustCompile(`LCP \(Largest Contentful Paint\):\s*([\d\.]+s)`)
+    lcpMatch := lcpRegex.FindStringSubmatch(msg)
+    if len(lcpMatch) > 1 {
+        data["LCP"] = lcpMatch[1]
+        fmt.Printf("Extracted LCP: %s\n", data["LCP"])
+    }
+    
+    tbtRegex := regexp.MustCompile(`TBT \(Total Blocking Time\):\s*([\d\.]+ms)`)
+    tbtMatch := tbtRegex.FindStringSubmatch(msg)
+    if len(tbtMatch) > 1 {
+        data["TBT"] = tbtMatch[1]
+        fmt.Printf("Extracted TBT: %s\n", data["TBT"])
+    }
+    
+    clsRegex := regexp.MustCompile(`CLS \(Cumulative Layout Shift\):\s*([\d\.]+)`)
+    clsMatch := clsRegex.FindStringSubmatch(msg)
+    if len(clsMatch) > 1 {
+        data["CLS"] = clsMatch[1]
+        fmt.Printf("Extracted CLS: %s\n", data["CLS"])
+    }
+    
+    websiteRegex := regexp.MustCompile(`Website:\s*([^\n]+)`)
+    websiteMatch := websiteRegex.FindStringSubmatch(msg)
+    if len(websiteMatch) > 1 {
+        data["Website"] = strings.TrimSpace(websiteMatch[1])
+        fmt.Printf("Extracted Website: %s\n", data["Website"])
     }
     
     // Log hasil akhir untuk debugging
@@ -391,6 +386,7 @@ func extractGTmetrixData(msg string) map[string]string {
     
     return data
 }
+
 // HandlePomodoroStart menangani pesan permintaan untuk memulai siklus Pomodoro
 func HandlePomodoroStart(Profile itmodel.Profile, Pesan itmodel.IteungMessage, db *mongo.Database) string {
 	// Validasi input dasar
