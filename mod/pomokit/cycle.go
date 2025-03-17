@@ -130,12 +130,6 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			"IP: %s\n"+
 			"Aktivitas: %s\n"+
 			"🔗 Alamat URL %s\n"+
-			"📊 *Metrik GTmetrix*\n"+
-            "Grade: %s\n"+
-            "Performance: %s\n"+
-            "LCP: %s\n"+
-            "TBT: %s\n"+
-            "CLS: %s\n"+
 			"📅 %s",
 		cycle,
 		userName,
@@ -143,11 +137,6 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		ip,
 		pekerjaan,
 		url,
-		gtData["Grade"],
-        gtData["Performance"],
-        gtData["LCP"],
-        gtData["TBT"],
-        gtData["CLS"],
 		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"),
 	)
 }
