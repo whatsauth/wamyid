@@ -46,6 +46,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
     
 	var gtData map[string]string
     if len(msgParts) > 1 {
+		
         gtData = extractGTmetrixData("Rekap Data GTmetrix" + msgParts[1])
     }
 
