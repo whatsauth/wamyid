@@ -161,7 +161,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 
 		// cek apakah data sudah up to date
-		if Idata.Picture != stravaActivity.Picture {
+		if Idata.Picture != stravaActivity.Picture || Idata.Name != stravaActivity.Name {
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
 			reply += "\n\nAtau mungkin link yang kamu share bukan punya kamu 😏"
