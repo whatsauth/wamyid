@@ -39,16 +39,6 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	if cycle == 0 {
 		return "Wah kak " + userName + ", format cycle tidak valid. Contoh: 'Iteung Pomodoro Report 1 cycle'"
 	}
-	
-    
-    // 2. Split pesan untuk memisahkan bagian GTmetrix
-    msgParts := strings.Split(Pesan.Message, "Rekap Data GTmetrix")
-    
-	var gtData map[string]string
-    if len(msgParts) > 1 {
-		
-        gtData = extractGTmetrixData("Rekap Data GTmetrix" + msgParts[1])
-    }
 
 	hostname := extractValue(Pesan.Message, "Hostname : ")
 	ip := extractIP(Pesan.Message)
@@ -103,7 +93,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		url = urlMatch[1]
 	}
 
-	gtData = extractGTmetrixData(Pesan.Message)
+	gtData := extractGTmetrixData(Pesan.Message)
 
 	// 6. Simpan ke database
 	loc, _ := time.LoadLocation("Asia/Jakarta")
@@ -267,12 +257,12 @@ func extractActivities(msg string) string {
 }
 
 func extractToken(msg string) string {
-    re := regexp.MustCompile(`(#v4\.[^\s]+)`)
-    match := re.FindStringSubmatch(msg)
-    if len(match) > 1 {
-        return strings.TrimSpace(match[1])
-    }
-    return ""
+	re := regexp.MustCompile(`#(v4\..+)`)
+	match := re.FindStringSubmatch(msg)
+	if len(match) > 1 {
+		return match[1]
+	}
+	return ""
 }
 
 func getPublicKey(db *mongo.Database) (string, error) {
@@ -285,11 +275,6 @@ func getPublicKey(db *mongo.Database) (string, error) {
 
 func extractGTmetrixData(msg string) map[string]string {
     data := make(map[string]string)
-
-	parts := strings.Split(msg, "Rekap Data GTmetrix")
-    if len(parts) < 2 {
-        return data
-    }
     
     // Ekstrak bagian GTmetrix
     gtSection := regexp.MustCompile(`(?s)Rekap Data GTmetrix(.*?)$`)
