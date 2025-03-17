@@ -100,9 +100,8 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 
 	// Ekstrak GTmetrix data jika ada
 	gtData := make(map[string]string)
-	if strings.Contains(Pesan.Message, "Rekap Data GTmetrix") {
-		gtData = extractGTmetrixData(Pesan.Message)
-	}
+	// Pastikan untuk selalu mencoba mengekstrak GTmetrix data
+	gtData = extractGTmetrixData(Pesan.Message)
 
 	// 6. Simpan ke database
 	loc, _ := time.LoadLocation("Asia/Jakarta")
@@ -280,8 +279,14 @@ func extractActivities(msg string) string {
 }
 
 func extractToken(msg string) string {
-    re := regexp.MustCompile(`#(v4\.[a-zA-Z0-9_\-]+)`)
-    match := re.FindStringSubmatch(msg)
+    reHash := regexp.MustCompile(`#(v4\.[a-zA-Z0-9_\-\+\/\=\.]+)`)
+    match := reHash.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        return match[1]
+    }
+    
+    rePlain := regexp.MustCompile(`(v4\.public\.[a-zA-Z0-9_\-\+\/\=\.]+)`)
+    match = rePlain.FindStringSubmatch(msg)
     if len(match) > 1 {
         return match[1]
     }
@@ -320,6 +325,12 @@ func extractGTmetrixData(msg string) map[string]string {
         
         // Jika dalam bagian GTmetrix, proses setiap baris
         if inGTmetrixSection {
+            // Deteksi jika kita sudah keluar dari bagian GTmetrix
+            // Periksa apakah baris mengandung token atau dibiarkan kosong
+            if strings.Contains(trimmedLine, "v4.public.") || trimmedLine == "" {
+                break
+            }
+            
             // Deteksi format "Key: Value"
             parts := strings.SplitN(trimmedLine, ":", 2)
             if len(parts) == 2 {
@@ -342,11 +353,6 @@ func extractGTmetrixData(msg string) map[string]string {
                 case "CLS (Cumulative Layout Shift)":
                     data["CLS"] = value
                 }
-            }
-            
-            // Deteksi akhir bagian GTmetrix (token biasanya muncul setelah bagian GTmetrix)
-            if strings.Contains(trimmedLine, "#v4.") {
-                break
             }
         }
     }
