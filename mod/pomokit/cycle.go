@@ -46,6 +46,11 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	pekerjaan := extractActivities(Pesan.Message)
 	token := extractToken(Pesan.Message)
 
+	// Validasi token - tambahkan pengecekan token
+	if token == "" {
+		return "Wah kak " + userName + ", token tidak ditemukan dalam pesan"
+	}
+
 	// 3. Verifikasi public key
 	publicKey, err := getPublicKey(db)
 	if err != nil {
@@ -93,7 +98,11 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		url = urlMatch[1]
 	}
 
-	gtData := extractGTmetrixData(Pesan.Message)
+	// Ekstrak GTmetrix data jika ada
+	gtData := make(map[string]string)
+	if strings.Contains(Pesan.Message, "Rekap Data GTmetrix") {
+		gtData = extractGTmetrixData(Pesan.Message)
+	}
 
 	// 6. Simpan ke database
 	loc, _ := time.LoadLocation("Asia/Jakarta")
@@ -109,11 +118,11 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		URLPekerjaan: url,
 		WaGroupID:   Pesan.Group_id,
 		GTmetrixGrade:      gtData["Grade"],
-        GTmetrixPerformance: gtData["Performance"],
-        GTmetrixStructure:  gtData["Structure"],
-        LCP:                gtData["LCP"],
-        TBT:                gtData["TBT"],
-        CLS:                gtData["CLS"],
+		GTmetrixPerformance: gtData["Performance"],
+		GTmetrixStructure:  gtData["Structure"],
+		LCP:                gtData["LCP"],
+		TBT:                gtData["TBT"],
+		CLS:                gtData["CLS"],
 		CreatedAt:   time.Now().In(loc),
 	}
 
@@ -123,22 +132,47 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	}
 
 	// 7. Generate response
-	return fmt.Sprintf(
+	response := fmt.Sprintf(
 		"✅ *Laporan Cycle %d Berhasil!*\n"+
 			"Nama: %s\n"+
 			"Hostname: %s\n"+
 			"IP: %s\n"+
-			"Aktivitas: %s\n"+
-			"🔗 Alamat URL %s\n"+
-			"📅 %s",
+			"Aktivitas: %s\n",
 		cycle,
 		userName,
 		hostname,
 		ip,
 		pekerjaan,
+	)
+
+	// Tambahkan informasi GTmetrix jika ada
+	if len(gtData) > 0 && gtData["Grade"] != "" {
+		response += fmt.Sprintf(
+			"📊 *GTmetrix Results*\n"+
+				"Grade: %s\n"+
+				"Performance: %s\n"+
+				"Structure: %s\n"+
+				"LCP: %s\n"+
+				"TBT: %s\n"+
+				"CLS: %s\n",
+			gtData["Grade"],
+			gtData["Performance"],
+			gtData["Structure"],
+			gtData["LCP"],
+			gtData["TBT"],
+			gtData["CLS"],
+		)
+	}
+
+	// Tambahkan URL dan timestamp
+	response += fmt.Sprintf(
+		"🔗 Alamat URL %s\n"+
+			"📅 %s",
 		url,
 		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"),
 	)
+
+	return response
 }
 
 // Tambahkan fungsi untuk mengambil data user dari db web
@@ -246,12 +280,13 @@ func extractActivities(msg string) string {
 }
 
 func extractToken(msg string) string {
-	re := regexp.MustCompile(`#(v4\..+)`)
-	match := re.FindStringSubmatch(msg)
-	if len(match) > 1 {
-		return match[1]
-	}
-	return ""
+    re := regexp.MustCompile(`#(v4\.[a-zA-Z0-9_\-]+)`)
+    match := re.FindStringSubmatch(msg)
+    if len(match) > 1 {
+        return match[1]
+    }
+    
+    return ""
 }
 
 func getPublicKey(db *mongo.Database) (string, error) {
@@ -265,28 +300,54 @@ func getPublicKey(db *mongo.Database) (string, error) {
 func extractGTmetrixData(msg string) map[string]string {
     data := make(map[string]string)
     
-    // Ekstrak bagian GTmetrix
-    gtSection := regexp.MustCompile(`(?s)Rekap Data GTmetrix(.*?)$`)
-    matches := gtSection.FindStringSubmatch(msg)
-    if len(matches) < 2 {
+    // Periksa apakah bagian GTmetrix ada dalam pesan
+    if !strings.Contains(msg, "Rekap Data GTmetrix") {
         return data
     }
     
-    // Definisikan pola untuk setiap metrik
-    patterns := map[string]*regexp.Regexp{
-        "Website":     regexp.MustCompile(`Website:\s*(.+)`),
-        "Grade":      regexp.MustCompile(`Grade:\s*(\w+)`),
-        "Performance": regexp.MustCompile(`Performance:\s*(\d+%)`),
-        "Structure":   regexp.MustCompile(`Structure:\s*(\d+%)`),
-        "LCP":         regexp.MustCompile(`LCP \(Largest Contentful Paint\):\s*([\d.]+s)`),
-        "TBT":         regexp.MustCompile(`TBT \(Total Blocking Time\):\s*([\d.]+ms)`),
-        "CLS":         regexp.MustCompile(`CLS \(Cumulative Layout Shift\):\s*([\d.]+)`),
-    }
-
-    for key, re := range patterns {
-        match := re.FindStringSubmatch(matches[1])
-        if len(match) > 1 {
-            data[key] = strings.TrimSpace(match[1])
+    // Ekstrak bagian GTmetrix dengan pendekatan yang lebih sederhana
+    lines := strings.Split(msg, "\n")
+    inGTmetrixSection := false
+    
+    for _, line := range lines {
+        trimmedLine := strings.TrimSpace(line)
+        
+        // Tandai kapan bagian GTmetrix dimulai
+        if strings.Contains(trimmedLine, "Rekap Data GTmetrix") {
+            inGTmetrixSection = true
+            continue
+        }
+        
+        // Jika dalam bagian GTmetrix, proses setiap baris
+        if inGTmetrixSection {
+            // Deteksi format "Key: Value"
+            parts := strings.SplitN(trimmedLine, ":", 2)
+            if len(parts) == 2 {
+                key := strings.TrimSpace(parts[0])
+                value := strings.TrimSpace(parts[1])
+                
+                switch key {
+                case "Website":
+                    data["Website"] = value
+                case "Grade":
+                    data["Grade"] = value
+                case "Performance":
+                    data["Performance"] = value
+                case "Structure":
+                    data["Structure"] = value
+                case "LCP (Largest Contentful Paint)":
+                    data["LCP"] = value
+                case "TBT (Total Blocking Time)":
+                    data["TBT"] = value
+                case "CLS (Cumulative Layout Shift)":
+                    data["CLS"] = value
+                }
+            }
+            
+            // Deteksi akhir bagian GTmetrix (token biasanya muncul setelah bagian GTmetrix)
+            if strings.Contains(trimmedLine, "#v4.") {
+                break
+            }
         }
     }
     
