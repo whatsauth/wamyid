@@ -248,7 +248,7 @@ func extractValue(msg, prefix string) string {
 
 func extractIP(msg string) string {
     // 1. Cek apakah format URL whatismyipaddress sudah ada
-    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/[^\s]+)`)
+    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/[^\s\n]+)`)
     matchURL := reURL.FindStringSubmatch(msg)
     if len(matchURL) > 1 {
         return matchURL[1] // Langsung kembalikan URL lengkap
