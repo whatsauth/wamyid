@@ -247,19 +247,18 @@ func extractValue(msg, prefix string) string {
 }
 
 func extractIP(msg string) string {
-    // 1. Cek apakah format URL whatismyipaddress sudah ada
-    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/[^\s\n]+)`)
+    // 1. tipe IPv4
+    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/[0-9a-fA-F.:]+)`)
     matchURL := reURL.FindStringSubmatch(msg)
     if len(matchURL) > 1 {
         return matchURL[1] // Langsung kembalikan URL lengkap
     }
 
-    // 2. Jika tidak ada URL, cari IP biasa dan konstruksi URL
-    reIP := regexp.MustCompile(`IP\s*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
-    matchIP := reIP.FindStringSubmatch(msg)
-    if len(matchIP) > 1 {
-        // Bangun URL dari IP yang ditemukan
-        return "https://whatismyipaddress.com/ip/" + matchIP[1]
+    // 3. Tipe IPv6
+    reIPv6 := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/[0-9a-fA-F:]+)`)
+    matchIPv6 := reIPv6.FindStringSubmatch(msg)
+    if len(matchIPv6) > 1 {
+        return matchIPv6[1]
     }
 
     return ""
