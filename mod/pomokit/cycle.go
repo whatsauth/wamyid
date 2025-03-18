@@ -248,7 +248,7 @@ func extractValue(msg, prefix string) string {
 
 func extractIP(msg string) string {
     // 1. Cek apakah format URL whatismyipaddress sudah ada
-    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})`)
+    reURL := regexp.MustCompile(`IP\s*:\s*(https://whatismyipaddress\.com/ip/[^\s]+)`)
     matchURL := reURL.FindStringSubmatch(msg)
     if len(matchURL) > 1 {
         return matchURL[1] // Langsung kembalikan URL lengkap
@@ -353,7 +353,7 @@ func extractGTmetrixData(msg string) map[string]string {
         fmt.Printf("Extracted Structure: %s\n", data["Structure"])
     }
     
-    lcpRegex := regexp.MustCompile(`LCP \(Largest Contentful Paint\):\s*([\d\.]+s)`)
+    lcpRegex := regexp.MustCompile(`LCP \(Largest Contentful Paint\):\s*([\d\.]+(?:s|ms))`)
     lcpMatch := lcpRegex.FindStringSubmatch(msg)
     if len(lcpMatch) > 1 {
         data["LCP"] = lcpMatch[1]
