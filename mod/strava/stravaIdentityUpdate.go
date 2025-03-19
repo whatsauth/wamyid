@@ -41,7 +41,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 	stravaIdentity.AthleteId = data.AthleteId
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
-		stravaIdentity.Name = e.ChildText("h2.Details_name__Wz5bH")
+		stravaIdentity.Name = e.ChildText("h2[data-testid='details-name']")
 
 		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
 			imgTitle := imgEl.Attr("title")
