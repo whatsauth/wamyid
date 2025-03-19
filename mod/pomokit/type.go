@@ -18,6 +18,7 @@ type PomodoroReport struct {
     Token               string             `bson:"token" json:"token"`
     URLPekerjaan        string             `bson:"urlpekerjaan" json:"urlpekerjaan"`
     WaGroupID           string             `bson:"wagroupid" json:"wagroupid"`
+    GTmetrixURLTarget   string             `bson:"gtmetrix_url_target" json:"gtmetrix_url_target"`
     GTmetrixGrade       string             `bson:"gtmetrix_grade" json:"gtmetrix_grade"`
     GTmetrixPerformance string             `bson:"gtmetrix_performance" json:"gtmetrix_performance"`
     GTmetrixStructure   string             `bson:"gtmetrix_structure" json:"gtmetrix_structure"`

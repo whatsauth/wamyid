@@ -116,6 +116,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 		Token:       token,
 		URLPekerjaan: url,
 		WaGroupID:   Pesan.Group_id,
+		GTmetrixURLTarget:  gtData["Website"],
 		GTmetrixGrade:      gtData["Grade"],
 		GTmetrixPerformance: gtData["Performance"],
 		GTmetrixStructure:  gtData["Structure"],
@@ -136,12 +137,14 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 			"Nama: %s\n"+
 			"Hostname: %s\n"+
 			"IP: %s\n"+
-			"Aktivitas: %s\n",
+			"Aktivitas: %s\n"+
+			"Alamat URL Pekerjaan %s\n",
 		cycle,
 		userName,
 		hostname,
 		ip,
 		pekerjaan,
+		url,
 	)
 
 	// Tambahkan informasi GTmetrix jika ada
@@ -149,6 +152,10 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 	hasGTmetrixData := strings.Contains(Pesan.Message, "Rekap Data GTmetrix")
 	if hasGTmetrixData {
 		response += "📊 *GTmetrix Results*\n"
+
+		if gtData["Website"] != "" {
+			response += fmt.Sprintf("Target URL: %s\n", gtData["Website"])
+		}
 		
 		if gtData["Grade"] != "" {
 			response += fmt.Sprintf("Grade: %s\n", gtData["Grade"])
@@ -177,9 +184,7 @@ func HandlePomodoroReport(Profile itmodel.Profile, Pesan itmodel.IteungMessage, 
 
 	// Tambahkan URL dan timestamp
 	response += fmt.Sprintf(
-		"🔗 Alamat URL %s\n"+
 			"📅 %s",
-		url,
 		report.CreatedAt.Format("2006-01-02 🕒15:04 WIB"),
 	)
 
@@ -373,7 +378,8 @@ func extractGTmetrixData(msg string) map[string]string {
         fmt.Printf("Extracted CLS: %s\n", data["CLS"])
     }
     
-    websiteRegex := regexp.MustCompile(`Website:\s*([^\n]+)`)
+    // Extract the Website URL from "Website: URL" format
+    websiteRegex := regexp.MustCompile(`Website:\s*(https?://[^\s\n]+)`)
     websiteMatch := websiteRegex.FindStringSubmatch(msg)
     if len(websiteMatch) > 1 {
         data["Website"] = strings.TrimSpace(websiteMatch[1])
