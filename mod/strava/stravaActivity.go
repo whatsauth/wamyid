@@ -90,12 +90,12 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 	stravaActivity.PhoneNumber = phone
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
-		stravaActivity.Name = e.ChildText("h3.styles_name__sPSF9")
-		stravaActivity.Title = e.ChildText("h1.styles_name__irvsZ")
-		stravaActivity.TypeSport = e.ChildText("span.styles_typeText__6DEXK")
+		stravaActivity.Name = e.ChildText("h3[class^='styles_name__']")
+		stravaActivity.Title = e.ChildText("h1[class^='styles_name__']")
+		stravaActivity.TypeSport = e.ChildText("span[class^='styles_typeText__']")
 		// stravaActivity.DateTime = e.ChildText("time.styles_date__Bx7mx")
 
-		e.ForEach("time.styles_date__Bx7mx", func(_ int, timeEl *colly.HTMLElement) {
+		e.ForEach("time[class^='styles_date__']", func(_ int, timeEl *colly.HTMLElement) {
 			dt := timeEl.Attr("datetime")
 			if dt != "" {
 				stravaActivity.DateTime = formatDateTimeToIndo(dt)
@@ -145,7 +145,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 	}
 
 	found := false
-	c.OnHTML("div.MapAndElevationChart_mapContainer__VIs6u", func(e *colly.HTMLElement) {
+	c.OnHTML("div[class^='MapAndElevationChart_mapContainer__']", func(e *colly.HTMLElement) {
 		found = true
 	})
 
