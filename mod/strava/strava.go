@@ -2,7 +2,7 @@ package strava
 
 var domApp = "strava.app.link"
 var domWeb = "www.strava.com"
-var isMaintenance = false
+var isMaintenance = true
 
 func maintenance(phone string) string {
 	if phone != "6282268895372" {
