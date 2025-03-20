@@ -379,12 +379,20 @@ func extractGTmetrixData(msg string) map[string]string {
     }
     
     // Extract the Website URL from "Website: URL" format
-    websiteRegex := regexp.MustCompile(`Website:\s*(https?://[^\s\n]+)`)
-    websiteMatch := websiteRegex.FindStringSubmatch(msg)
-    if len(websiteMatch) > 1 {
-        data["Website"] = strings.TrimSpace(websiteMatch[1])
-        fmt.Printf("Extracted Website: %s\n", data["Website"])
-    }
+	websiteRegex := regexp.MustCompile(`Website:\s*(https?://[^\s\n]+)`)
+	websiteMatch := websiteRegex.FindStringSubmatch(msg)
+	if len(websiteMatch) > 1 {
+		url := strings.TrimSpace(websiteMatch[1])
+		
+		// Cek dan hapus "Grade:" jika ada di URL
+		gradeIndex := strings.Index(url, "Grade:")
+		if gradeIndex != -1 {
+			url = url[:gradeIndex]
+		}
+		
+		data["Website"] = url
+		fmt.Printf("Extracted Website: %s\n", data["Website"])
+	}
     
     // Log hasil akhir untuk debugging
     fmt.Printf("Final GTmetrix data: %+v\n", data)
