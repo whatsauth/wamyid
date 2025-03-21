@@ -29,7 +29,17 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 	}
 
 	if strings.Contains(rawUrl, domWeb) {
-		reply += scrapeStravaActivityUpdate(db, rawUrl, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
+		path := "/activities/"
+		if strings.Contains(rawUrl, path) {
+			parts := strings.Split(rawUrl, path)
+
+			if len(parts) > 1 {
+				activityId = strings.Split(parts[1], "/")[0]
+				fullActivityURL = "https://www.strava.com" + path + activityId
+
+				reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
+			}
+		}
 
 	} else if strings.Contains(rawUrl, domApp) {
 		c.OnHTML("a", func(e *colly.HTMLElement) {
@@ -120,6 +130,10 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 				stravaActivity.Elevation = value
 			}
 		})
+
+		if stravaActivity.Elevation == "" {
+			stravaActivity.Elevation = "0 m"
+		}
 	})
 
 	found := false
@@ -214,13 +228,15 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 
 					} else {
 						reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa yang di update!! 😀"
-						reply += "\n\n- Name: " + data.Name
+						reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
+						reply += "\n- Name: " + data.Name
 						reply += "\n- Title: " + data.Title
 						reply += "\n- Date Time: " + data.DateTime
 						reply += "\n- Type Sport: " + data.TypeSport
 						reply += "\n- Distance: " + stravaActivity.Distance
 						reply += "\n- Moving Time: " + stravaActivity.MovingTime
 						reply += "\n- Elevation: " + stravaActivity.Elevation
+						reply += "\n- Status: " + stravaActivity.Status
 						reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 					}
 

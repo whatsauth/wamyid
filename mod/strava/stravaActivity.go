@@ -46,7 +46,6 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 				reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 			}
 		}
-		// reply += scrapeStravaActivity(db, rawUrl, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 
 	} else if strings.Contains(rawUrl, domApp) {
 		c.OnHTML("a", func(e *colly.HTMLElement) {
@@ -139,6 +138,10 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				stravaActivity.Elevation = value
 			}
 		})
+
+		if stravaActivity.Elevation == "" {
+			stravaActivity.Elevation = "0 m"
+		}
 	})
 
 	// cek apakah yang share link strava activity adalah pemilik akun strava
@@ -189,14 +192,15 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		if data.ActivityId == stravaActivity.ActivityId {
 			createdAtFormated := formatDateTimeToIndo(data.CreatedAt.Format("2006-01-02T15:04:05"))
 			reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Kamu sudah pernah share aktivitas ini sebelumnya pada tanggal " + createdAtFormated + "! Berikut data aktivitas kamu yang sudah tersimpan."
-			reply += "\n\n- Name: " + stravaActivity.Name
+			reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
+			reply += "\n- Name: " + stravaActivity.Name
 			reply += "\n- Title: " + stravaActivity.Title
 			reply += "\n- Date Time: " + stravaActivity.DateTime
 			reply += "\n- Type Sport: " + stravaActivity.TypeSport
 			reply += "\n- Distance: " + stravaActivity.Distance
 			reply += "\n- Moving Time: " + stravaActivity.MovingTime
 			reply += "\n- Elevation: " + stravaActivity.Elevation
-			reply += "\n\nStatus: " + stravaActivity.Status
+			reply += "\n- Status: " + stravaActivity.Status
 			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 
 			reply += "\nJangan Curang yaaaa!"
@@ -261,14 +265,15 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				reply += "\n\nError saving data to MongoDB: " + err.Error()
 			} else {
 				reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀"
-				reply += "\n\n- Name: " + stravaActivity.Name
+				reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
+				reply += "\n- Name: " + stravaActivity.Name
 				reply += "\n- Title: " + stravaActivity.Title
 				reply += "\n- Date Time: " + stravaActivity.DateTime
 				reply += "\n- Type Sport: " + stravaActivity.TypeSport
 				reply += "\n- Distance: " + stravaActivity.Distance
 				reply += "\n- Moving Time: " + stravaActivity.MovingTime
 				reply += "\n- Elevation: " + stravaActivity.Elevation
-				reply += "\n\nStatus: " + stravaActivity.Status
+				reply += "\n- Status: " + stravaActivity.Status
 				reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 			}
 
