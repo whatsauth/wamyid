@@ -2,66 +2,69 @@ package strava
 
 import (
 	"context"
+	"strconv"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// StravaInfo adalah struktur data untuk menyimpan informasi poin pengguna
 type StravaInfo struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	Name        string             `json:"name"`
-	PhoneNumber string             `json:"phone_number"`
-	TotalKm     float64            `json:"total_km"`
-	Poin        float64            `json:"poin"`
-	Count       int                `json:"count"`
+	Name        string  `json:"name"`
+	PhoneNumber string  `json:"phone_number"`
+	TotalKm     float64 `json:"total_km"`
+	Poin        float64 `json:"poin"`
+	Count       int     `json:"count"`
 }
 
+// TambahPoinDariAktivitas menghitung total KM dan menambahkan poin ke strava_poin
 func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 	colActivity := "strava_activity"
 	colPoin := "strava_poin"
 
-	// Ambil total km dari koleksi strava_activity
-	match := bson.M{"phone_number": phone}
-	group := bson.M{"_id": nil, "totalKm": bson.M{"$sum": bson.M{"$toDouble": "$distance"}}}
-
-	cursor, err := db.Collection(colActivity).Aggregate(context.TODO(), mongo.Pipeline{
-		{{Key: "$match", Value: match}},
-		{{Key: "$group", Value: group}},
-	})
+	// Ambil semua aktivitas berdasarkan phone_number
+	cursor, err := db.Collection(colActivity).Find(context.TODO(), bson.M{"phone_number": phone})
 	if err != nil {
 		return err
 	}
 	defer cursor.Close(context.TODO())
 
-	var result struct {
-		TotalKm float64 `bson:"totalKm"`
-	}
-	if cursor.Next(context.TODO()) {
-		if err := cursor.Decode(&result); err != nil {
+	totalKm := 0.0
+	for cursor.Next(context.TODO()) {
+		var activity struct {
+			Distance string `bson:"distance"`
+		}
+		if err := cursor.Decode(&activity); err != nil {
 			return err
 		}
-	} else {
-		// Jika tidak ada aktivitas, tidak perlu update poin
-		return nil
+
+		// Hapus " km" dan konversi ke float
+		distanceStr := strings.Replace(activity.Distance, " km", "", -1)
+		distance, err := strconv.ParseFloat(distanceStr, 64)
+		if err != nil {
+			continue // Skip jika gagal parsing
+		}
+
+		totalKm += distance
 	}
 
-	// Update atau insert data ke strava_poin
+	if totalKm == 0 {
+		return nil // Tidak ada aktivitas valid
+	}
+
+	// Update atau Insert ke strava_poin
 	filter := bson.M{"phone_number": phone}
 	update := bson.M{
-		"$set": bson.M{"total_km": result.TotalKm},
+		"$set": bson.M{"total_km": totalKm},
 		"$inc": bson.M{
-			"poin":  (result.TotalKm / 6) * 100, // Konversi km ke poin
+			"poin":  (totalKm / 6) * 100, // Konversi KM ke poin
 			"count": 1,
 		},
 	}
-	opts := options.Update().SetUpsert(true) // Upsert otomatis insert jika belum ada
+	opts := options.Update().SetUpsert(true)
 
 	_, err = db.Collection(colPoin).UpdateOne(context.TODO(), filter, update, opts)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
