@@ -57,12 +57,15 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 	// Update atau Insert ke strava_poin
 	filter := bson.M{"phone_number": phone}
 	update := bson.M{
-		"$set": bson.M{"total_km": totalKm},
+		"$set": bson.M{
+			"total_km": totalKm,
+			"poin":     (totalKm / 6) * 100, // Pastikan poin selalu dihitung dari total KM
+		},
 		"$inc": bson.M{
-			"poin":  (totalKm / 6) * 100, // Konversi KM ke poin
-			"count": 1,
+			"count": 1, // Count tetap di-increment
 		},
 	}
+
 	opts := options.Update().SetUpsert(true)
 
 	_, err = db.Collection(colPoin).UpdateOne(context.TODO(), filter, update, opts)
