@@ -92,6 +92,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 	col := "strava_activity"
 	filter := bson.M{
 		"athlete_id":  Idata.AthleteId,
+		"activity_id": activityId,
 		"distance":    bson.M{"$eq": ""},
 		"moving_time": bson.M{"$eq": ""},
 	}
@@ -105,7 +106,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 	}
 
 	stravaActivity := StravaActivity{}
-	stravaActivity.ActivityId = activityId
+	stravaActivity.ActivityId = data.ActivityId
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
@@ -181,7 +182,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 			return
 		}
 
-		if data.Distance == "" && data.MovingTime == "" {
+		if data.Distance == "" && data.MovingTime == "" && data.ActivityId == stravaActivity.ActivityId {
 			if data.Status == "Invalid" {
 				distanceFloat := parseDistance(stravaActivity.Distance)
 				if distanceFloat < 3 {
