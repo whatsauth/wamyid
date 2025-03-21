@@ -53,3 +53,21 @@ func formatDateTimeToIndo(dateTime string) string {
 
 	return t.Format("02 Jan 2006 15:04 WIB")
 }
+
+func extractContains(link, path string, isApp bool) (string, string) {
+	if strings.Contains(link, path) {
+		parts := strings.Split(link, path)
+
+		if len(parts) > 1 {
+			id := strings.Split(parts[1], "/")[0]
+			if isApp {
+				id = strings.Split(id, "?")[0]
+			}
+			fullUrl := "https://www.strava.com" + path + id
+
+			return id, fullUrl
+		}
+	}
+
+	return "", ""
+}

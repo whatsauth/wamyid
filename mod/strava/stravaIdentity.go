@@ -33,34 +33,20 @@ func StravaIdentityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
 	}
 
+	path := "/athletes/"
 	if strings.Contains(rawUrl, domWeb) {
-		path := "/athletes/"
-		if strings.Contains(rawUrl, path) {
-			parts := strings.Split(rawUrl, path)
-
-			if len(parts) > 1 {
-				athleteId = strings.Split(parts[1], "/")[0]
-				fullAthleteURL = "https://www.strava.com" + path + athleteId
-
-				reply += scrapeStravaIdentity(db, fullAthleteURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
-			}
+		athleteId, fullAthleteURL = extractContains(rawUrl, path, false)
+		if athleteId != "" {
+			reply += scrapeStravaIdentity(db, fullAthleteURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 		}
 
 	} else if strings.Contains(rawUrl, domApp) {
 		c.OnHTML("a", func(e *colly.HTMLElement) {
 			link := e.Attr("href")
 
-			path := "/athletes/"
-			if strings.Contains(link, path) {
-				parts := strings.Split(link, path)
-
-				if len(parts) > 1 {
-					athleteId = strings.Split(parts[1], "/")[0]
-					athleteId = strings.Split(athleteId, "?")[0]
-					fullAthleteURL = "https://www.strava.com" + path + athleteId
-
-					reply += scrapeStravaIdentity(db, fullAthleteURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
-				}
+			athleteId, fullAthleteURL = extractContains(link, path, true)
+			if athleteId != "" {
+				reply += scrapeStravaIdentity(db, fullAthleteURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 			}
 		})
 	}
@@ -100,13 +86,7 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaIdentity.Name = e.ChildText("h2[data-testid='details-name']")
-
-		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
-			imgTitle := imgEl.Attr("title")
-			if imgTitle == stravaIdentity.Name {
-				stravaIdentity.Picture = imgEl.Attr("src")
-			}
-		})
+		stravaIdentity.Picture = extractStravaProfileImg(e, stravaIdentity.Name)
 
 		identities = append(identities, stravaIdentity)
 	})

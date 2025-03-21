@@ -42,13 +42,7 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		stravaIdentity.Name = e.ChildText("h2[data-testid='details-name']")
-
-		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
-			imgTitle := imgEl.Attr("title")
-			if imgTitle == stravaIdentity.Name {
-				stravaIdentity.Picture = imgEl.Attr("src")
-			}
-		})
+		stravaIdentity.Picture = extractStravaProfileImg(e, stravaIdentity.Name)
 	})
 
 	c.OnScraped(func(r *colly.Response) {
@@ -63,12 +57,6 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 		}
 
 		if data.AthleteId == stravaIdentity.AthleteId {
-			// cek apakah data sudah up to date
-			// if data.Picture == stravaIdentity.Picture {
-			// 	reply += "\n\nData Strava kak " + Pesan.Alias_name + " sudah up to date."
-			// 	return
-			// }
-
 			stravaIdentity.UpdatedAt = time.Now()
 
 			updateData := bson.M{

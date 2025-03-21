@@ -28,34 +28,20 @@ func StravaActivityUpdateIfEmptyDataHandler(Profile itmodel.Profile, Pesan itmod
 		return reply + "\n\nMaaf, pesan yang kamu kirim tidak mengandung link Strava. Silakan kirim link aktivitas Strava untuk mendapatkan informasinya."
 	}
 
+	path := "/activities/"
 	if strings.Contains(rawUrl, domWeb) {
-		path := "/activities/"
-		if strings.Contains(rawUrl, path) {
-			parts := strings.Split(rawUrl, path)
-
-			if len(parts) > 1 {
-				activityId = strings.Split(parts[1], "/")[0]
-				fullActivityURL = "https://www.strava.com" + path + activityId
-
-				reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
-			}
+		activityId, fullActivityURL = extractContains(rawUrl, path, false)
+		if activityId != "" {
+			reply += scrapeStravaActivityUpdate(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 		}
 
 	} else if strings.Contains(rawUrl, domApp) {
 		c.OnHTML("a", func(e *colly.HTMLElement) {
 			link := e.Attr("href")
 
-			path := "/activities/"
-			if strings.Contains(link, path) {
-				parts := strings.Split(link, path)
-
-				if len(parts) > 1 {
-					activityId = strings.Split(parts[1], "/")[0]
-					activityId = strings.Split(activityId, "?")[0]
-					fullActivityURL = "https://www.strava.com" + path + activityId
-
-					reply += scrapeStravaActivityUpdate(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
-				}
+			activityId, fullActivityURL = extractContains(link, path, true)
+			if activityId != "" {
+				reply += scrapeStravaActivityUpdate(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 			}
 		})
 	}
@@ -109,32 +95,11 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 	stravaActivity.ActivityId = data.ActivityId
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
-		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
-			imgTitle := imgEl.Attr("title")
-			if imgTitle == data.Name {
-				stravaActivity.Picture = imgEl.Attr("src")
-			}
-		})
+		stravaActivity.Picture = extractStravaProfileImg(e, stravaActivity.Name)
 	})
 
 	c.OnHTML("div", func(e *colly.HTMLElement) {
-		e.ForEach("span", func(_ int, el *colly.HTMLElement) {
-			label := strings.ToLower(strings.TrimSpace(el.Text))
-			value := strings.TrimSpace(el.DOM.Next().Text()) // Ambil elemen di sebelahnya
-
-			switch label {
-			case "distance":
-				stravaActivity.Distance = value
-			case "time":
-				stravaActivity.MovingTime = value
-			case "elevation":
-				stravaActivity.Elevation = value
-			}
-		})
-
-		if stravaActivity.Elevation == "" {
-			stravaActivity.Elevation = "0 m"
-		}
+		extractStravaActivitySpan(e, &stravaActivity)
 	})
 
 	found := false
