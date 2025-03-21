@@ -161,7 +161,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 
 		// cek apakah data sudah up to date
-		if Idata.Picture != stravaActivity.Picture || Idata.Name != stravaActivity.Name {
+		if Idata.Picture != stravaActivity.Picture {
 			reply += "\n\nAda yang salah nih dengan akun strava kamu, coba lakukan update dengan perintah dibawah yaaa"
 			reply += "\n\n *strava update in*"
 			reply += "\n\nAtau mungkin link yang kamu share bukan punya kamu 😏"
@@ -185,19 +185,11 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 			reply += "\n- Distance: " + stravaActivity.Distance
 			reply += "\n- Moving Time: " + stravaActivity.MovingTime
 			reply += "\n- Elevation: " + stravaActivity.Elevation
+			reply += "\n\nStatus: " + stravaActivity.Status
 			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 
 			reply += "\nJangan Curang yaaaa!"
 			reply += "\nSana Lari lagi jangan malas!"
-
-			// simpan data ke database jika data belum ada
-			stravaActivity.CreatedAt = time.Now()
-			stravaActivity.Status = "Duplicate"
-
-			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
-			if err != nil {
-				reply += "\n\nError saving data to MongoDB: " + err.Error()
-			}
 			return
 		}
 
@@ -265,6 +257,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				reply += "\n- Distance: " + stravaActivity.Distance
 				reply += "\n- Moving Time: " + stravaActivity.MovingTime
 				reply += "\n- Elevation: " + stravaActivity.Elevation
+				reply += "\n\nStatus: " + stravaActivity.Status
 				reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 			}
 
