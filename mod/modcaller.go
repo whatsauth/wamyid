@@ -79,6 +79,8 @@ func Caller(Profile itmodel.Profile, Modulename string, Pesan itmodel.IteungMess
 		reply = strava.StravaIdentityUpdateHandler(Profile, Pesan, db)
 	case "strava-update-activity":
 		reply = strava.StravaActivityUpdateIfEmptyDataHandler(Profile, Pesan, db)
+	case "strava-poin":
+		reply = strava.InisialisasiPoinDariAktivitasLama(Pesan, db)
 	}
 
 	return
