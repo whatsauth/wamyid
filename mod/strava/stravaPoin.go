@@ -25,7 +25,8 @@ func InisialisasiPoinDariAktivitasLama(Pesan itmodel.IteungMessage, db *mongo.Da
 	colPoin := "strava_poin"
 
 	// Ambil semua aktivitas dari strava_activity
-	cursor, err := db.Collection(colActivity).Find(context.TODO(), bson.M{})
+	filter := bson.M{"status": "Valid"}
+	cursor, err := db.Collection(colActivity).Find(context.TODO(), filter)
 	if err != nil {
 		return "Error fetching activities: " + err.Error()
 	}
