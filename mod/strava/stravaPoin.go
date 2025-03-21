@@ -33,7 +33,10 @@ func InisialisasiPoinDariAktivitasLama(Pesan itmodel.IteungMessage, db *mongo.Da
 	defer cursor.Close(context.TODO())
 
 	// Map untuk menyimpan total km per pengguna
-	userData := make(map[string]float64)
+	userData := make(map[string]struct {
+		TotalKm       float64
+		ActivityCount int
+	})
 
 	// Loop melalui semua aktivitas
 	for cursor.Next(context.TODO()) {
@@ -55,22 +58,44 @@ func InisialisasiPoinDariAktivitasLama(Pesan itmodel.IteungMessage, db *mongo.Da
 		}
 
 		// Tambahkan ke map berdasarkan nomor telepon
-		userData[activity.PhoneNumber] += distance
+		userData[activity.PhoneNumber] = struct {
+			TotalKm       float64
+			ActivityCount int
+		}{
+			TotalKm:       userData[activity.PhoneNumber].TotalKm + distance,
+			ActivityCount: userData[activity.PhoneNumber].ActivityCount + 1,
+		}
 	}
 
 	// Update atau insert poin ke `strava_poin`
-	for phone, totalKm := range userData {
+	for phone, data := range userData {
 		filter := bson.M{"phone_number": phone}
+
+		// Ambil count sebelumnya dari `strava_poin`
+		var existing struct {
+			ActivityCount int `bson:"activity_count"`
+		}
+		err := db.Collection(colPoin).FindOne(context.TODO(), filter).Decode(&existing)
+		if err != nil && err != mongo.ErrNoDocuments {
+			log.Println("Error fetching existing count:", err)
+			continue
+		}
+
+		// Jumlah total aktivitas valid dari sebelumnya + yang baru dihitung
+		newCount := existing.ActivityCount + data.ActivityCount
+
 		update := bson.M{
-			"$set": bson.M{"total_km": totalKm},
+			"$set": bson.M{
+				"total_km": data.TotalKm,
+				"count":    newCount, // Update total count
+			},
 			"$inc": bson.M{
-				"poin":           (totalKm / 6) * 100, // Konversi km ke poin
-				"activity_count": 1,
+				"poin": (data.TotalKm / 6) * 100, // Konversi km ke poin
 			},
 		}
 		opts := options.Update().SetUpsert(true) // Insert jika belum ada
 
-		_, err := db.Collection(colPoin).UpdateOne(context.TODO(), filter, update, opts)
+		_, err = db.Collection(colPoin).UpdateOne(context.TODO(), filter, update, opts)
 		if err != nil {
 			log.Println("Error updating strava_poin:", err)
 		}
