@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// StravaInfo untuk menyimpan poin dan total km
+// StravaInfo menyimpan total poin dan kilometer
 type StravaInfo struct {
 	Name        string  `json:"name"`
 	PhoneNumber string  `json:"phone_number"`
@@ -20,7 +20,7 @@ type StravaInfo struct {
 	Count       int     `json:"count"`
 }
 
-// Fungsi untuk membaca aktivitas yang sudah tersimpan dan menambah poin
+// TambahPoinDariAktivitas membaca semua aktivitas dan menambah poin
 func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 	colActivity := "strava_activity"
 	colPoin := "strava_poin"
@@ -57,7 +57,19 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 		return nil
 	}
 
-	// 2. Perbarui atau buat data di strava_poin
+	// 2. Ambil data lama dari strava_poin
+	var poinData StravaInfo
+	err = db.Collection(colPoin).FindOne(context.TODO(), bson.M{"phone_number": phone}).Decode(&poinData)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return err
+	}
+
+	// 3. Jika sudah ada data sebelumnya, gunakan total km sebelumnya + baru
+	if err == nil {
+		totalKm += poinData.TotalKm
+	}
+
+	// 4. Perbarui atau buat data di strava_poin
 	filter := bson.M{"phone_number": phone}
 	update := bson.M{
 		"$set": bson.M{
@@ -65,7 +77,7 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 			"poin":     (totalKm / 6) * 100, // Konversi ke poin
 		},
 		"$inc": bson.M{
-			"count": 1, // Jumlah update
+			"count": 1, // Tambah jumlah update
 		},
 	}
 	opts := options.Update().SetUpsert(true) // Buat dokumen baru jika belum ada
