@@ -241,6 +241,12 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 			}
 
+			err = TambahPoinDariAktivitas(db, phone)
+			if err != nil {
+				reply += "\n\nError saving data to MongoDB: " + err.Error()
+				return
+			}
+
 			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": profilePhone})
 			if err != nil {
 				reply += "\n\nWah kak " + alias + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
