@@ -2,6 +2,7 @@ package strava
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// StravaInfo adalah struktur data untuk menyimpan informasi poin pengguna
+// StravaInfo untuk menyimpan poin dan total km
 type StravaInfo struct {
 	Name        string  `json:"name"`
 	PhoneNumber string  `json:"phone_number"`
@@ -19,19 +20,20 @@ type StravaInfo struct {
 	Count       int     `json:"count"`
 }
 
-// TambahPoinDariAktivitas menghitung total KM dan menambahkan poin ke strava_poin
+// Fungsi untuk membaca aktivitas yang sudah tersimpan dan menambah poin
 func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 	colActivity := "strava_activity"
 	colPoin := "strava_poin"
 
-	// Ambil semua aktivitas berdasarkan phone_number
+	// 1. Ambil semua aktivitas berdasarkan nomor telepon
 	cursor, err := db.Collection(colActivity).Find(context.TODO(), bson.M{"phone_number": phone})
 	if err != nil {
 		return err
 	}
 	defer cursor.Close(context.TODO())
 
-	totalKm := 0.0
+	var totalKm float64
+
 	for cursor.Next(context.TODO()) {
 		var activity struct {
 			Distance string `bson:"distance"`
@@ -40,34 +42,38 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 			return err
 		}
 
-		// Hapus " km" dan konversi ke float
+		// Hapus " km" jika ada dan konversi ke float64
 		distanceStr := strings.Replace(activity.Distance, " km", "", -1)
 		distance, err := strconv.ParseFloat(distanceStr, 64)
 		if err != nil {
-			continue // Skip jika gagal parsing
+			fmt.Println("Gagal mengonversi jarak:", activity.Distance)
+			continue
 		}
-
 		totalKm += distance
 	}
 
+	// Jika tidak ada aktivitas, tidak perlu update
 	if totalKm == 0 {
-		return nil // Tidak ada aktivitas valid
+		return nil
 	}
 
-	// Update atau Insert ke strava_poin
+	// 2. Perbarui atau buat data di strava_poin
 	filter := bson.M{"phone_number": phone}
 	update := bson.M{
 		"$set": bson.M{
 			"total_km": totalKm,
-			"poin":     (totalKm / 6) * 100, // Pastikan poin selalu dihitung dari total KM
+			"poin":     (totalKm / 6) * 100, // Konversi ke poin
 		},
 		"$inc": bson.M{
-			"count": 1, // Count tetap di-increment
+			"count": 1, // Jumlah update
 		},
 	}
-
-	opts := options.Update().SetUpsert(true)
+	opts := options.Update().SetUpsert(true) // Buat dokumen baru jika belum ada
 
 	_, err = db.Collection(colPoin).UpdateOne(context.TODO(), filter, update, opts)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
