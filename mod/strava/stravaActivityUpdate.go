@@ -105,7 +105,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 	}
 
 	stravaActivity := StravaActivity{}
-	stravaActivity.ActivityId = data.ActivityId
+	stravaActivity.ActivityId = activityId
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
 		e.ForEach("img", func(_ int, imgEl *colly.HTMLElement) {
