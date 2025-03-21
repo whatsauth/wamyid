@@ -33,6 +33,7 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 	defer cursor.Close(context.TODO())
 
 	var totalKm float64
+	var count int
 
 	for cursor.Next(context.TODO()) {
 		var activity struct {
@@ -50,10 +51,11 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 			continue
 		}
 		totalKm += distance
+		count++ // Tambah jumlah aktivitas
 	}
 
 	// Jika tidak ada aktivitas, tidak perlu update
-	if totalKm == 0 {
+	if count == 0 {
 		return nil
 	}
 
@@ -64,9 +66,10 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 		return err
 	}
 
-	// 3. Jika sudah ada data sebelumnya, gunakan total km sebelumnya + baru
+	// 3. Jika sudah ada data sebelumnya, tambahkan total km dan count lama
 	if err == nil {
 		totalKm += poinData.TotalKm
+		count += poinData.Count
 	}
 
 	// 4. Perbarui atau buat data di strava_poin
@@ -75,9 +78,7 @@ func TambahPoinDariAktivitas(db *mongo.Database, phone string) error {
 		"$set": bson.M{
 			"total_km": totalKm,
 			"poin":     (totalKm / 6) * 100, // Konversi ke poin
-		},
-		"$inc": bson.M{
-			"count": 1, // Tambah jumlah update
+			"count":    count,               // Perbarui dengan jumlah aktivitas total
 		},
 	}
 	opts := options.Update().SetUpsert(true) // Buat dokumen baru jika belum ada
