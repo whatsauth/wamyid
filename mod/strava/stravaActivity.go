@@ -35,7 +35,18 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 	}
 
 	if strings.Contains(rawUrl, domWeb) {
-		reply += scrapeStravaActivity(db, rawUrl, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
+		path := "/activities/"
+		if strings.Contains(rawUrl, path) {
+			parts := strings.Split(rawUrl, path)
+
+			if len(parts) > 1 {
+				activityId = strings.Split(parts[1], "/")[0]
+				fullActivityURL = "https://www.strava.com" + path + activityId
+
+				reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
+			}
+		}
+		// reply += scrapeStravaActivity(db, rawUrl, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 
 	} else if strings.Contains(rawUrl, domApp) {
 		c.OnHTML("a", func(e *colly.HTMLElement) {
