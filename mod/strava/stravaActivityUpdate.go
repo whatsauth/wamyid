@@ -2,6 +2,7 @@ package strava
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -227,6 +228,31 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 
 					if statuscode != http.StatusOK {
 						reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+						return
+					}
+
+					distanceStr := strings.Replace(stravaActivity.Distance, " km", "", -1)
+					distance, err := strconv.ParseFloat(distanceStr, 64)
+					if err != nil {
+						reply += "\n\nError parsing distance: " + err.Error()
+						return
+					}
+
+					aktivitasStrava := map[string]interface{}{
+						"activity_id":  stravaActivity.ActivityId,
+						"phone_number": Idata.PhoneNumber,
+						"distance":     distance,
+						"name_strava":  stravaActivity.Name,
+					}
+
+					statuscode1, httpresp1, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, aktivitasStrava, conf.DomyikadoStravaPoin)
+					if err != nil {
+						reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
+						return
+					}
+
+					if statuscode1 != http.StatusOK {
+						reply += "\n\nSalah posting endpoint domyikado1: " + httpresp1.Response + "\ninfo\n" + httpresp1.Info
 						return
 					}
 
