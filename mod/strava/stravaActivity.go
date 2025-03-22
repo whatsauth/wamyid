@@ -277,6 +277,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				"activity_id":  stravaActivity.ActivityId,
 				"phone_number": Idata.PhoneNumber,
 				"distance":     distance,
+				"name_strava":  stravaActivity.Name,
 			}
 
 			statuscode1, httpresp1, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, aktivitasStrava, conf.DomyikadoStravaPoin)
