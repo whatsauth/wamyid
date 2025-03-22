@@ -2,6 +2,7 @@ package strava
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -265,10 +266,17 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				return
 			}
 
+			distanceStr := strings.Replace(stravaActivity.Distance, " km", "", -1)
+			distance, err := strconv.ParseFloat(distanceStr, 64)
+			if err != nil {
+				reply += "\n\nError parsing distance: " + err.Error()
+				return
+			}
+
 			aktivitasStrava := map[string]interface{}{
 				"activity_id":  stravaActivity.ActivityId,
 				"phone_number": Idata.PhoneNumber,
-				"distance":     stravaActivity.Distance,
+				"distance":     distance,
 			}
 
 			statuscode1, httpresp1, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, aktivitasStrava, conf.DomyikadoStravaPoin)
