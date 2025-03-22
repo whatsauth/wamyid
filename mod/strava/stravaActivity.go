@@ -265,7 +265,13 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				return
 			}
 
-			statuscode1, httpresp1, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoStravaPoin)
+			aktivitasStrava := map[string]interface{}{
+				"activity_id":  stravaActivity.ActivityId,
+				"phone_number": Idata.PhoneNumber,
+				"distance":     stravaActivity.Distance,
+			}
+
+			statuscode1, httpresp1, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, aktivitasStrava, conf.DomyikadoStravaPoin)
 			if err != nil {
 				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
 				return
