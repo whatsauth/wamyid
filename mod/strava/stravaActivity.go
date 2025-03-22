@@ -265,6 +265,17 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				return
 			}
 
+			statuscode1, httpresp1, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoStravaPoin)
+			if err != nil {
+				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
+				return
+			}
+
+			if statuscode1 != http.StatusOK {
+				reply += "\n\nSalah posting endpoint domyikado: " + httpresp1.Response + "\ninfo\n" + httpresp1.Info
+				return
+			}
+
 			reply += "\n\nStrava Profile Picture: " + stravaActivity.Picture
 			reply += "\n\nCek link di atas apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa"
 		}

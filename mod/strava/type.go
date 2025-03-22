@@ -5,12 +5,13 @@ import (
 )
 
 type Config struct {
-	PhoneNumber      string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
-	LeaflyURL        string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
-	LeaflySecret     string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
-	DomyikadoUserURL string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
-	DomyikadoSecret  string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
-	KimseokgisURL    string `json:"urlkimseokgis" bson:"urlkimseokgis"`
+	PhoneNumber         string `json:"phonenumber,omitempty" bson:"phonenumber,omitempty"`
+	LeaflyURL           string `json:"leaflyurl,omitempty" bson:"leaflyurl,omitempty"`
+	LeaflySecret        string `json:"leaflysecret,omitempty" bson:"leaflysecret,omitempty"`
+	DomyikadoUserURL    string `json:"domyikadouserurl,omitempty" bson:"domyikadouserurl,omitempty"`
+	DomyikadoSecret     string `json:"domyikadosecret,omitempty" bson:"domyikadosecret,omitempty"`
+	DomyikadoStravaPoin string `json:"domyikadostravapoin,omitempty" bson:"domyikadostravapoin,omitempty"`
+	KimseokgisURL       string `json:"urlkimseokgis" bson:"urlkimseokgis"`
 }
 
 type StravaIdentity struct {
