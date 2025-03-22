@@ -278,7 +278,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 			}
 
 			if statuscode1 != http.StatusOK {
-				reply += "\n\nSalah posting endpoint domyikado: " + httpresp1.Response + "\ninfo\n" + httpresp1.Info
+				reply += "\n\nSalah posting endpoint domyikado1: " + httpresp1.Response + "\ninfo\n" + httpresp1.Info
 				return
 			}
 
