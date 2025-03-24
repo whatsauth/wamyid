@@ -1,12 +1,10 @@
 package strava
 
 import (
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly/v2"
-	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
@@ -122,27 +120,22 @@ func scrapeStravaIdentity(db *mongo.Database, url, profilePhone, phone, alias st
 			reply += "\n\nCek link di atas apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa"
 		}
 
-		conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": profilePhone})
+		conf, err := getConfigByPhone(db, profilePhone)
 		if err != nil {
-			reply += "\n\nWah kak " + alias + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+			reply += "\n\nWah kak " + alias + " " + err.Error()
 			return
 		}
 
-		datastrava := map[string]interface{}{
+		dataToUser := map[string]interface{}{
 			"stravaprofilepicture": stravaIdentity.Picture,
 			"athleteid":            stravaIdentity.AthleteId,
 			"phonenumber":          phone,
 			"name":                 alias,
 		}
 
-		statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+		err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoUserURL, dataToUser)
 		if err != nil {
-			reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
-			return
-		}
-
-		if statuscode != http.StatusOK {
-			reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+			reply += "\n\n" + err.Error()
 			return
 		}
 

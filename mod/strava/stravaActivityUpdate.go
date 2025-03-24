@@ -1,13 +1,10 @@
 package strava
 
 import (
-	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly/v2"
-	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
@@ -207,52 +204,41 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 						reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 					}
 
-					conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": profilePhone})
+					conf, err := getConfigByPhone(db, profilePhone)
 					if err != nil {
-						reply += "\n\nWah kak " + alias + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+						reply += "\n\nWah kak " + alias + " " + err.Error()
 						return
 					}
 
-					datastrava := map[string]interface{}{
+					dataToUser := map[string]interface{}{
 						"stravaprofilepicture": stravaActivity.Picture,
 						"athleteid":            stravaActivity.AthleteId,
 						"phonenumber":          Idata.PhoneNumber,
 						"name":                 alias,
 					}
 
-					statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+					err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoUserURL, dataToUser)
 					if err != nil {
-						reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
+						reply += "\n\n" + err.Error()
 						return
 					}
 
-					if statuscode != http.StatusOK {
-						reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
-						return
-					}
-
-					distanceStr := strings.Replace(stravaActivity.Distance, " km", "", -1)
-					distance, err := strconv.ParseFloat(distanceStr, 64)
+					distance, err := convertDistance(stravaActivity.Distance)
 					if err != nil {
-						reply += "\n\nError parsing distance: " + err.Error()
+						reply += "\n\n" + err.Error()
 						return
 					}
 
-					aktivitasStrava := map[string]interface{}{
+					dataToStravaPoin := map[string]interface{}{
 						"activity_id":  stravaActivity.ActivityId,
 						"phone_number": Idata.PhoneNumber,
 						"distance":     distance,
 						"name_strava":  stravaActivity.Name,
 					}
 
-					statuscode1, httpresp1, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, aktivitasStrava, conf.DomyikadoStravaPoin)
+					err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoStravaPoin, dataToStravaPoin)
 					if err != nil {
-						reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
-						return
-					}
-
-					if statuscode1 != http.StatusOK {
-						reply += "\n\nSalah posting endpoint domyikado1: " + httpresp1.Response + "\ninfo\n" + httpresp1.Info
+						reply += "\n\n" + err.Error()
 						return
 					}
 

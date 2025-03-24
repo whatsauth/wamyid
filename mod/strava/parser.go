@@ -1,6 +1,7 @@
 package strava
 
 import (
+	"errors"
 	"regexp"
 	"strconv"
 	"strings"
@@ -70,4 +71,13 @@ func extractContains(link, path string, isApp bool) (string, string) {
 	}
 
 	return "", ""
+}
+
+func convertDistance(distanceStr string) (float64, error) {
+	cleaned := strings.Replace(distanceStr, " km", "", -1)
+	distance, err := strconv.ParseFloat(cleaned, 64)
+	if err != nil {
+		return 0, errors.New("gagal mengonversi distance: " + err.Error())
+	}
+	return distance, nil
 }

@@ -1,11 +1,9 @@
 package strava
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gocolly/colly/v2"
-	"github.com/gocroot/helper/atapi"
 	"github.com/gocroot/helper/atdb"
 	"github.com/whatsauth/itmodel"
 	"go.mongodb.org/mongo-driver/bson"
@@ -76,27 +74,22 @@ func StravaIdentityUpdateHandler(Profile itmodel.Profile, Pesan itmodel.IteungMe
 			reply += "\n\nStrava Profile Picture: " + stravaIdentity.Picture
 			reply += "\n\nCek link di atas apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa"
 
-			conf, err := atdb.GetOneDoc[Config](db, "config", bson.M{"phonenumber": Profile.Phonenumber})
+			conf, err := getConfigByPhone(db, Profile.Phonenumber)
 			if err != nil {
-				reply += "\n\nWah kak " + Pesan.Alias_name + " mohon maaf ada kesalahan dalam pengambilan config di database " + err.Error()
+				reply += "\n\nWah kak " + Pesan.Alias_name + " " + err.Error()
 				return
 			}
 
-			datastrava := map[string]interface{}{
+			dataToUser := map[string]interface{}{
 				"stravaprofilepicture": stravaIdentity.Picture,
 				"athleteid":            stravaIdentity.AthleteId,
 				"phonenumber":          Pesan.Phone_number,
 				"name":                 Pesan.Alias_name,
 			}
 
-			statuscode, httpresp, err := atapi.PostStructWithToken[itmodel.Response]("secret", conf.DomyikadoSecret, datastrava, conf.DomyikadoUserURL)
+			err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoUserURL, dataToUser)
 			if err != nil {
-				reply += "\n\nAkses ke endpoint domyikado gagal: " + err.Error()
-				return
-			}
-
-			if statuscode != http.StatusOK {
-				reply += "\n\nSalah posting endpoint domyikado: " + httpresp.Response + "\ninfo\n" + httpresp.Info
+				reply += "\n\n" + err.Error()
 				return
 			}
 
