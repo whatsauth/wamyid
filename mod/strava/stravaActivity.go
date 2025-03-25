@@ -153,21 +153,36 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 		if data.ActivityId == stravaActivity.ActivityId {
 			createdAtFormated := formatDateTimeToIndo(data.CreatedAt.Format("2006-01-02T15:04:05"))
-			reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Kamu sudah pernah share aktivitas ini sebelumnya pada tanggal " + createdAtFormated + "! Berikut data aktivitas kamu yang sudah tersimpan."
-			reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
-			reply += "\n- Name: " + stravaActivity.Name
-			reply += "\n- Title: " + stravaActivity.Title
-			reply += "\n- Date Time: " + stravaActivity.DateTime
-			reply += "\n- Type Sport: " + stravaActivity.TypeSport
-			reply += "\n- Distance: " + stravaActivity.Distance
-			reply += "\n- Moving Time: " + stravaActivity.MovingTime
-			reply += "\n- Elevation: " + stravaActivity.Elevation
-			reply += "\n- Status: " + stravaActivity.Status
-			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
-
-			reply += "\nJangan Curang yaaaa!"
-			reply += "\nSana Lari lagi jangan malas!"
-			return
+			if stravaActivity.Status == "Valid" {
+				reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Kamu sudah pernah share aktivitas ini sebelumnya pada tanggal " + createdAtFormated + "! Berikut data aktivitas kamu yang sudah tersimpan."
+				reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
+				reply += "\n- Name: " + stravaActivity.Name
+				reply += "\n- Title: " + stravaActivity.Title
+				reply += "\n- Date Time: " + stravaActivity.DateTime
+				reply += "\n- Type Sport: " + stravaActivity.TypeSport
+				reply += "\n- Distance: " + stravaActivity.Distance
+				reply += "\n- Moving Time: " + stravaActivity.MovingTime
+				reply += "\n- Elevation: " + stravaActivity.Elevation
+				reply += "\n- Status: " + stravaActivity.Status
+				reply += "\n\nJangan Curang yaaaa!"
+				reply += "\nSana Lari lagi jangan malas!"
+				reply += "\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+				return
+			} else if stravaActivity.Status == "Invalid" {
+				reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Aktivitas yang kamu kirimkan tidak valid. Berikut datanya."
+				reply += "\n- Type Sport: " + stravaActivity.TypeSport
+				reply += "\n- Distance: " + stravaActivity.Distance
+				reply += "\n- Moving Time: " + stravaActivity.MovingTime
+				reply += "\n- Elevation: " + stravaActivity.Elevation
+				reply += "\n- Status: " + stravaActivity.Status
+				reply += "\n\nSana Lari lagi jangan malas!"
+				reply += "\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+				return
+			} else if stravaActivity.Status == "Fraudulent" {
+				reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
+				reply += "\nYang semangat dong... yang semangat dong..."
+				return
+			}
 		}
 
 		// cek apakah ada map atau tidak di halaman strava
