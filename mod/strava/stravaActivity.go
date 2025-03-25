@@ -153,7 +153,8 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 		if data.ActivityId == stravaActivity.ActivityId {
 			createdAtFormated := formatDateTimeToIndo(data.CreatedAt.Format("2006-01-02T15:04:05"))
-			if stravaActivity.Status == "Valid" {
+			switch stravaActivity.Status {
+			case "Valid":
 				reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Kamu sudah pernah share aktivitas ini sebelumnya pada tanggal " + createdAtFormated + "! Berikut data aktivitas kamu yang sudah tersimpan."
 				reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
 				reply += "\n- Name: " + stravaActivity.Name
@@ -168,7 +169,8 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				reply += "\nSana Lari lagi jangan malas!"
 				reply += "\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 				return
-			} else if stravaActivity.Status == "Invalid" {
+
+			case "Invalid":
 				reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Aktivitas yang kamu kirimkan tidak valid. Berikut datanya."
 				reply += "\n- Type Sport: " + stravaActivity.TypeSport
 				reply += "\n- Distance: " + stravaActivity.Distance
@@ -178,11 +180,13 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				reply += "\n\nSana Lari lagi jangan malas!"
 				reply += "\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 				return
-			} else if stravaActivity.Status == "Fraudulent" {
+
+			case "Fraudulent":
 				reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
 				reply += "\nYang semangat dong... yang semangat dong..."
 				return
 			}
+
 		}
 
 		// cek apakah ada map atau tidak di halaman strava
