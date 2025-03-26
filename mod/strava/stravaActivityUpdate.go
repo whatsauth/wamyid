@@ -140,10 +140,10 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 			return
 		}
 
-		if stravaActivity.TypeSport == "Ride" {
-			reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
-			return
-		}
+		// if stravaActivity.TypeSport == "Ride" {
+		// 	reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
+		// 	return
+		// }
 
 		if data.Distance == "" && data.MovingTime == "" && data.ActivityId == stravaActivity.ActivityId {
 			if data.Status == "Invalid" {

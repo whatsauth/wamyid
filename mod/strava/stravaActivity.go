@@ -205,19 +205,19 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 			return
 		}
 
-		if stravaActivity.TypeSport == "Ride" {
-			// simpan data ke database jika data belum ada
-			stravaActivity.CreatedAt = time.Now()
-			stravaActivity.Status = "Invalid"
+		// if stravaActivity.TypeSport == "Ride" {
+		// 	// simpan data ke database jika data belum ada
+		// 	stravaActivity.CreatedAt = time.Now()
+		// 	stravaActivity.Status = "Invalid"
 
-			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
-			if err != nil {
-				reply += "\n\nError saving data to MongoDB: " + err.Error()
-			}
+		// 	_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+		// 	if err != nil {
+		// 		reply += "\n\nError saving data to MongoDB: " + err.Error()
+		// 	}
 
-			reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
-			return
-		}
+		// 	reply += "\n\nMaaf kak, sistem hanya dapat mengambil data aktivitas jalan dan lari. Silakan share link aktivitas jalan dan lari Strava kamu."
+		// 	return
+		// }
 
 		// cek apakah jarak lari kurang dari 5 km
 		distanceFloat := parseDistance(stravaActivity.Distance)
