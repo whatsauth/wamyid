@@ -36,6 +36,7 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 	if strings.Contains(rawUrl, domWeb) {
 		activityId, fullActivityURL = extractContains(rawUrl, path, false)
 		if activityId != "" {
+			reply += activityId + fullActivityURL
 			reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 		}
 
@@ -45,6 +46,7 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 
 			activityId, fullActivityURL = extractContains(link, path, true)
 			if activityId != "" {
+				reply += activityId + fullActivityURL
 				reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 			}
 		})
@@ -153,7 +155,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		}
 		if data.ActivityId == stravaActivity.ActivityId {
 			createdAtFormated := formatDateTimeToIndo(data.CreatedAt.Format("2006-01-02T15:04:05"))
-			switch stravaActivity.Status {
+			switch data.Status {
 			case "Valid":
 				reply += "\n\nMaaf kak, " + "*" + alias + "*" + "! Kamu sudah pernah share aktivitas ini sebelumnya pada tanggal " + createdAtFormated + "! Berikut data aktivitas kamu yang sudah tersimpan."
 				reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
