@@ -36,7 +36,6 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 	if strings.Contains(rawUrl, domWeb) {
 		activityId, fullActivityURL = extractContains(rawUrl, path, false)
 		if activityId != "" {
-			reply += activityId + fullActivityURL
 			reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 		}
 
@@ -46,7 +45,6 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 
 			activityId, fullActivityURL = extractContains(link, path, true)
 			if activityId != "" {
-				reply += activityId + fullActivityURL
 				reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 			}
 		})
@@ -166,7 +164,6 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				reply += "\n- Distance: " + stravaActivity.Distance
 				reply += "\n- Moving Time: " + stravaActivity.MovingTime
 				reply += "\n- Elevation: " + stravaActivity.Elevation
-				reply += "\n- Status: " + stravaActivity.Status
 				reply += "\n\nJangan Curang yaaaa!"
 				reply += "\nSana Lari lagi jangan malas!"
 				reply += "\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
