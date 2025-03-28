@@ -35,7 +35,6 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 	path := "/activities/"
 	if strings.Contains(rawUrl, domWeb) {
 		activityId, fullActivityURL = extractContains(rawUrl, path, false)
-		reply += "\n\nLink Activity Strava kamu: " + fullActivityURL + "\n" + activityId
 		if activityId != "" {
 			reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 		}
@@ -45,7 +44,6 @@ func StravaActivityHandler(Profile itmodel.Profile, Pesan itmodel.IteungMessage,
 			link := e.Attr("href")
 
 			activityId, fullActivityURL = extractContains(link, path, true)
-			reply += "\n\nLink Activity Strava kamu: " + fullActivityURL + "\n" + activityId
 			if activityId != "" {
 				reply += scrapeStravaActivity(db, fullActivityURL, Profile.Phonenumber, Pesan.Phone_number, Pesan.Alias_name)
 			}
