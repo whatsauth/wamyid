@@ -60,9 +60,9 @@ func extractContains(link, path string, isApp bool) (string, string) {
 		parts := strings.Split(link, path)
 
 		if len(parts) > 1 {
-			id := strings.Split(parts[1], "/")[0]
+			id := strings.SplitN(parts[1], "/", 2)[0]
 			if isApp {
-				id = strings.Split(id, "?")[0]
+				id = strings.SplitN(id, "?", 2)[0]
 			}
 			fullUrl := "https://www.strava.com" + path + id
 
