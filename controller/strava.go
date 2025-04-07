@@ -37,15 +37,15 @@ func GetStravaActivitiesWithGrupIDFromPomokit(respw http.ResponseWriter, req *ht
 	// Buat mapping phonenumber -> grup_id
 	phoneToGroup := make(map[string]string)
 	for _, p := range pomokitDocs {
-		if _, exists := phoneToGroup[p.PhoneNumber]; !exists {
-			phoneToGroup[p.PhoneNumber] = p.WaGroupID
+		if phoneToGroup[p.PhoneNumber] == "" && p.WaGroupID != "" {
+			phoneToGroup[p.PhoneNumber] = p.WaGroupID // Ambil grup ID pertama yang tidak kosong
 		}
 	}
 
 	// Gabungkan data tanpa mengubah struct
 	var response []map[string]interface{}
 	for _, s := range stravaDocs {
-		mergedData := StructToMap(s)                        // Convert struct ke map
+		mergedData := StructToMap(s)                          // Convert struct ke map
 		mergedData["wagroupid"] = phoneToGroup[s.PhoneNumber] // Tambahkan grup_id
 		response = append(response, mergedData)
 	}
