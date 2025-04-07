@@ -282,11 +282,22 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				return
 			}
 
+			grupid, err := getWaGroupIDFromPomokit(db, Idata.PhoneNumber)
+			if err != nil {
+				reply += "\n\n" + err.Error()
+				return
+			}
+			if grupid == "" {
+				reply += "\n\nGrup ID tidak ditemukan. Pastikan akun Strava kamu sudah terhubung dengan sistem."
+				return
+			}
+
 			dataToStravaPoin := map[string]interface{}{
 				"activity_id":  stravaActivity.ActivityId,
 				"phone_number": Idata.PhoneNumber,
 				"distance":     distance,
 				"name_strava":  stravaActivity.Name,
+				"wagroupid":    grupid,
 			}
 
 			err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoStravaPoin, dataToStravaPoin)
