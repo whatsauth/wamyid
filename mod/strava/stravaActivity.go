@@ -287,10 +287,6 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				reply += "\n\n" + err.Error()
 				return
 			}
-			if grupid == "" {
-				reply += "\n\nGrup ID tidak ditemukan. Pastikan akun Strava kamu sudah terhubung dengan sistem."
-				return
-			}
 
 			dataToStravaPoin := map[string]interface{}{
 				"activity_id":  stravaActivity.ActivityId,
