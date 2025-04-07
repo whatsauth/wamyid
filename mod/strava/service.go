@@ -36,11 +36,14 @@ func postToDomyikado(secret, url string, data map[string]interface{}) error {
 func getWaGroupIDFromPomokit(db *mongo.Database, phoneNumber string) (string, error) {
 	pomokitDoc, err := atdb.GetOneDoc[pomokit.PomodoroReport](db, "pomokit", bson.M{"phonenumber": phoneNumber})
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return "", nil
+		}
 		return "", errors.New("kesalahan dalam pengambilan data pomokit: " + err.Error())
 	}
 
 	if pomokitDoc.WaGroupID == "" {
-		return "", errors.New("grup ID tidak ditemukan")
+		return "", nil
 	}
 
 	return pomokitDoc.WaGroupID, nil
