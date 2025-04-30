@@ -220,7 +220,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 
 		// cek apakah jarak lari kurang dari 5 km
 		distanceFloat := parseDistance(stravaActivity.Distance)
-		if distanceFloat < 3 {
+		if distanceFloat < 2 {
 			// simpan data ke database jika data belum ada
 			stravaActivity.CreatedAt = time.Now()
 			stravaActivity.Status = "Invalid"
@@ -231,7 +231,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 			}
 
 			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
-			reply += "\nSatu hari minimal 3 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi"
+			reply += "\nSatu hari minimal 2 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi"
 			reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 			return
 
@@ -293,6 +293,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 				"phone_number": Idata.PhoneNumber,
 				"distance":     distance,
 				"name_strava":  stravaActivity.Name,
+				"created_at":   stravaActivity.CreatedAt,
 				"wagroupid":    grupid,
 			}
 

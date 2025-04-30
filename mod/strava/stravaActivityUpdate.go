@@ -233,6 +233,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 						"activity_id":  stravaActivity.ActivityId,
 						"phone_number": Idata.PhoneNumber,
 						"distance":     distance,
+						"created_at":   stravaActivity.CreatedAt,
 						"name_strava":  stravaActivity.Name,
 					}
 
