@@ -32,6 +32,8 @@ func URL(w http.ResponseWriter, r *http.Request) {
 		controller.GetStravaActivitiesWithGrupIDFromPomokit(w, r)
 	case method == "GET" && path == "/data/pomokit":
 		controller.GetPomokitData(w, r)
+	case method == "GET" && helper.URLParam(path, "/data/pomokit/:nomorwa"):
+		controller.GetPomokitDataByPhonenumber(w, r)
 	default:
 		controller.NotFound(w, r)
 	}

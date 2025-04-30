@@ -91,6 +91,20 @@ func GetAllDoc[T any](db *mongo.Database, collection string) (doc T, err error) 
 	return
 }
 
+func GetAllDocs[T any](db *mongo.Database, collection string, filter bson.M) (doc T, err error) {
+	ctx := context.Background()
+	cur, err := db.Collection(collection).Find(ctx, filter)
+	if err != nil {
+		return
+	}
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &doc)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func GetOneDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc T, err error) {
 	err = db.Collection(collection).FindOne(context.Background(), filter).Decode(&doc)
 	if err != nil {
