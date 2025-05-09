@@ -219,93 +219,93 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		// }
 
 		// cek apakah jarak lari kurang dari 5 km
-		distanceFloat := parseDistance(stravaActivity.Distance)
-		if distanceFloat < 2 {
-			// simpan data ke database jika data belum ada
-			stravaActivity.CreatedAt = time.Now()
-			stravaActivity.Status = "Invalid"
+		// distanceFloat := parseDistance(stravaActivity.Distance)
+		// if distanceFloat < 2 {
+		// 	// simpan data ke database jika data belum ada
+		// 	stravaActivity.CreatedAt = time.Now()
+		// 	stravaActivity.Status = "Invalid"
 
-			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
-			if err != nil {
-				reply += "\n\nError saving data to MongoDB: " + err.Error()
-			}
+		// 	_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+		// 	if err != nil {
+		// 		reply += "\n\nError saving data to MongoDB: " + err.Error()
+		// 	}
 
-			reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
-			reply += "\nSatu hari minimal 2 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi"
-			reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
-			return
+		// 	reply += "\n\nWahhh, kamu malas sekali ya, jangan malas lari terus dong kak! 😏"
+		// 	reply += "\nSatu hari minimal 2 km, masa kamu cuma " + stravaActivity.Distance + " aja 😂 \nxixixixiixi"
+		// 	reply += "\n\nJangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
+		// 	return
 
+		// } else {
+		// simpan data ke database jika data belum ada
+		stravaActivity.CreatedAt = time.Now()
+		stravaActivity.Status = "Valid"
+
+		_, err = atdb.InsertOneDoc(db, col, stravaActivity)
+		if err != nil {
+			reply += "\n\nError saving data to MongoDB: " + err.Error()
 		} else {
-			// simpan data ke database jika data belum ada
-			stravaActivity.CreatedAt = time.Now()
-			stravaActivity.Status = "Valid"
-
-			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
-			if err != nil {
-				reply += "\n\nError saving data to MongoDB: " + err.Error()
-			} else {
-				reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀"
-				reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
-				reply += "\n- Name: " + stravaActivity.Name
-				reply += "\n- Title: " + stravaActivity.Title
-				reply += "\n- Date Time: " + stravaActivity.DateTime
-				reply += "\n- Type Sport: " + stravaActivity.TypeSport
-				reply += "\n- Distance: " + stravaActivity.Distance
-				reply += "\n- Moving Time: " + stravaActivity.MovingTime
-				reply += "\n- Elevation: " + stravaActivity.Elevation
-				reply += "\n- Status: " + stravaActivity.Status
-				reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
-			}
-
-			conf, err := getConfigByPhone(db, profilePhone)
-			if err != nil {
-				reply += "\n\nWah kak " + alias + " " + err.Error()
-				return
-			}
-
-			dataToUser := map[string]interface{}{
-				"stravaprofilepicture": stravaActivity.Picture,
-				"athleteid":            stravaActivity.AthleteId,
-				"phonenumber":          Idata.PhoneNumber,
-				"name":                 alias,
-			}
-
-			err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoUserURL, dataToUser)
-			if err != nil {
-				reply += "\n\n" + err.Error()
-				return
-			}
-
-			distance, err := convertDistance(stravaActivity.Distance)
-			if err != nil {
-				reply += "\n\n" + err.Error()
-				return
-			}
-
-			grupid, err := getWaGroupIDFromPomokit(db, Idata.PhoneNumber)
-			if err != nil {
-				reply += "\n\n" + err.Error()
-				return
-			}
-
-			dataToStravaPoin := map[string]interface{}{
-				"activity_id":  stravaActivity.ActivityId,
-				"phone_number": Idata.PhoneNumber,
-				"distance":     distance,
-				"name_strava":  stravaActivity.Name,
-				"created_at":   stravaActivity.CreatedAt,
-				"wagroupid":    grupid,
-			}
-
-			err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoStravaPoin, dataToStravaPoin)
-			if err != nil {
-				reply += "\n\n" + err.Error()
-				return
-			}
-
-			reply += "\n\nStrava Profile Picture: " + stravaActivity.Picture
-			reply += "\n\nCek link di atas apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa"
+			reply += "\n\nHaiiiii kak, " + "*" + alias + "*" + "! Berikut Progres Aktivitas kamu hari ini yaaa!! 😀"
+			reply += "\n\n- Activity ID: " + stravaActivity.ActivityId
+			reply += "\n- Name: " + stravaActivity.Name
+			reply += "\n- Title: " + stravaActivity.Title
+			reply += "\n- Date Time: " + stravaActivity.DateTime
+			reply += "\n- Type Sport: " + stravaActivity.TypeSport
+			reply += "\n- Distance: " + stravaActivity.Distance
+			reply += "\n- Moving Time: " + stravaActivity.MovingTime
+			reply += "\n- Elevation: " + stravaActivity.Elevation
+			reply += "\n- Status: " + stravaActivity.Status
+			reply += "\n\nSemangat terus, jangan lupa jaga kesehatan dan tetap semangat!! 💪🏻💪🏻💪🏻"
 		}
+
+		conf, err := getConfigByPhone(db, profilePhone)
+		if err != nil {
+			reply += "\n\nWah kak " + alias + " " + err.Error()
+			return
+		}
+
+		dataToUser := map[string]interface{}{
+			"stravaprofilepicture": stravaActivity.Picture,
+			"athleteid":            stravaActivity.AthleteId,
+			"phonenumber":          Idata.PhoneNumber,
+			"name":                 alias,
+		}
+
+		err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoUserURL, dataToUser)
+		if err != nil {
+			reply += "\n\n" + err.Error()
+			return
+		}
+
+		distance, err := convertDistance(stravaActivity.Distance)
+		if err != nil {
+			reply += "\n\n" + err.Error()
+			return
+		}
+
+		grupid, err := getWaGroupIDFromPomokit(db, Idata.PhoneNumber)
+		if err != nil {
+			reply += "\n\n" + err.Error()
+			return
+		}
+
+		dataToStravaPoin := map[string]interface{}{
+			"activity_id":  stravaActivity.ActivityId,
+			"phone_number": Idata.PhoneNumber,
+			"distance":     distance,
+			"name_strava":  stravaActivity.Name,
+			"created_at":   stravaActivity.CreatedAt,
+			"wagroupid":    grupid,
+		}
+
+		err = postToDomyikado(conf.DomyikadoSecret, conf.DomyikadoStravaPoin, dataToStravaPoin)
+		if err != nil {
+			reply += "\n\n" + err.Error()
+			return
+		}
+
+		reply += "\n\nStrava Profile Picture: " + stravaActivity.Picture
+		reply += "\n\nCek link di atas apakah sudah sama dengan Strava Profile Picture di profile akun do.my.id yaa"
+		// }
 	})
 
 	err = c.Visit(url)
