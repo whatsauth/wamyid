@@ -84,11 +84,11 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 	stravaActivity.PhoneNumber = phone
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
-		stravaActivity.Name = e.ChildText("h3[class^='styles_name__']")
-		stravaActivity.Title = e.ChildText("h1[class^='styles_name__']")
-		stravaActivity.TypeSport = e.ChildText("span[class^='styles_typeText__']")
+		stravaActivity.Name = e.ChildText("h3[class^='styles_name__'], h3[class^='AthleteBanner_name__']")
+		stravaActivity.Title = e.ChildText("h1[class^='styles_name__'], h1[class^='Summary_name__']")
+		stravaActivity.TypeSport = e.ChildText("span[class^='styles_typeText__'], span[class^='Summary_typeText__']")
 
-		e.ForEach("time[class^='styles_date__']", func(_ int, timeEl *colly.HTMLElement) {
+		e.ForEach("time[class^='styles_date__'], time[class^='Summary_date__']", func(_ int, timeEl *colly.HTMLElement) {
 			dt := timeEl.Attr("datetime")
 			if dt != "" {
 				stravaActivity.DateTime = formatDateTimeToIndo(dt)
