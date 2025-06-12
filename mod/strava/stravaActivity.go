@@ -84,11 +84,11 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 	stravaActivity.PhoneNumber = phone
 
 	c.OnHTML("main", func(e *colly.HTMLElement) {
-		stravaActivity.Name = e.ChildText("h3[class^='styles_name__'], h3[class^='AthleteBanner_name__']")
-		stravaActivity.Title = e.ChildText("h1[class^='styles_name__'], h1[class^='Summary_name__']")
-		stravaActivity.TypeSport = e.ChildText("span[class^='styles_typeText__'], span[class^='Summary_typeText__']")
+		stravaActivity.Name = e.ChildText("h3[class*='name']")
+		stravaActivity.Title = e.ChildText("h1[class*='name']")
+		stravaActivity.TypeSport = e.ChildText("span[class*='typeText']")
 
-		e.ForEach("time[class^='styles_date__'], time[class^='Summary_date__']", func(_ int, timeEl *colly.HTMLElement) {
+		e.ForEach("time[class*='date']", func(_ int, timeEl *colly.HTMLElement) {
 			dt := timeEl.Attr("datetime")
 			if dt != "" {
 				stravaActivity.DateTime = formatDateTimeToIndo(dt)
@@ -121,7 +121,7 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 	}
 
 	found := false
-	c.OnHTML("div[class^='MapAndElevationChart_mapContainer__']", func(e *colly.HTMLElement) {
+	c.OnHTML("div[class*='mapContainer']", func(e *colly.HTMLElement) {
 		found = true
 	})
 
@@ -191,13 +191,13 @@ func scrapeStravaActivity(db *mongo.Database, url, profilePhone, phone, alias st
 		// cek apakah ada map atau tidak di halaman strava
 		if !found {
 			// simpan data ke database jika data belum ada
-			stravaActivity.CreatedAt = time.Now()
-			stravaActivity.Status = "Fraudulent"
+			// stravaActivity.CreatedAt = time.Now()
+			// stravaActivity.Status = "Fraudulent"
 
-			_, err = atdb.InsertOneDoc(db, col, stravaActivity)
-			if err != nil {
-				reply += "\n\nError saving data to MongoDB: " + err.Error()
-			}
+			// _, err = atdb.InsertOneDoc(db, col, stravaActivity)
+			// if err != nil {
+			// 	reply += "\n\nError saving data to MongoDB: " + err.Error()
+			// }
 
 			reply += "\n\nJangan Curang donggg! Silahkan share record aktivitas yang benar dari Strava ya kak, bukan dibikin manual kaya gitu"
 			reply += "\nYang semangat dong... yang semangat dong..."

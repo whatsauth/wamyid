@@ -101,7 +101,7 @@ func scrapeStravaActivityUpdate(db *mongo.Database, url, profilePhone, phone, al
 	})
 
 	found := false
-	c.OnHTML("div[class^='MapAndElevationChart_mapContainer__']", func(e *colly.HTMLElement) {
+	c.OnHTML("div[class*='mapContainer']", func(e *colly.HTMLElement) {
 		found = true
 	})
 
